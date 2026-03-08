@@ -2,8 +2,19 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>מרכז הבקרה של חיי ✨</title>
+    <!-- PWA -->
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="מרכז הבקרה">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="מרכז הבקרה">
+    <meta name="description" content="מרכז הבקרה האישי שלי">
+    <!-- Apple touch icons (inline SVG as data URI) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237c3aed'/%3E%3Ctext x='50' y='72' font-size='55' text-anchor='middle'%3E✨%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237c3aed'/%3E%3Ctext x='50' y='72' font-size='55' text-anchor='middle'%3E✨%3C/text%3E%3C/svg%3E">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Heebo','Nunito','sans-serif']}}}}</script>
@@ -11,6 +22,7 @@
     <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { font-family: 'Heebo', 'Nunito', sans-serif; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
@@ -53,8 +65,10 @@ window.onerror = function(msg, src, line, col, err) {
 };
 </script>
 <script type="text/babel">
-    const auth = { onAuthStateChanged: () => {}, signOut: () => {} };
-    const db = { collection: () => ({ doc: () => ({ set: async () => {}, get: async () => ({ exists: false, data: () => ({}) }) }) }) };
+    // ── SUPABASE INIT ──────────────────────────────────────────────
+    const SUPABASE_URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
 
@@ -153,9 +167,14 @@ window.onerror = function(msg, src, line, col, err) {
         const [error, setError] = useState('');
         const signInWithGoogle = async () => {
             setLoading(true); setError('');
-            try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-            catch (err) { setError('שגיאה בהתחברות. נסי שוב.'); }
-            setLoading(false);
+            try {
+                const { error: err } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.href }
+                });
+                if (err) throw err;
+            }
+            catch (err) { setError('שגיאה בהתחברות: ' + (err.message || 'נסי שוב.')); setLoading(false); }
         };
         return (
             <div className="min-h-screen soft-bg flex items-center justify-center p-4">
@@ -481,61 +500,102 @@ window.onerror = function(msg, src, line, col, err) {
 
         // Effects - ALSO before any return
         useEffect(() => {
-            setUser({ displayName: 'תצוגה מקדימה', photoURL: null, uid: 'preview' });
-            setLoading(false);
+            // שמיעה לשינויי auth ב-Supabase
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                if (session?.user) {
+                    setUser({
+                        displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email,
+                        photoURL: session.user.user_metadata?.avatar_url || null,
+                        uid: session.user.id,
+                        email: session.user.email
+                    });
+                } else {
+                    setUser(null);
+                }
+                setLoading(false);
+            });
+            return () => subscription.unsubscribe();
         }, []);
 
+        // ── HELPER: apply loaded data object to state ──────────────
+        const applyDataToState = (d) => {
+            if (d.visionText) setVisionText(d.visionText);
+            if (d.bannerImg) setBannerImg(d.bannerImg);
+            if (d.headerTitle) setHeaderTitle(d.headerTitle);
+            if (d.headerAffirmation !== undefined) setHeaderAffirmation(d.headerAffirmation);
+            if (d.tabs) setTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t));
+            if (d.projects) setProjects(d.projects);
+            if (d.tasks) setTasks(d.tasks);
+            if (d.resources) setResources(d.resources);
+            if (d.morningRitual) setMorningRitual(d.morningRitual);
+            if (d.gameChangers) setGameChangers(d.gameChangers);
+            if (d.dailySchedule) setDailySchedule(d.dailySchedule);
+            if (d.ideas) setIdeas(d.ideas);
+            if (d.domains) setDomains(d.domains);
+            if (d.domainGoals) setDomainGoals(d.domainGoals);
+            if (d.successMetrics) setSuccessMetrics(d.successMetrics);
+            if (d.morningRitualTitle) setMorningRitualTitle(d.morningRitualTitle);
+            if (d.morningRitualEmoji) setMorningRitualEmoji(d.morningRitualEmoji);
+            if (d.gameChangersTitle) setGameChangersTitle(d.gameChangersTitle);
+            if (d.gameChangersEmoji) setGameChangersEmoji(d.gameChangersEmoji);
+            if (d.archive) setArchive(d.archive);
+            if (d.permanentArchive) setPermanentArchive(d.permanentArchive);
+            if (d.mindsetEntries) setMindsetEntries(d.mindsetEntries);
+            if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems);
+            if (d.futureSelfEntries) setFutureSelfEntries(d.futureSelfEntries);
+            if (d.futureSelfFiles) setFutureSelfFiles(d.futureSelfFiles);
+            if (d.dayScheduleTasks) setDayScheduleTasks(d.dayScheduleTasks);
+            if (d.weekSchedule) setWeekSchedule(d.weekSchedule);
+            if (d.customTabData) setCustomTabData(d.customTabData);
+            if (d.currentWeight !== undefined) setCurrentWeight(d.currentWeight);
+            if (d.affirmations) setAffirmations(d.affirmations);
+            if (d.affirmationUrl) setAffirmationUrl(d.affirmationUrl);
+            if (d.homeBlockOrder) setHomeBlockOrder(d.homeBlockOrder);
+            if (d.hiddenHomeBlocks) setHiddenHomeBlocks(d.hiddenHomeBlocks);
+            if (d.homeBlockWidths) setHomeBlockWidths(d.homeBlockWidths);
+            if (d.homeBlockTextSize) setHomeBlockTextSize(d.homeBlockTextSize);
+            if (d.homeCustomBlocks) setHomeCustomBlocks(d.homeCustomBlocks);
+            if (d.builtinTabBlocks) setBuiltinTabBlocks(prev=>({...prev,...d.builtinTabBlocks}));
+            if (d.builtinTabBlockWidths) setBuiltinTabBlockWidths(d.builtinTabBlockWidths);
+            if (d.builtinTabBlockOrder) setBuiltinTabBlockOrder(d.builtinTabBlockOrder);
+            if (d.builtinTabHiddenBlocks) setBuiltinTabHiddenBlocks(d.builtinTabHiddenBlocks);
+            if (d.monthNotes) setMonthNotes(d.monthNotes);
+            if (d.quarterlyGoals) setQuarterlyGoals(prev=>({...prev,...d.quarterlyGoals}));
+            if (d.themeAccent) setThemeAccent(d.themeAccent);
+        };
+
+        // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
         useEffect(() => {
+            // שלב 1: טעינה מהירה מ-localStorage (offline-first)
             try {
                 const saved = localStorage.getItem('dashboard_data');
-                if (saved) {
-                    const d = JSON.parse(saved);
-                    if (d.visionText) setVisionText(d.visionText);
-                    if (d.bannerImg) setBannerImg(d.bannerImg);
-                    if (d.headerTitle) setHeaderTitle(d.headerTitle);
-                    if (d.headerAffirmation !== undefined) setHeaderAffirmation(d.headerAffirmation);
-                    if (d.tabs) setTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t));
-                    if (d.projects) setProjects(d.projects);
-                    if (d.tasks) setTasks(d.tasks);
-                    if (d.resources) setResources(d.resources);
-                    if (d.morningRitual) setMorningRitual(d.morningRitual);
-                    if (d.gameChangers) setGameChangers(d.gameChangers);
-                    if (d.dailySchedule) setDailySchedule(d.dailySchedule);
-                    if (d.ideas) setIdeas(d.ideas);
-                    if (d.domains) setDomains(d.domains);
-                    if (d.domainGoals) setDomainGoals(d.domainGoals);
-                    if (d.successMetrics) setSuccessMetrics(d.successMetrics);
-                    if (d.morningRitualTitle) setMorningRitualTitle(d.morningRitualTitle);
-                    if (d.morningRitualEmoji) setMorningRitualEmoji(d.morningRitualEmoji);
-                    if (d.gameChangersTitle) setGameChangersTitle(d.gameChangersTitle);
-                    if (d.gameChangersEmoji) setGameChangersEmoji(d.gameChangersEmoji);
-                    if (d.archive) setArchive(d.archive);
-                    if (d.permanentArchive) setPermanentArchive(d.permanentArchive);
-                    if (d.mindsetEntries) setMindsetEntries(d.mindsetEntries);
-                    if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems);
-                    if (d.futureSelfEntries) setFutureSelfEntries(d.futureSelfEntries);
-                    if (d.futureSelfFiles) setFutureSelfFiles(d.futureSelfFiles);
-                    if (d.dayScheduleTasks) setDayScheduleTasks(d.dayScheduleTasks);
-                    if (d.weekSchedule) setWeekSchedule(d.weekSchedule);
-                    if (d.customTabData) setCustomTabData(d.customTabData);
-                    if (d.currentWeight !== undefined) setCurrentWeight(d.currentWeight);
-                    if (d.affirmations) setAffirmations(d.affirmations);
-                    if (d.affirmationUrl) setAffirmationUrl(d.affirmationUrl);
-                    if (d.homeBlockOrder) setHomeBlockOrder(d.homeBlockOrder);
-                    if (d.hiddenHomeBlocks) setHiddenHomeBlocks(d.hiddenHomeBlocks);
-                    if (d.homeBlockWidths) setHomeBlockWidths(d.homeBlockWidths);
-                    if (d.homeBlockTextSize) setHomeBlockTextSize(d.homeBlockTextSize);
-                    if (d.homeCustomBlocks) setHomeCustomBlocks(d.homeCustomBlocks);
-                    if (d.builtinTabBlocks) setBuiltinTabBlocks(prev=>({...prev,...d.builtinTabBlocks}));
-                    if (d.builtinTabBlockWidths) setBuiltinTabBlockWidths(d.builtinTabBlockWidths);
-                    if (d.builtinTabBlockOrder) setBuiltinTabBlockOrder(d.builtinTabBlockOrder);
-                    if (d.builtinTabHiddenBlocks) setBuiltinTabHiddenBlocks(d.builtinTabHiddenBlocks);
-                    if (d.monthNotes) setMonthNotes(d.monthNotes);
-                    if (d.quarterlyGoals) setQuarterlyGoals(prev=>({...prev,...d.quarterlyGoals}));
-                    if (d.themeAccent) setThemeAccent(d.themeAccent);
-                }
-            } catch (e) { console.error(e); }
-        }, []);
+                if (saved) applyDataToState(JSON.parse(saved));
+            } catch (e) { console.error('localStorage load error:', e); }
+
+            // שלב 2: אם מחוברת — טוען מהענן (הענן גובר)
+            if (!user || !user.uid) return;
+            (async () => {
+                try {
+                    const { data: row, error } = await supabase
+                        .from('dashboard_data')
+                        .select('data, updated_at')
+                        .eq('user_id', user.uid)
+                        .single();
+                    if (error && error.code !== 'PGRST116') {
+                        console.warn('Supabase load error:', error.message);
+                        return;
+                    }
+                    if (row?.data) {
+                        // הענן גובר על localStorage אם עדכני יותר
+                        const localTs = (() => { try { return JSON.parse(localStorage.getItem('dashboard_data') || '{}').timestamp || ''; } catch(e) { return ''; } })();
+                        if (!localTs || row.data.timestamp > localTs) {
+                            applyDataToState(row.data);
+                            localStorage.setItem('dashboard_data', JSON.stringify(row.data));
+                        }
+                    }
+                } catch (e) { console.error('Cloud load error:', e); }
+            })();
+        }, [user]);
 
         // Auto-save archive to localStorage on every change
         useEffect(() => {
@@ -547,6 +607,31 @@ window.onerror = function(msg, src, line, col, err) {
                 localStorage.setItem('dashboard_data', JSON.stringify(existing));
             } catch(e) {}
         }, [archive]);
+
+        // ── REAL-TIME SYNC: מאזין לשינויים מהנייד/מחשב אחר ─────────
+        useEffect(() => {
+            if (!user || !user.uid) return;
+            const channel = supabase
+                .channel('dashboard-sync-' + user.uid)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'dashboard_data',
+                    filter: 'user_id=eq.' + user.uid
+                }, (payload) => {
+                    if (payload.new?.data) {
+                        const remoteTs = payload.new.data.timestamp || '';
+                        const localTs = (() => { try { return JSON.parse(localStorage.getItem('dashboard_data') || '{}').timestamp || ''; } catch(e) { return ''; } })();
+                        if (remoteTs > localTs) {
+                            applyDataToState(payload.new.data);
+                            localStorage.setItem('dashboard_data', JSON.stringify(payload.new.data));
+                            setSaveNotification(true); setTimeout(() => setSaveNotification(false), 2000);
+                        }
+                    }
+                })
+                .subscribe();
+            return () => supabase.removeChannel(channel);
+        }, [user]);
 
         // lucide icons handled per-component
 
@@ -619,12 +704,20 @@ window.onerror = function(msg, src, line, col, err) {
         const getFirstDayOfMonth = (y, m) => new Date(y, m-1, 1).getDay();
         const typeColor = (t) => ({morning:'#f59e0b',work:'#6366f1',noon:'#10b981',fitness:'#f43f5e',family:'#ec4899',general:'#64748b'}[t]||'#64748b');
 
-        const saveAllData = () => {
+        const saveAllData = async () => {
             try {
                 const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, timestamp: new Date().toISOString() };
+                // שמירה ל-localStorage תמיד
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
+                // שמירה ל-Supabase אם מחוברת
+                if (user && user.uid) {
+                    const { error: sbErr } = await supabase
+                        .from('dashboard_data')
+                        .upsert({ user_id: user.uid, data: data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+                    if (sbErr) console.warn('Supabase save error:', sbErr.message);
+                }
                 setSaveNotification(true); setTimeout(() => setSaveNotification(false), 3000);
-            } catch (error) { alert('שגיאה בשמירת הנתונים'); }
+            } catch (error) { alert('שגיאה בשמירת הנתונים: ' + error.message); }
         };
 
         const loadAllData = () => {
@@ -1141,7 +1234,7 @@ window.onerror = function(msg, src, line, col, err) {
                                 {user && (<>
                                     <div className="text-left hidden md:block"><p className="text-xs text-slate-500">מחוברת כ:</p><p className="text-sm font-semibold text-slate-700">{user.displayName}</p></div>
                                     {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-violet-300" />}
-                                    <button onClick={() => auth.signOut()} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="hidden md:inline">יציאה</span></button>
+                                    <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="hidden md:inline">יציאה</span></button>
                                 </>)}
                             </div>
                             <div style={{display:"flex",gap:"8px"}}>
@@ -3271,6 +3364,67 @@ window.onerror = function(msg, src, line, col, err) {
 
     const root = createRoot(document.getElementById('root'));
     root.render(<App />);
+</script>
+
+<script>
+// ── PWA MANIFEST (injected dynamically so it works as single-file) ──
+(function() {
+    const manifest = {
+        name: 'מרכז הבקרה של חיי',
+        short_name: 'מרכז הבקרה',
+        description: 'מרכז הבקרה האישי שלי',
+        start_url: window.location.href,
+        display: 'standalone',
+        background_color: '#f8f7ff',
+        theme_color: '#7c3aed',
+        dir: 'rtl',
+        lang: 'he',
+        orientation: 'any',
+        icons: [
+            { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237c3aed'/%3E%3Ctext x='50' y='72' font-size='55' text-anchor='middle'%3E✨%3C/text%3E%3C/svg%3E", sizes: '192x192', type: 'image/svg+xml' },
+            { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237c3aed'/%3E%3Ctext x='50' y='72' font-size='55' text-anchor='middle'%3E✨%3C/text%3E%3C/svg%3E", sizes: '512x512', type: 'image/svg+xml' }
+        ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = url;
+    document.head.appendChild(link);
+})();
+
+// ── SERVICE WORKER (offline cache) ──────────────────────────────────
+if ('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE = 'dashboard-v1';
+const PRECACHE = [self.location.href || '/'];
+self.addEventListener('install', e => {
+    e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', e => {
+    e.waitUntil(clients.claim());
+});
+self.addEventListener('fetch', e => {
+    // Network first for Supabase API; cache first for everything else
+    if (e.request.url.includes('supabase.co')) {
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    } else {
+        e.respondWith(
+            caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+                const clone = res.clone();
+                caches.open(CACHE).then(c => c.put(e.request, clone));
+                return res;
+            }))
+        );
+    }
+});
+`;
+    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl, {scope: './'})
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(err => console.warn('SW registration failed:', err));
+}
 </script>
 </body>
 </html>
