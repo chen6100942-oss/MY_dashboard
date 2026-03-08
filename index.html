@@ -42,13 +42,14 @@
                     const access_token = params.get('access_token');
                     const refresh_token = params.get('refresh_token');
                     const expires_at = Date.now() + parseInt(params.get('expires_in')||3600)*1000;
+                    // נקה את ה-hash מיד כדי למנוע לולאה
+                    window.history.replaceState({}, '', window.location.pathname);
                     if (access_token) {
                         // fetch user info
                         fetch(URL+'/auth/v1/user', {headers: {'apikey':KEY,'Authorization':'Bearer '+access_token}})
                         .then(r=>r.json()).then(user => {
                             _session = {access_token, refresh_token, expires_at, user};
                             localStorage.setItem('sb_session', JSON.stringify(_session));
-                            window.history.replaceState({}, '', window.location.pathname);
                             _authListeners.forEach(fn => fn('SIGNED_IN', _session));
                         }).catch(console.error);
                         return;
@@ -605,14 +606,14 @@ window.onerror = function(msg, src, line, col, err) {
 
             let resolved = false;
 
-            // Fallback: if auth doesn't respond within 3 seconds, stop loading
+            // Fallback: if auth doesn't respond within 8 seconds, stop loading
             const fallbackTimer = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
                     setUser(null);
                     setLoading(false);
                 }
-            }, 3000);
+            }, 8000);
 
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
                 if (!resolved) resolved = true;
