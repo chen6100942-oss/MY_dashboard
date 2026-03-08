@@ -145,6 +145,11 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <div id="error-display" style="display:none;position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:9999;font-size:14px;"></div>
+<div id="static-loader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#fafbff 0%,#f0f4ff 30%,#fdf2f8 60%,#faf5ff 100%);z-index:8888;">
+  <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);animation:spin 1s linear infinite;margin-bottom:16px;"></div>
+  <p style="font-family:'Heebo',sans-serif;color:#8b5cf6;font-weight:600;font-size:16px;">טוען...</p>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
 <div id="root"></div>
 <script>
 window.onerror = function(msg, src, line, col, err) {
@@ -3471,6 +3476,10 @@ window.onerror = function(msg, src, line, col, err) {
             </div>
         );
     };
+
+    // הסתר את מסך הטעינה הסטטי ברגע ש-React מוכן
+    const staticLoader = document.getElementById('static-loader');
+    if (staticLoader) staticLoader.style.display = 'none';
 
     const root = createRoot(document.getElementById('root'));
     root.render(<App />);
