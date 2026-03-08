@@ -22,7 +22,7 @@
     <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js" crossorigin="anonymous"></script>
     <style>
         * { font-family: 'Heebo', 'Nunito', sans-serif; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
@@ -68,7 +68,8 @@ window.onerror = function(msg, src, line, col, err) {
     // ── SUPABASE INIT ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { createClient } = (window.supabase || window.supabaseJs || {});
+    const supabase = createClient ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
 
@@ -168,6 +169,7 @@ window.onerror = function(msg, src, line, col, err) {
         const signInWithGoogle = async () => {
             setLoading(true); setError('');
             try {
+                if (!supabase) throw new Error('שירות ההתחברות לא זמין כרגע');
                 const { error: err } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: { redirectTo: window.location.href }
@@ -500,7 +502,12 @@ window.onerror = function(msg, src, line, col, err) {
 
         // Effects - ALSO before any return
         useEffect(() => {
-            // שמיעה לשינויי auth ב-Supabase
+            if (!supabase) {
+                // fallback: תצוגה מקדימה בלי ענן
+                setUser({ displayName: 'תצוגה מקדימה', photoURL: null, uid: 'preview', email: '' });
+                setLoading(false);
+                return;
+            }
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
                 if (session?.user) {
                     setUser({
@@ -573,7 +580,7 @@ window.onerror = function(msg, src, line, col, err) {
             } catch (e) { console.error('localStorage load error:', e); }
 
             // שלב 2: אם מחוברת — טוען מהענן (הענן גובר)
-            if (!user || !user.uid) return;
+            if (!supabase || !user || !user.uid || user.uid === 'preview') return;
             (async () => {
                 try {
                     const { data: row, error } = await supabase
@@ -610,7 +617,7 @@ window.onerror = function(msg, src, line, col, err) {
 
         // ── REAL-TIME SYNC: מאזין לשינויים מהנייד/מחשב אחר ─────────
         useEffect(() => {
-            if (!user || !user.uid) return;
+            if (!supabase || !user || !user.uid || user.uid === 'preview') return;
             const channel = supabase
                 .channel('dashboard-sync-' + user.uid)
                 .on('postgres_changes', {
@@ -710,7 +717,7 @@ window.onerror = function(msg, src, line, col, err) {
                 // שמירה ל-localStorage תמיד
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 // שמירה ל-Supabase אם מחוברת
-                if (user && user.uid) {
+                if (supabase && user && user.uid && user.uid !== 'preview') {
                     const { error: sbErr } = await supabase
                         .from('dashboard_data')
                         .upsert({ user_id: user.uid, data: data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -1234,7 +1241,7 @@ window.onerror = function(msg, src, line, col, err) {
                                 {user && (<>
                                     <div className="text-left hidden md:block"><p className="text-xs text-slate-500">מחוברת כ:</p><p className="text-sm font-semibold text-slate-700">{user.displayName}</p></div>
                                     {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-violet-300" />}
-                                    <button onClick={() => supabase.auth.signOut()} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="hidden md:inline">יציאה</span></button>
+                                    <button onClick={() => supabase ? supabase.auth.signOut() : setUser(null)} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="hidden md:inline">יציאה</span></button>
                                 </>)}
                             </div>
                             <div style={{display:"flex",gap:"8px"}}>
