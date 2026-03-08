@@ -3478,8 +3478,10 @@ window.onerror = function(msg, src, line, col, err) {
     };
 
     // הסתר את מסך הטעינה הסטטי ברגע ש-React מוכן
-    const staticLoader = document.getElementById('static-loader');
-    if (staticLoader) staticLoader.style.display = 'none';
+    try {
+        const staticLoader = document.getElementById('static-loader');
+        if (staticLoader && staticLoader.parentNode) staticLoader.parentNode.removeChild(staticLoader);
+    } catch(e) {}
 
     const root = createRoot(document.getElementById('root'));
     root.render(<App />);
