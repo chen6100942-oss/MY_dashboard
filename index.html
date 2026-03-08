@@ -22,97 +22,12 @@
     <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script>
-    // ── Supabase Minimal Client (ללא CDN) ──────────────────────────
-    window.supabase = (() => {
-        const URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
-        const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
-        let _session = null;
-        let _authListeners = [];
-
-        const headers = (extra={}) => ({ 'Content-Type':'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + ((_session?.access_token) || KEY), ...extra });
-
-        // שחזור session מ-localStorage או URL hash
-        const _restoreSession = () => {
-            try {
-                // בדוק hash מ-OAuth redirect
-                const hash = window.location.hash;
-                if (hash && hash.includes('access_token')) {
-                    const params = new URLSearchParams(hash.slice(1));
-                    const access_token = params.get('access_token');
-                    const refresh_token = params.get('refresh_token');
-                    const expires_at = Date.now() + parseInt(params.get('expires_in')||3600)*1000;
-                    // נקה את ה-hash מיד כדי למנוע לולאה
-                    window.history.replaceState({}, '', window.location.pathname);
-                    if (access_token) {
-                        // fetch user info
-                        fetch(URL+'/auth/v1/user', {headers: {'apikey':KEY,'Authorization':'Bearer '+access_token}})
-                        .then(r=>r.json()).then(user => {
-                            _session = {access_token, refresh_token, expires_at, user};
-                            localStorage.setItem('sb_session', JSON.stringify(_session));
-                            _authListeners.forEach(fn => fn('SIGNED_IN', _session));
-                        }).catch(console.error);
-                        return;
-                    }
-                }
-                // בדוק localStorage
-                const saved = localStorage.getItem('sb_session');
-                if (saved) {
-                    const s = JSON.parse(saved);
-                    if (s.expires_at && s.expires_at > Date.now()) {
-                        _session = s;
-                        setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_IN', _session)), 100);
-                    } else {
-                        localStorage.removeItem('sb_session');
-                        setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100);
-                    }
-                } else {
-                    setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100);
-                }
-            } catch(e) { setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100); }
-        };
-
-        setTimeout(_restoreSession, 0);
-
-        return {
-            createClient: () => window.supabase,
-            auth: {
-                onAuthStateChange: (fn) => {
-                    _authListeners.push(fn);
-                    return { data: { subscription: { unsubscribe: () => { _authListeners = _authListeners.filter(f=>f!==fn); } } } };
-                },
-                signInWithOAuth: async ({ provider, options }) => {
-                    const redirectTo = encodeURIComponent(options?.redirectTo || window.location.href);
-                    window.location.href = URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+redirectTo;
-                    return { error: null };
-                },
-                signOut: async () => {
-                    try { await fetch(URL+'/auth/v1/logout', {method:'POST', headers: headers()}); } catch(e) {}
-                    _session = null;
-                    localStorage.removeItem('sb_session');
-                    _authListeners.forEach(fn => fn('SIGNED_OUT', null));
-                    return { error: null };
-                },
-                getSession: () => Promise.resolve({ data: { session: _session }, error: null })
-            },
-            from: (table) => ({
-                upsert: (data, opts) => fetch(URL+'/rest/v1/'+table+'?on_conflict='+(opts?.onConflict||''), {
-                    method: 'POST',
-                    headers: headers({'Prefer':'resolution=merge-duplicates,return=minimal'}),
-                    body: JSON.stringify(data)
-                }).then(r => r.ok ? {error:null} : r.json().then(e=>({error:e}))),
-                select: (cols='*') => ({
-                    eq: (col, val) => ({
-                        single: () => fetch(URL+'/rest/v1/'+table+'?select='+cols+'&'+col+'=eq.'+val, {
-                            headers: headers({'Accept':'application/vnd.pgrst.object+json'})
-                        }).then(r => r.ok ? r.json().then(data=>({data,error:null})) : r.json().then(e=>({data:null,error:e})))
-                    })
-                })
-            }),
-            channel: () => ({ on: function(){ return this; }, subscribe: function(){ return this; } }),
-            removeChannel: () => {}
-        };
-    })();
+    window.supabase = supabase.createClient(
+        'https://xrtrlxyhuulkdfcsggha.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ'
+    );
     </script>
     <style>
         * { font-family: 'Heebo', 'Nunito', sans-serif; }
@@ -132,6 +47,11 @@
     </style>
 </head>
 <body class="soft-bg">
+<div id="static-loader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#fafbff 0%,#f0f4ff 30%,#fdf2f8 60%,#faf5ff 100%);z-index:8888;">
+  <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);animation:sb-spin 1s linear infinite;margin-bottom:16px;"></div>
+  <p style="font-family:Heebo,sans-serif;color:#8b5cf6;font-weight:600;font-size:16px;">טוען...</p>
+  <style>@keyframes sb-spin{to{transform:rotate(360deg)}}</style>
+</div>
 <script>
 // Ensure Babel transforms the JSX after it loads
 window.addEventListener('DOMContentLoaded', function() {
@@ -146,11 +66,6 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <div id="error-display" style="display:none;position:fixed;top:0;left:0;right:0;background:red;color:white;padding:20px;z-index:9999;font-size:14px;"></div>
-<div id="static-loader" style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#fafbff 0%,#f0f4ff 30%,#fdf2f8 60%,#faf5ff 100%);z-index:8888;">
-  <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ec4899);animation:spin 1s linear infinite;margin-bottom:16px;"></div>
-  <p style="font-family:'Heebo',sans-serif;color:#8b5cf6;font-weight:600;font-size:16px;">טוען...</p>
-  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-</div>
 <div id="root"></div>
 <script>
 window.onerror = function(msg, src, line, col, err) {
@@ -161,10 +76,7 @@ window.onerror = function(msg, src, line, col, err) {
 };
 </script>
 <script type="text/babel">
-    // ── SUPABASE INIT ──────────────────────────────────────────────
-    const SUPABASE_URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
-    // Supabase כבר מאותחל ב-window.supabase למעלה
+    // Supabase מאותחל ב-window.supabase
     const supabase = window.supabase;
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
@@ -597,27 +509,21 @@ window.onerror = function(msg, src, line, col, err) {
 
         // Effects - ALSO before any return
         useEffect(() => {
+            // הסתר static loader
+            const sl = document.getElementById('static-loader');
+            if (sl) sl.style.display = 'none';
+
             if (!supabase) {
-                // fallback: תצוגה מקדימה בלי ענן
                 setUser({ displayName: 'תצוגה מקדימה', photoURL: null, uid: 'preview', email: '' });
                 setLoading(false);
                 return;
             }
 
-            let resolved = false;
-
-            // Fallback: if auth doesn't respond within 8 seconds, stop loading
-            const fallbackTimer = setTimeout(() => {
-                if (!resolved) {
-                    resolved = true;
-                    setUser(null);
-                    setLoading(false);
-                }
-            }, 8000);
+            // fallback אם auth לא עונה תוך 5 שניות
+            const fallback = setTimeout(() => { setLoading(false); }, 5000);
 
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-                if (!resolved) resolved = true;
-                clearTimeout(fallbackTimer);
+                clearTimeout(fallback);
                 if (session?.user) {
                     setUser({
                         displayName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email,
@@ -630,7 +536,7 @@ window.onerror = function(msg, src, line, col, err) {
                 }
                 setLoading(false);
             });
-            return () => { clearTimeout(fallbackTimer); subscription.unsubscribe(); };
+            return () => { clearTimeout(fallback); subscription.unsubscribe(); };
         }, []);
 
         // ── HELPER: apply loaded data object to state ──────────────
@@ -3477,12 +3383,6 @@ window.onerror = function(msg, src, line, col, err) {
             </div>
         );
     };
-
-    // הסתר את מסך הטעינה הסטטי ברגע ש-React מוכן
-    try {
-        const staticLoader = document.getElementById('static-loader');
-        if (staticLoader && staticLoader.parentNode) staticLoader.parentNode.removeChild(staticLoader);
-    } catch(e) {}
 
     const root = createRoot(document.getElementById('root'));
     root.render(<App />);
