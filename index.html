@@ -23,10 +23,96 @@
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
     <script>
-    // טעינת Supabase בצורה בטוחה
-    window._supabaseReady = false;
+    // ── Supabase Minimal Client (ללא CDN) ──────────────────────────
+    window.supabase = (() => {
+        const URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
+        const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
+        let _session = null;
+        let _authListeners = [];
+
+        const headers = (extra={}) => ({ 'Content-Type':'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + ((_session?.access_token) || KEY), ...extra });
+
+        // שחזור session מ-localStorage או URL hash
+        const _restoreSession = () => {
+            try {
+                // בדוק hash מ-OAuth redirect
+                const hash = window.location.hash;
+                if (hash && hash.includes('access_token')) {
+                    const params = new URLSearchParams(hash.slice(1));
+                    const access_token = params.get('access_token');
+                    const refresh_token = params.get('refresh_token');
+                    const expires_at = Date.now() + parseInt(params.get('expires_in')||3600)*1000;
+                    if (access_token) {
+                        // fetch user info
+                        fetch(URL+'/auth/v1/user', {headers: {'apikey':KEY,'Authorization':'Bearer '+access_token}})
+                        .then(r=>r.json()).then(user => {
+                            _session = {access_token, refresh_token, expires_at, user};
+                            localStorage.setItem('sb_session', JSON.stringify(_session));
+                            window.history.replaceState({}, '', window.location.pathname);
+                            _authListeners.forEach(fn => fn('SIGNED_IN', _session));
+                        }).catch(console.error);
+                        return;
+                    }
+                }
+                // בדוק localStorage
+                const saved = localStorage.getItem('sb_session');
+                if (saved) {
+                    const s = JSON.parse(saved);
+                    if (s.expires_at && s.expires_at > Date.now()) {
+                        _session = s;
+                        setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_IN', _session)), 100);
+                    } else {
+                        localStorage.removeItem('sb_session');
+                        setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100);
+                    }
+                } else {
+                    setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100);
+                }
+            } catch(e) { setTimeout(() => _authListeners.forEach(fn => fn('SIGNED_OUT', null)), 100); }
+        };
+
+        setTimeout(_restoreSession, 0);
+
+        return {
+            createClient: () => window.supabase,
+            auth: {
+                onAuthStateChange: (fn) => {
+                    _authListeners.push(fn);
+                    return { data: { subscription: { unsubscribe: () => { _authListeners = _authListeners.filter(f=>f!==fn); } } } };
+                },
+                signInWithOAuth: async ({ provider, options }) => {
+                    const redirectTo = encodeURIComponent(options?.redirectTo || window.location.href);
+                    window.location.href = URL+'/auth/v1/authorize?provider='+provider+'&redirect_to='+redirectTo;
+                    return { error: null };
+                },
+                signOut: async () => {
+                    try { await fetch(URL+'/auth/v1/logout', {method:'POST', headers: headers()}); } catch(e) {}
+                    _session = null;
+                    localStorage.removeItem('sb_session');
+                    _authListeners.forEach(fn => fn('SIGNED_OUT', null));
+                    return { error: null };
+                },
+                getSession: () => Promise.resolve({ data: { session: _session }, error: null })
+            },
+            from: (table) => ({
+                upsert: (data, opts) => fetch(URL+'/rest/v1/'+table+'?on_conflict='+(opts?.onConflict||''), {
+                    method: 'POST',
+                    headers: headers({'Prefer':'resolution=merge-duplicates,return=minimal'}),
+                    body: JSON.stringify(data)
+                }).then(r => r.ok ? {error:null} : r.json().then(e=>({error:e}))),
+                select: (cols='*') => ({
+                    eq: (col, val) => ({
+                        single: () => fetch(URL+'/rest/v1/'+table+'?select='+cols+'&'+col+'=eq.'+val, {
+                            headers: headers({'Accept':'application/vnd.pgrst.object+json'})
+                        }).then(r => r.ok ? r.json().then(data=>({data,error:null})) : r.json().then(e=>({data:null,error:e})))
+                    })
+                })
+            }),
+            channel: () => ({ on: function(){ return this; }, subscribe: function(){ return this; } }),
+            removeChannel: () => {}
+        };
+    })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js" crossorigin="anonymous" onload="window._supabaseReady=true;" onerror="window._supabaseReady=false;"></script>
     <style>
         * { font-family: 'Heebo', 'Nunito', sans-serif; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
@@ -72,17 +158,8 @@ window.onerror = function(msg, src, line, col, err) {
     // ── SUPABASE INIT ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
-    // אתחול Supabase — תומך בפורמטים שונים של UMD
-    let supabase = null;
-    try {
-        const sb = window.supabase || window.Supabase || {};
-        const createClient = sb.createClient || (typeof createClient !== 'undefined' ? createClient : null);
-        if (createClient) {
-            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else if (sb && typeof sb === 'function') {
-            supabase = sb(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-    } catch(e) { console.warn('Supabase init failed:', e); supabase = null; }
+    // Supabase כבר מאותחל ב-window.supabase למעלה
+    const supabase = window.supabase;
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
 
