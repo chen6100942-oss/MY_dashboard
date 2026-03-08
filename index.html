@@ -22,7 +22,11 @@
     <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.2/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js" crossorigin="anonymous"></script>
+    <script>
+    // טעינת Supabase בצורה בטוחה
+    window._supabaseReady = false;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js" crossorigin="anonymous" onload="window._supabaseReady=true;" onerror="window._supabaseReady=false;"></script>
     <style>
         * { font-family: 'Heebo', 'Nunito', sans-serif; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-6px); } }
@@ -68,8 +72,17 @@ window.onerror = function(msg, src, line, col, err) {
     // ── SUPABASE INIT ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://xrtrlxyhuulkdfcsggha.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhydHJseHlodXVsa2RmY3NnZ2hhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDIwMDksImV4cCI6MjA4ODQ3ODAwOX0.LJi4QlHw0Yg0KixDgCG17BM4gxgGbSGyYUEpzhapGGQ';
-    const { createClient } = (window.supabase || window.supabaseJs || {});
-    const supabase = createClient ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+    // אתחול Supabase — תומך בפורמטים שונים של UMD
+    let supabase = null;
+    try {
+        const sb = window.supabase || window.Supabase || {};
+        const createClient = sb.createClient || (typeof createClient !== 'undefined' ? createClient : null);
+        if (createClient) {
+            supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else if (sb && typeof sb === 'function') {
+            supabase = sb(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+    } catch(e) { console.warn('Supabase init failed:', e); supabase = null; }
     const { useState, useEffect, useRef } = React;
     const { createRoot } = ReactDOM;
 
