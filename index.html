@@ -170,7 +170,7 @@ window.addEventListener('DOMContentLoaded', function() {
             try {
                 const { error: err } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: window.location.href }
+                    options: { redirectTo: 'https://chen6100942-oss.github.io/MY_dashboard/' }
                 });
                 if (err) throw err;
             }
