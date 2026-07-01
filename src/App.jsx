@@ -242,6 +242,8 @@ import { supabase } from './lib/supabaseClient.js';
         const dragOverItem = useRef(null);
         const autoSaveTimer = useRef(null);
         const isFirstRender = useRef(true);
+        const userRef = useRef(user);
+        useEffect(() => { userRef.current = user; }, [user]);
 
         const TEXT_SIZES = ['text-xs','text-sm','text-base','text-lg','text-xl'];
 
@@ -432,6 +434,19 @@ import { supabase } from './lib/supabaseClient.js';
                             applyDataToState(row.data);
                             localStorage.setItem('dashboard_data', JSON.stringify(row.data));
                         }
+                    } else {
+                        // No cloud row yet — migrate localStorage to cloud (first login)
+                        const saved = localStorage.getItem('dashboard_data');
+                        if (saved && user?.uid) {
+                            try {
+                                const localData = JSON.parse(saved);
+                                await supabase.from('dashboard_data').upsert(
+                                    { user_id: user.uid, data: localData, updated_at: new Date().toISOString() },
+                                    { onConflict: 'user_id' }
+                                );
+                                console.log('✅ Migrated localStorage data to Supabase cloud');
+                            } catch (migErr) { console.warn('Migration error:', migErr); }
+                        }
                     }
                 } catch (e) { console.error('Cloud load error:', e); }
             })();
@@ -445,6 +460,11 @@ import { supabase } from './lib/supabaseClient.js';
                 try {
                     const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
+                    const u = userRef.current;
+                    if (supabase && u?.uid && u.uid !== 'local') {
+                        supabase.from('dashboard_data').upsert({ user_id: u.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+                            .then(({ error: err }) => { if (err) console.warn('Cloud auto-save error:', err.message); });
+                    }
                 } catch(e) {}
             }, 1000);
         }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes]);
@@ -524,8 +544,11 @@ import { supabase } from './lib/supabaseClient.js';
         const saveAllData = async () => {
             try {
                 const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, timestamp: new Date().toISOString() };
-                // שמירה ל-localStorage תמיד
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
+                if (supabase && user?.uid && user.uid !== 'local') {
+                    const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+                    if (err) console.warn('Cloud save error:', err.message);
+                }
                 setSaveNotification(true); setTimeout(() => setSaveNotification(false), 3000);
             } catch (error) { alert('שגיאה בשמירת הנתונים: ' + error.message); }
         };
