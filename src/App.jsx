@@ -237,6 +237,10 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
+        const [userProfile, setUserProfile] = useState(null);
+        const [inviteEmail, setInviteEmail] = useState('');
+        const [inviteLoading, setInviteLoading] = useState(false);
+        const [inviteResult, setInviteResult] = useState(null);
 
         const dragItem = useRef(null);
         const dragOverItem = useRef(null);
@@ -449,6 +453,16 @@ import { supabase } from './lib/supabaseClient.js';
                         }
                     }
                 } catch (e) { console.error('Cloud load error:', e); }
+
+                // Load user profile for role-based UI
+                try {
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('role, display_name')
+                        .eq('id', user.uid)
+                        .single();
+                    if (profileData) setUserProfile(profileData);
+                } catch (e) { console.warn('Profile load error:', e); }
             })();
         }, [user]);
 
@@ -540,6 +554,33 @@ import { supabase } from './lib/supabaseClient.js';
         const getDaysInMonth = (y, m) => new Date(y, m, 0).getDate();
         const getFirstDayOfMonth = (y, m) => new Date(y, m-1, 1).getDay();
         const typeColor = (t) => ({morning:'#f59e0b',work:'#6366f1',noon:'#10b981',fitness:'#f43f5e',family:'#ec4899',general:'#64748b'}[t]||'#64748b');
+
+        const handleInviteUser = async () => {
+            if (!inviteEmail || inviteLoading) return;
+            setInviteLoading(true);
+            setInviteResult(null);
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const response = await fetch('/.netlify/functions/invite-user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${session.access_token}`,
+                    },
+                    body: JSON.stringify({ email: inviteEmail }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setInviteResult({ success: true, message: data.message || `הזמנה נשלחה ל-${inviteEmail} ✉️` });
+                    setInviteEmail('');
+                } else {
+                    setInviteResult({ success: false, message: data.error || 'שגיאה בשליחת ההזמנה' });
+                }
+            } catch {
+                setInviteResult({ success: false, message: 'שגיאת רשת — נסי שנית' });
+            }
+            setInviteLoading(false);
+        };
 
         const saveAllData = async () => {
             try {
@@ -1937,6 +1978,37 @@ import { supabase } from './lib/supabaseClient.js';
                                             ⚠️ איפוס מלא של הדשבורד
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {userProfile?.role === 'admin' && (
+                            <div className="space-y-4">
+                                <div className="card p-6">
+                                    <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2 mb-4">👑 ניהול משתמשים</h3>
+                                    <p className="text-xs text-slate-500 mb-3">הזמן משתמש חדש — יקבל מייל עם קישור לקביעת סיסמה ויכנס לדשבורד ריק משלו</p>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="email"
+                                            value={inviteEmail}
+                                            onChange={e => setInviteEmail(e.target.value)}
+                                            placeholder="מייל המשתמש החדש"
+                                            className="flex-1 px-3 py-2 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-violet-400 transition-all"
+                                            dir="ltr"
+                                        />
+                                        <button
+                                            onClick={handleInviteUser}
+                                            disabled={inviteLoading || !inviteEmail}
+                                            className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-sm transition-all disabled:opacity-50 shrink-0"
+                                        >
+                                            {inviteLoading ? 'שולח...' : 'הזמן ✉️'}
+                                        </button>
+                                    </div>
+                                    {inviteResult && (
+                                        <p className={`mt-2 text-xs font-semibold ${inviteResult.success ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                            {inviteResult.message}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         )}
