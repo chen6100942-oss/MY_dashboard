@@ -1,3 +1,5 @@
+const { createClient } = require('@supabase/supabase-js');
+
 exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -38,51 +40,34 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid email address' }) };
     }
 
-    // Verify caller is admin — use anon key + caller JWT so RLS lets them read only their own profile
-    const profileRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/profiles?select=role&limit=1`,
-        {
-            headers: {
-                'apikey': ANON_KEY,
-                'Authorization': `Bearer ${callerJwt}`,
-                'Accept': 'application/json',
-            },
-        }
-    );
+    // Verify caller is admin using their JWT + anon key (RLS enforced)
+    const callerClient = createClient(SUPABASE_URL, ANON_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: `Bearer ${callerJwt}` } },
+    });
 
-    if (!profileRes.ok) {
-        return { statusCode: 403, headers, body: JSON.stringify({ error: 'Could not verify admin status' }) };
-    }
+    const { data: profiles, error: profileError } = await callerClient
+        .from('profiles')
+        .select('role')
+        .limit(1);
 
-    const profiles = await profileRes.json();
-    if (!Array.isArray(profiles) || !profiles[0] || profiles[0].role !== 'admin') {
+    if (profileError || !profiles || !profiles[0] || profiles[0].role !== 'admin') {
+        console.log('Admin check failed:', profileError?.message, profiles);
         return { statusCode: 403, headers, body: JSON.stringify({ error: 'Admin access required' }) };
     }
 
-    // Send invite via Supabase Admin API
-    const inviteRes = await fetch(
-        `${SUPABASE_URL}/auth/v1/admin/invite`,
-        {
-            method: 'POST',
-            headers: {
-                'apikey': SERVICE_ROLE_KEY,
-                'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email }),
-        }
-    );
+    // Send invite using Supabase admin client with service role key
+    const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false },
+    });
 
-    const rawText = await inviteRes.text();
-    console.log('Invite API response:', inviteRes.status, rawText.substring(0, 200));
+    const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
+        redirectTo: 'https://inside-out-byhenzerah.netlify.app',
+    });
 
-    if (!inviteRes.ok) {
-        let msg = 'שגיאה בשליחת ההזמנה';
-        try {
-            const parsed = JSON.parse(rawText);
-            msg = parsed.msg || parsed.message || parsed.error_description || parsed.error || msg;
-        } catch {}
-        return { statusCode: inviteRes.status, headers, body: JSON.stringify({ error: msg }) };
+    if (inviteError) {
+        console.log('Invite error:', inviteError.message);
+        return { statusCode: 400, headers, body: JSON.stringify({ error: inviteError.message }) };
     }
 
     return {
