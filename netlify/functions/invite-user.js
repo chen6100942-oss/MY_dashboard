@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 
 exports.handler = async (event) => {
     const headers = {
@@ -44,6 +45,7 @@ exports.handler = async (event) => {
     const callerClient = createClient(SUPABASE_URL, ANON_KEY, {
         auth: { autoRefreshToken: false, persistSession: false },
         global: { headers: { Authorization: `Bearer ${callerJwt}` } },
+        realtime: { transport: WebSocket },
     });
 
     const { data: profiles, error: profileError } = await callerClient
@@ -59,6 +61,7 @@ exports.handler = async (event) => {
     // Send invite using Supabase admin client with service role key
     const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
         auth: { autoRefreshToken: false, persistSession: false },
+        realtime: { transport: WebSocket },
     });
 
     const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
