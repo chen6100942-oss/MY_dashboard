@@ -73,10 +73,15 @@ exports.handler = async (event) => {
         }
     );
 
-    const inviteData = await inviteRes.json();
+    const rawText = await inviteRes.text();
+    console.log('Invite API response:', inviteRes.status, rawText.substring(0, 200));
 
     if (!inviteRes.ok) {
-        const msg = inviteData.msg || inviteData.message || inviteData.error_description || 'שגיאה בשליחת ההזמנה';
+        let msg = 'שגיאה בשליחת ההזמנה';
+        try {
+            const parsed = JSON.parse(rawText);
+            msg = parsed.msg || parsed.message || parsed.error_description || parsed.error || msg;
+        } catch {}
         return { statusCode: inviteRes.status, headers, body: JSON.stringify({ error: msg }) };
     }
 
