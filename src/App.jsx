@@ -1057,7 +1057,56 @@ import { supabase } from './lib/supabaseClient.js';
         };
 
         return (
-            <div className="min-h-screen soft-bg text-slate-700 p-4 md:p-6 lg:p-8">
+            <div className="flex min-h-screen" style={{background:'linear-gradient(135deg,#fafbff 0%,#f0f4ff 30%,#fdf2f8 60%,#faf5ff 100%)'}}>
+
+                {/* SIDEBAR */}
+                <aside style={{width:'240px',flexShrink:0}} className="bg-white shadow-md fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
+                    {/* Brand */}
+                    <div className="p-5 border-b border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center shrink-0">
+                                <span style={{fontSize:'10px',fontWeight:'900',color:'white',lineHeight:1,textAlign:'center'}}>IN</span>
+                            </div>
+                            <div>
+                                <div className="text-sm font-black text-slate-800 tracking-widest">INSIDE OUT</div>
+                                <div style={{fontSize:'10px'}} className="text-slate-400 font-medium">Design Your Life</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Nav items */}
+                    <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
+                        {[...tabs, {id:'tab-settings', name:'הגדרות', icon:'settings', emoji:'⚙️'}].map(tab => (
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                {activeTab===tab.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'20px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
+                                <Icon name={tab.icon||'circle'} size={16} className={activeTab===tab.id ? 'text-violet-600' : 'text-slate-400'} />
+                                <span>{tab.name}</span>
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* User + logout */}
+                    <div className="p-4 border-t border-slate-100">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                {(user?.email?.[0]||'C').toUpperCase()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div style={{fontSize:'12px'}} className="font-semibold text-slate-700 truncate">{user?.displayName||user?.email||'חן'}</div>
+                                <div style={{fontSize:'10px'}} className="text-slate-400">{userProfile?.role==='admin'?'מנהל.ת':'משתמש.ת'}</div>
+                            </div>
+                        </div>
+                        <button onClick={() => supabase.auth.signOut()}
+                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all" style={{fontSize:'12px',fontWeight:600}}>
+                            <Icon name="log-out" size={14} />
+                            <span>יציאה</span>
+                        </button>
+                    </div>
+                </aside>
+
+                {/* MAIN CONTENT */}
+                <div className="flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px'}}>
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
 
                 {/* TITLE */}
@@ -1118,7 +1167,6 @@ import { supabase } from './lib/supabaseClient.js';
                             <div style={{display:"flex",gap:"8px"}}>
                                 <button onClick={undo} disabled={undoStack.length === 0} title="בטל" className={undoStack.length > 0 ? "w-10 h-10 rounded-full shadow bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all" : "w-10 h-10 rounded-full shadow bg-slate-100 text-slate-300 cursor-not-allowed flex items-center justify-center"}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
                                 <button onClick={saveAllData} title="שמירת נתונים" className="w-10 h-10 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
-                                <button onClick={() => supabase.auth.signOut()} title="יציאה מהחשבון" className="w-10 h-10 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-400 hover:text-rose-400 rounded-full shadow transition-all flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
                             </div>
                         </div>
 
@@ -1126,19 +1174,6 @@ import { supabase } from './lib/supabaseClient.js';
                 </div>
 
                 {/* TABS */}
-                <nav className="max-w-5xl mx-auto mb-8">
-                    <div className="flex gap-2 justify-center flex-wrap no-scrollbar pb-2">
-                        {tabs.map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all whitespace-nowrap shadow-sm ${activeTab===tab.id ? 'bg-violet-600 text-white shadow-md' : 'bg-white text-slate-600 hover:text-slate-800 hover:shadow-md'}`}>
-                                <span>{tab.emoji || '📌'}</span><span>{tab.name}</span>
-                            </button>
-                        ))}
-                        <button onClick={() => setActiveTab('tab-settings')} className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all whitespace-nowrap shadow-sm hover:shadow-md ${activeTab==='tab-settings'?'bg-violet-600 text-white shadow-md':'bg-white text-slate-500 hover:text-slate-700'}`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                            <span>הגדרות</span>
-                        </button>
-                    </div>
-                </nav>
 
                 {/* QUOTE - only on home tab */}
                 {activeTab === 'home' && (
@@ -3477,6 +3512,7 @@ import { supabase } from './lib/supabaseClient.js';
                     <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-[9px] font-bold text-white">Me</div><span className="text-sm font-medium italic text-slate-400">"הכל מתחיל מבפנים החוצה." ✨</span></div>
                     <div className="font-medium flex items-center gap-2 text-slate-400 bg-white/80 px-3.5 py-1.5 rounded-full border border-slate-100 text-[11px]"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026</div>
                 </footer>
+                </div>
             </div>
         );
     };
