@@ -27,7 +27,8 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'ideas', name: 'רעיונות', icon: 'lightbulb', color: 'yellow', emoji: '💡' },
             { id: 'resources', name: 'כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
-            { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' }
+            { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' },
+            { id: 'vision-board', name: 'לוח חזון', icon: 'image', color: 'pink', emoji: '🖼️' }
         ]);
         const [newTabName, setNewTabName] = useState('');
         const [newTabIcon, setNewTabIcon] = useState('star');
@@ -206,7 +207,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         // ── DRAG & DROP / LAYOUT EDIT ────────────────────────────────
         const [layoutEditMode, setLayoutEditMode] = useState(false);
-        const [homeBlockOrder, setHomeBlockOrder] = useState(['countdown','goals','morning','affirmations','gamechangers']);
+        const [homeBlockOrder, setHomeBlockOrder] = useState(['countdown','today-tasks','goals','morning','affirmations','gamechangers']);
         const [hiddenHomeBlocks, setHiddenHomeBlocks] = useState([]);
         // blockWidths: 'full' | 'half' | 'third'  (default 'full')
         const [homeBlockWidths, setHomeBlockWidths] = useState({});
@@ -237,6 +238,10 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
+        const [visionBoardItems, setVisionBoardItems] = useState([]);
+        const [vbNewText, setVbNewText] = useState('');
+        const [vbBg, setVbBg] = useState('#f5f3ff');
+        const [vbEditingId, setVbEditingId] = useState(null);
         const [userProfile, setUserProfile] = useState(null);
         const [inviteEmail, setInviteEmail] = useState('');
         const [inviteLoading, setInviteLoading] = useState(false);
@@ -356,6 +361,9 @@ import { supabase } from './lib/supabaseClient.js';
             if (!result.some(t => t.id === 'my-world')) {
                 result.push({ id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' });
             }
+            if (!result.some(t => t.id === 'vision-board')) {
+                result.push({ id: 'vision-board', name: 'לוח חזון', icon: 'image', color: 'pink', emoji: '🖼️' });
+            }
             return result;
         };
 
@@ -392,7 +400,11 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.currentWeight !== undefined) setCurrentWeight(d.currentWeight);
             if (d.affirmations) setAffirmations(d.affirmations);
             if (d.affirmationUrl) setAffirmationUrl(d.affirmationUrl);
-            if (d.homeBlockOrder) setHomeBlockOrder(d.homeBlockOrder);
+            if (d.homeBlockOrder) {
+                const order = [...d.homeBlockOrder];
+                if (!order.includes('today-tasks')) order.splice(1, 0, 'today-tasks');
+                setHomeBlockOrder(order);
+            }
             if (d.hiddenHomeBlocks) setHiddenHomeBlocks(d.hiddenHomeBlocks);
             if (d.homeBlockWidths) setHomeBlockWidths(d.homeBlockWidths);
             if (d.homeBlockTextSize) setHomeBlockTextSize(d.homeBlockTextSize);
@@ -408,6 +420,8 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
             if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
             if (d.worldNotes) setWorldNotes(d.worldNotes);
+            if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
+            if (d.vbBg) setVbBg(d.vbBg);
         };
 
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
@@ -472,7 +486,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
                     if (supabase && u?.uid && u.uid !== 'local') {
@@ -481,7 +495,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes]);
+        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg]);
 
 
         // lucide icons handled per-component
@@ -584,7 +598,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -628,6 +642,8 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
                     if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
                     if (d.worldNotes) setWorldNotes(d.worldNotes);
+                    if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
+                    if (d.vbBg) setVbBg(d.vbBg);
                 }
             } catch (error) { console.error('Error loading data:', error); }
         };
@@ -1113,17 +1129,6 @@ import { supabase } from './lib/supabaseClient.js';
                 <div className="max-w-5xl mx-auto mb-5 pt-6 animate-slide-in-up">
                     <div style={{display:"flex",gap:"20px",alignItems:"stretch"}}>
 
-                        {/* תמונה שניתן להעלות */}
-                        <label style={{width:"180px",flexShrink:0,borderRadius:"20px",overflow:"hidden",border:"2px dashed #e2e8f0",background:"#f8fafc",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative",minHeight:"130px"}} className="hidden md:flex group hover:border-violet-400 transition-all">
-                            {bannerImg ? (<img src={bannerImg} alt="" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover"}} />) : (
-                                <div style={{textAlign:"center",padding:"16px",pointerEvents:"none"}}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{margin:"0 auto 8px"}}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    <p style={{fontSize:"11px",color:"#94a3b8",fontWeight:600}}>העלי תמונה</p>
-                                </div>
-                            )}
-                            {bannerImg && (<button onClick={function(e){e.preventDefault();e.stopPropagation();setBannerImg(null);}} style={{position:"absolute",top:"8px",right:"8px",width:"24px",height:"24px",background:"#ef4444",color:"white",borderRadius:"50%",fontSize:"14px",border:"none",cursor:"pointer",opacity:0,zIndex:10,display:"flex",alignItems:"center",justifyContent:"center"}} className="group-hover:opacity-100">×</button>)}
-                            <input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setBannerImg(ev.target.result);};r.readAsDataURL(f);}} />
-                        </label>
 
                         {/* כותרת ואפרמציה - מרכז */}
                         <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center"}}>
@@ -1429,6 +1434,34 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                         </div>
                                     );
+
+                                    /* ── TODAY'S TASKS ── */
+                                    if(blockId==='today-tasks') {
+                                        const todayStr = new Date().toISOString().split('T')[0];
+                                        const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
+                                        if (todayTasks.length === 0) return null;
+                                        return (
+                                            <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
+                                            {DragHint}
+                                            <div className="card p-5">
+                                                <h3 className="font-extrabold text-slate-700 mb-3 flex items-center gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+                                                    משימות להיום
+                                                    <span className="bg-violet-100 text-violet-700 text-xs font-black px-2 py-0.5 rounded-full">{todayTasks.length}</span>
+                                                </h3>
+                                                <div className="space-y-2">
+                                                    {todayTasks.map(task => (
+                                                        <div key={task.id} className="flex items-center gap-3 p-2.5 bg-violet-50 rounded-xl">
+                                                            <button onClick={() => setTasks(prev => prev.map(t => t.id===task.id ? {...t, completed:true} : t))} className="w-5 h-5 rounded-full border-2 border-violet-300 hover:bg-violet-500 hover:border-violet-500 transition-all flex items-center justify-center shrink-0" />
+                                                            <span className={`text-sm font-semibold text-slate-700 flex-1 ${sz}`}>{task.emoji} {task.text}</span>
+                                                            {task.priority === 'high' && <span className="text-[10px] bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded-full">דחוף</span>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            </div>
+                                        );
+                                    }
 
                                     /* ── GAME CHANGERS ── */
                                     if(blockId==='gamechangers') return (
@@ -1989,6 +2022,8 @@ import { supabase } from './lib/supabaseClient.js';
                                                         if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
                                                         if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
                                                         if (d.worldNotes) setWorldNotes(d.worldNotes);
+                                                        if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
+                                                        if (d.vbBg) setVbBg(d.vbBg);
                                                         if (d.homeBlockOrder) setHomeBlockOrder(d.homeBlockOrder);
                                                         if (d.homeBlockWidths) setHomeBlockWidths(d.homeBlockWidths);
                                                         if (d.monthNotes) setMonthNotes(d.monthNotes);
@@ -2914,6 +2949,82 @@ import { supabase } from './lib/supabaseClient.js';
 
                     </div>
                 )}
+                {/* VISION BOARD TAB */}
+                {activeTab === 'vision-board' && (
+                    <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-5">
+                        <div className="card p-5 border-t-4 border-pink-400">
+                            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                                <div>
+                                    <h2 className="text-2xl font-extrabold text-slate-800">🖼️ לוח חזון</h2>
+                                    <p className="text-slate-400 text-sm mt-0.5">העלי תמונות וכתבי משפטים שמייצגים את החזון השנתי שלך</p>
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <label className="text-xs font-semibold text-slate-500">רקע:</label>
+                                    {['#f5f3ff','#fff7ed','#f0fdf4','#eff6ff','#1e1b4b','#0f172a','#fdf4ff'].map(c => (
+                                        <button key={c} onClick={() => setVbBg(c)} className={`w-6 h-6 rounded-full border-2 transition-all ${vbBg===c?'border-violet-500 scale-110':'border-slate-200'}`} style={{background:c}} />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Canvas */}
+                            <div className="relative rounded-2xl overflow-hidden min-h-96 p-4" style={{background: vbBg, minHeight:'500px'}}>
+                                {visionBoardItems.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center h-96 text-slate-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                        <p className="font-semibold text-sm">לוח החזון ריק — הוסיפי תמונות ומשפטים</p>
+                                    </div>
+                                )}
+                                <div className="columns-2 md:columns-3 gap-3 space-y-3">
+                                    {visionBoardItems.map(item => (
+                                        <div key={item.id} className="relative break-inside-avoid group">
+                                            {item.type === 'image' ? (
+                                                <img src={item.src} alt="" className="w-full rounded-xl object-cover shadow-sm" />
+                                            ) : (
+                                                <div className="rounded-xl p-4 shadow-sm" style={{background: item.bgColor || 'rgba(255,255,255,0.7)', backdropFilter:'blur(8px)'}}>
+                                                    {vbEditingId === item.id ? (
+                                                        <textarea autoFocus defaultValue={item.text} onBlur={e => { setVisionBoardItems(prev => prev.map(i => i.id===item.id ? {...i, text:e.target.value} : i)); setVbEditingId(null); }} className="w-full bg-transparent outline-none resize-none text-center font-semibold" style={{fontSize: item.fontSize||'18px', color: item.color||'#1e1b4b', minHeight:'60px'}} />
+                                                    ) : (
+                                                        <p onDoubleClick={() => setVbEditingId(item.id)} className="text-center font-semibold cursor-pointer" style={{fontSize: item.fontSize||'18px', color: item.color||'#1e1b4b', lineHeight:1.4}}>{item.text}</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <button onClick={() => setVisionBoardItems(prev => prev.filter(i => i.id !== item.id))} className="absolute top-2 left-2 w-6 h-6 bg-rose-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center shadow-md">×</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="mt-4 flex flex-wrap gap-3 items-center">
+                                {/* Upload image */}
+                                <label className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold cursor-pointer transition-all shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    העלי תמונה
+                                    <input type="file" accept="image/*" multiple className="hidden" onChange={e => {
+                                        Array.from(e.target.files).forEach(f => {
+                                            const r = new FileReader();
+                                            r.onload = ev => setVisionBoardItems(prev => [...prev, {id: Date.now()+Math.random(), type:'image', src:ev.target.result}]);
+                                            r.readAsDataURL(f);
+                                        });
+                                        e.target.value='';
+                                    }} />
+                                </label>
+
+                                {/* Add text */}
+                                <div className="flex gap-2 flex-1 min-w-64">
+                                    <input type="text" value={vbNewText} onChange={e => setVbNewText(e.target.value)} onKeyDown={e => { if(e.key==='Enter'&&vbNewText.trim()){setVisionBoardItems(prev=>[...prev,{id:Date.now(),type:'text',text:vbNewText.trim(),fontSize:'20px',color:'#1e1b4b',bgColor:'rgba(255,255,255,0.75)'}]);setVbNewText('');} }} placeholder="הוסיפי משפט / ציטוט / מילת כוח..." className="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-xl outline-none focus:border-violet-400 text-sm transition-all" />
+                                    <button onClick={() => { if(!vbNewText.trim())return; setVisionBoardItems(prev=>[...prev,{id:Date.now(),type:'text',text:vbNewText.trim(),fontSize:'20px',color:'#1e1b4b',bgColor:'rgba(255,255,255,0.75)'}]); setVbNewText(''); }} disabled={!vbNewText.trim()} className="px-4 py-2.5 bg-pink-500 hover:bg-pink-600 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-50">הוסיפי ✨</button>
+                                </div>
+
+                                {visionBoardItems.length > 0 && (
+                                    <button onClick={() => { if(window.confirm('למחוק את כל הלוח?')) setVisionBoardItems([]); }} className="px-3 py-2.5 text-slate-400 hover:text-rose-500 text-xs font-semibold transition-all">נקי הכל</button>
+                                )}
+                            </div>
+                            <p className="text-xs text-slate-400 mt-2">💡 לחצי פעמיים על משפט כדי לערוך אותו</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* MY WORLD TAB */}
                 {activeTab === 'my-world' && (() => {
                     const ALL_COUNTRIES = [
