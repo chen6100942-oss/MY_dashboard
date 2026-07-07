@@ -1127,8 +1127,8 @@ import { supabase } from './lib/supabaseClient.js';
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
 
                 {/* TITLE */}
-                <div className="max-w-5xl mx-auto mb-5 pt-6 animate-slide-in-up">
-                    <div style={{display:"flex",gap:"20px",alignItems:"stretch"}}>
+                <div className="max-w-3xl mx-auto mb-2 pt-3 animate-slide-in-up text-center">
+                    <div style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
 
 
                         {/* כותרת ואפרמציה - מרכז */}
@@ -1217,6 +1217,23 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'home' && (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
+                        {/* GREETING */}
+                        {(() => {
+                            const now = new Date();
+                            const hour = now.getHours();
+                            const gr = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב';
+                            const name = (user?.displayName || user?.email || 'חן').split('@')[0];
+                            const dateStr = now.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+                            return (
+                                <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h2 className="text-lg font-extrabold text-slate-800">{gr}, {name} 👋</h2>
+                                        <p className="text-xs text-slate-400">{dateStr}</p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
                         {/* COMPACT TOOLBAR */}
                         {(() => {
                             const now = new Date(), e2026 = new Date(2026,11,31,23,59,59);
@@ -1245,7 +1262,7 @@ import { supabase } from './lib/supabaseClient.js';
                                     <span className="text-violet-600">{w2026}</span>
                                     <span className="text-slate-400 font-normal">שבועות |</span>
                                     <span>{d2026}</span>
-                                    <span className="text-slate-400 font-normal">ימים ל-2026</span>
+                                    <span className="text-slate-400 font-normal">ימים — עד סוף שנת 2026</span>
                                 </div>
                             </div>
                             );
@@ -1386,12 +1403,12 @@ import { supabase } from './lib/supabaseClient.js';
                                         <section>
                                             <div className="flex items-center justify-between mb-4 px-1">
                                                 <div className="w-9"></div>
-                                                <div className="flex items-center gap-2"><span className="text-2xl">🏆</span><h2 className={`font-bold text-slate-800 ${sz}`}>יעדים לשנת 2026</h2></div>
+                                                <div className="flex items-center gap-1.5"><Icon name="target" size={15} className="text-violet-500" /><h2 className="font-bold text-slate-700 text-sm">יעדים לשנת 2026</h2></div>
                                                 <button onClick={() => setShowAddGoalModal(true)} className="w-9 h-9 bg-violet-100 hover:bg-violet-200 rounded-xl flex items-center justify-center text-violet-600 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                                             </div>
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
                                                 {projects.filter(p=>p.showOnHome).map(project => { const progress = calculateProgress(project.id); return (
-                                                <div key={project.id} className="card p-4 text-center group relative overflow-visible">
+                                                <div key={project.id} className="card p-2 text-center group relative overflow-visible">
                                                     <div className="flex justify-end gap-1 mb-2 h-5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-5 h-5 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 text-xs">✏️</button>
                                                         <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-5 h-5 bg-rose-100 rounded-md flex items-center justify-center text-rose-500 text-xs">🗑️</button>
@@ -1399,9 +1416,9 @@ import { supabase } from './lib/supabaseClient.js';
                                                     {editingHomeGoal === project.id ? (
                                                         <div className="space-y-2"><div className="flex justify-center"><EmojiPicker value={editingHomeGoalEmoji} onChange={setEditingHomeGoalEmoji} size="lg" /></div><input value={editingHomeGoalTitle} onChange={e=>setEditingHomeGoalTitle(e.target.value)} className="w-full text-center text-xs font-bold border-b border-violet-300 outline-none bg-transparent py-1"/><div className="flex gap-1 justify-center mt-1"><button onClick={()=>{setProjects(prev=>prev.map(p=>p.id===project.id?{...p,title:editingHomeGoalTitle,emoji:editingHomeGoalEmoji}:p));setEditingHomeGoal(null);}} className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-xs font-semibold">שמור</button><button onClick={()=>setEditingHomeGoal(null)} className="px-3 py-1 bg-slate-100 rounded-lg text-xs">ביטול</button></div></div>
                                                     ):(<>
-                                                        <span className="text-3xl mb-2 block animate-float">{project.emoji}</span>
-                                                        <h3 className={`font-bold text-slate-700 mb-3 leading-tight ${sz}`}>{project.title}</h3>
-                                                        <span className={`font-extrabold bg-gradient-to-r ${project.gradient} gradient-text text-2xl`}>{progress}%</span>
+                                                        <span className="text-xl mb-1 block">{project.emoji}</span>
+                                                        <h3 className="font-bold text-slate-700 mb-1 leading-tight text-xs">{project.title}</h3>
+                                                        <span className={`font-extrabold bg-gradient-to-r ${project.gradient} gradient-text text-base`}>{progress}%</span>
                                                         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2"><div className={`h-full bg-gradient-to-r ${project.gradient} rounded-full`} style={{width:`${progress}%`}}></div></div>
                                                     </>)}
                                                 </div>);})}
