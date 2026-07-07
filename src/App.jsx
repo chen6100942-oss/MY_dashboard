@@ -1174,14 +1174,15 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        {/* כפתורי פעולה - צד שמאל */}
+                        {/* ברכה ותאריך - צד שמאל */}
                         <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",justifyContent:"space-between",gap:"8px",flexShrink:0}}>
-                            <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                                {user && (<>
-                                    <div className="text-left hidden md:block"><p className="text-xs text-slate-500">מחוברת כ:</p><p className="text-sm font-semibold text-slate-700">{user.displayName}</p></div>
-                                    {user.photoURL && <img src={user.photoURL} alt="Profile" className="w-10 h-10 rounded-full border-2 border-violet-300" />}
-                                    <button onClick={() => supabase ? supabase.auth.signOut() : setUser(null)} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span className="hidden md:inline">יציאה</span></button>
-                                </>)}
+                            <div className="text-right hidden md:block">
+                                {(() => {
+                                    const h = new Date().getHours();
+                                    const gr = h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
+                                    const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
+                                    return (<><p className="text-sm font-bold text-slate-700">{gr}, {profileName} ☀️</p><p className="text-xs text-slate-400">{d}</p></>);
+                                })()}
                             </div>
                             <div style={{display:"flex",gap:"8px"}}>
                                 <button onClick={undo} disabled={undoStack.length === 0} title="בטל" className={undoStack.length > 0 ? "w-10 h-10 rounded-full shadow bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all" : "w-10 h-10 rounded-full shadow bg-slate-100 text-slate-300 cursor-not-allowed flex items-center justify-center"}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
@@ -1214,23 +1215,6 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* HOME */}
                 {activeTab === 'home' && (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up">
-
-                        {/* GREETING */}
-                        {(() => {
-                            const now = new Date();
-                            const hour = now.getHours();
-                            const gr = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב';
-                            const name = profileName || (user?.displayName || user?.email || 'חן').split('@')[0];
-                            const dateStr = now.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-                            return (
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <h2 className="text-lg font-extrabold text-slate-800">{gr}, {name} 👋</h2>
-                                        <p className="text-xs text-slate-400">{dateStr}</p>
-                                    </div>
-                                </div>
-                            );
-                        })()}
 
                         {/* COMPACT TOOLBAR */}
                         {(() => {
