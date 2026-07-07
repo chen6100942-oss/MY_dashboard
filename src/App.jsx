@@ -1143,7 +1143,7 @@ import { supabase } from './lib/supabaseClient.js';
                             <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#8b5cf6,#ec4899,#f59e0b)",borderRadius:"9999px",opacity:0.6,margin:"0 auto 12px"}}></div>
 
                             {/* אפרמציה - מרכז */}
-                            {headerAffirmation ? (
+                            {headerAffirmation && activeTab !== 'home' ? (
                                 <div style={{textAlign:"center",width:"100%"}}>
                                     {editingAffirmation
                                         ? (<div style={{display:"flex",alignItems:"center",gap:"8px"}}><textarea autoFocus value={headerAffirmation} onChange={function(e){setHeaderAffirmation(e.target.value);}} rows={2} style={{flex:1,fontSize:"13px",fontWeight:600,border:"1px solid #c4b5fd",borderRadius:"12px",padding:"8px 12px",outline:"none",resize:"none",background:"#f5f3ff",textAlign:"center"}} /><button onClick={function(){setEditingAffirmation(false);}} style={{padding:"6px 12px",background:"#10b981",color:"#fff",borderRadius:"12px",fontSize:"12px",fontWeight:700,border:"none",cursor:"pointer",flexShrink:0}}>שמור</button></div>)
@@ -1191,7 +1191,8 @@ import { supabase } from './lib/supabaseClient.js';
                                 <button onClick={() => setEditingVision(false)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shrink-0">שמור ✓</button>
                             </div>
                         ) : (
-                            <p onClick={() => setEditingVision(true)} className="text-sm text-slate-500 italic leading-relaxed cursor-pointer hover:text-slate-700 transition-colors">{visionText}</p>
+                            <><p onClick={() => setEditingVision(true)} className="text-sm text-slate-500 italic leading-relaxed cursor-pointer hover:text-slate-700 transition-colors">{visionText}</p>
+                            {headerAffirmation && <p className="text-xs text-slate-400 text-center mt-1 font-medium">{headerAffirmation}</p>}</>
                         )}
                     </div>
                 </div>
@@ -1220,6 +1221,7 @@ import { supabase } from './lib/supabaseClient.js';
                         {(() => {
                             const now = new Date(), e2026 = new Date(2026,11,31,23,59,59);
                             const d2026 = Math.max(0, Math.ceil((e2026-now)/864e5));
+                            const w2026 = Math.floor(d2026/7);
                             return (
                             <div className="flex items-center gap-2 flex-wrap">
                                 {/* Search */}
@@ -1240,6 +1242,8 @@ import { supabase } from './lib/supabaseClient.js';
                                 {/* Mini countdown */}
                                 <div className="flex items-center gap-1.5 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm text-xs font-bold text-slate-600">
                                     <span className="text-violet-500">⏳</span>
+                                    <span className="text-violet-600">{w2026}</span>
+                                    <span className="text-slate-400 font-normal">שבועות |</span>
                                     <span>{d2026}</span>
                                     <span className="text-slate-400 font-normal">ימים ל-2026</span>
                                 </div>
@@ -1326,7 +1330,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 if (w==='half') return 'col-span-6 md:col-span-3';
                                 return 'col-span-6';
                             };
-                            const visibleBlocks = homeBlockOrder.filter(id=>!hiddenHomeBlocks.includes(id));
+                            const visibleBlocks = homeBlockOrder.filter(id=>!hiddenHomeBlocks.includes(id) && id!=='countdown');
 
                             return (
                             <div className="grid grid-cols-6 gap-5">
