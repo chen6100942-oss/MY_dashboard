@@ -1097,10 +1097,10 @@ import { supabase } from './lib/supabaseClient.js';
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
                         {[...tabs, {id:'tab-settings', name:'הגדרות', icon:'settings', emoji:'⚙️'}].map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
                                 {activeTab===tab.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'20px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
-                                <Icon name={tab.icon||'circle'} size={16} className={activeTab===tab.id ? 'text-violet-600' : 'text-slate-400'} />
-                                <span>{tab.name}</span>
+                                <span className="text-lg leading-none w-6 text-center shrink-0">{tab.emoji || '📌'}</span>
+                                <span className="text-xs">{tab.name}</span>
                             </button>
                         ))}
                     </nav>
@@ -1468,28 +1468,87 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                     );
 
-                                    /* ── TODAY'S TASKS ── */
+                                    /* ── CALENDAR + TODAY TASKS ── */
                                     if(blockId==='today-tasks') {
-                                        const todayStr = new Date().toISOString().split('T')[0];
+                                        const now = new Date();
+                                        const year = now.getFullYear();
+                                        const month = now.getMonth();
+                                        const todayDate = now.getDate();
+                                        const todayStr = now.toISOString().split('T')[0];
                                         const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
-                                        if (todayTasks.length === 0) return null;
+
+                                        const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+                                        const daysInMonth = new Date(year, month + 1, 0).getDate();
+                                        const monthName = now.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+
+                                        const dayLabels = ['א','ב','ג','ד','ה','ו','ש'];
+                                        const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+                                        const cells = Array.from({length: totalCells}, (_, i) => {
+                                            const d = i - firstDay + 1;
+                                            return (d >= 1 && d <= daysInMonth) ? d : null;
+                                        });
+
+                                        const tasksByDate = {};
+                                        tasks.filter(t => !t.completed && t.dueDate && t.dueDate.startsWith(`${year}-${String(month+1).padStart(2,'0')}`)).forEach(t => {
+                                            const d = parseInt(t.dueDate.split('-')[2]);
+                                            tasksByDate[d] = (tasksByDate[d] || 0) + 1;
+                                        });
+
                                         return (
                                             <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
                                             {DragHint}
-                                            <div className="card p-5">
-                                                <h3 className="font-extrabold text-slate-700 mb-3 flex items-center gap-2">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
-                                                    משימות להיום
-                                                    <span className="bg-violet-100 text-violet-700 text-xs font-black px-2 py-0.5 rounded-full">{todayTasks.length}</span>
-                                                </h3>
-                                                <div className="space-y-2">
-                                                    {todayTasks.map(task => (
-                                                        <div key={task.id} className="flex items-center gap-3 p-2.5 bg-violet-50 rounded-xl">
-                                                            <button onClick={() => setTasks(prev => prev.map(t => t.id===task.id ? {...t, completed:true} : t))} className="w-5 h-5 rounded-full border-2 border-violet-300 hover:bg-violet-500 hover:border-violet-500 transition-all flex items-center justify-center shrink-0" />
-                                                            <span className={`text-sm font-semibold text-slate-700 flex-1 ${sz}`}>{task.emoji} {task.text}</span>
-                                                            {task.priority === 'high' && <span className="text-[10px] bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded-full">דחוף</span>}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Monthly Calendar */}
+                                                <div className="card p-4">
+                                                    <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
+                                                        <Icon name="calendar" size={15} className="text-violet-500" />
+                                                        {monthName}
+                                                    </h3>
+                                                    <div className="grid grid-cols-7 mb-1">
+                                                        {dayLabels.map(d => (
+                                                            <div key={d} className="text-center text-[10px] font-bold text-slate-400 py-1">{d}</div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="grid grid-cols-7 gap-y-0.5">
+                                                        {cells.map((d, i) => (
+                                                            <div key={i} className="relative flex flex-col items-center py-0.5">
+                                                                {d ? (
+                                                                    <>
+                                                                        <span className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold cursor-default transition-all ${d === todayDate ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-600 hover:bg-violet-50'}`}>{d}</span>
+                                                                        {tasksByDate[d] && <span className="w-1 h-1 rounded-full bg-pink-400 mt-0.5 absolute bottom-0.5" />}
+                                                                    </>
+                                                                ) : <span />}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Today's Tasks */}
+                                                <div className="card p-4">
+                                                    <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
+                                                        <Icon name="check-square" size={15} className="text-violet-500" />
+                                                        משימות להיום
+                                                        {todayTasks.length > 0 && <span className="bg-violet-100 text-violet-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">{todayTasks.length}</span>}
+                                                    </h3>
+                                                    {todayTasks.length === 0 ? (
+                                                        <div className="flex flex-col items-center justify-center h-32 text-slate-300">
+                                                            <Icon name="check-circle" size={32} />
+                                                            <p className="text-xs mt-2 font-medium">אין משימות להיום 🎉</p>
                                                         </div>
-                                                    ))}
+                                                    ) : (
+                                                        <div className="space-y-2 overflow-y-auto max-h-48">
+                                                            {todayTasks.map(task => (
+                                                                <div key={task.id} className="flex items-center gap-2.5 p-2 bg-violet-50 rounded-xl group">
+                                                                    <button
+                                                                        onClick={() => setTasks(prev => prev.map(t => t.id===task.id ? {...t, completed:true} : t))}
+                                                                        className="w-5 h-5 rounded-full border-2 border-violet-300 hover:bg-violet-500 hover:border-violet-500 transition-all shrink-0"
+                                                                    />
+                                                                    <span className="text-xs font-semibold text-slate-700 flex-1 leading-tight">{task.text}</span>
+                                                                    {task.priority === 'high' && <span className="text-[9px] bg-rose-100 text-rose-600 font-bold px-1.5 py-0.5 rounded-full shrink-0">דחוף</span>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             </div>
