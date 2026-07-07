@@ -239,6 +239,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
         const [collapsedHomeBlocks, setCollapsedHomeBlocks] = useState({morning: true, affirmations: true});
+        const [profileName, setProfileName] = useState('חן זרח');
         const [visionBoardItems, setVisionBoardItems] = useState([]);
         const [vbNewText, setVbNewText] = useState('');
         const [vbBg, setVbBg] = useState('#f5f3ff');
@@ -421,6 +422,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
             if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
             if (d.worldNotes) setWorldNotes(d.worldNotes);
+            if (d.profileName) setProfileName(d.profileName);
             if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
             if (d.vbBg) setVbBg(d.vbBg);
         };
@@ -487,7 +489,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
                     if (supabase && u?.uid && u.uid !== 'local') {
@@ -599,7 +601,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -1222,7 +1224,7 @@ import { supabase } from './lib/supabaseClient.js';
                             const now = new Date();
                             const hour = now.getHours();
                             const gr = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב';
-                            const name = (user?.displayName || user?.email || 'חן').split('@')[0];
+                            const name = profileName || (user?.displayName || user?.email || 'חן').split('@')[0];
                             const dateStr = now.toLocaleDateString('he-IL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
                             return (
                                 <div className="flex items-center justify-between mb-2">
@@ -1642,6 +1644,12 @@ import { supabase } from './lib/supabaseClient.js';
                             <div className="space-y-4">
                                 <div className="card p-6 space-y-5">
                                     <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">👤 פרופיל אישי</h3>
+
+                                    {/* Display name */}
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-500 mb-1">שם להצגה (בברכה)</p>
+                                        <input value={profileName} onChange={e => setProfileName(e.target.value)} placeholder="שמך המלא, למשל: חן זרח" className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-violet-400 transition-all" />
+                                    </div>
 
                                     {/* Banner image */}
                                     <div>
