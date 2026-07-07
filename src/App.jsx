@@ -1129,12 +1129,22 @@ import { supabase } from './lib/supabaseClient.js';
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
 
                 {/* TITLE */}
-                <div className="max-w-3xl mx-auto mb-2 pt-3 animate-slide-in-up text-center">
-                    <div style={{display:"flex",gap:"12px",alignItems:"flex-start"}}>
+                <div className="max-w-5xl mx-auto mb-2 pt-3 animate-slide-in-up">
+                    <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"start",gap:"12px"}}>
 
+
+                        {/* ברכה ותאריך - עמודה ימנית */}
+                        <div className="text-right hidden md:block pt-1">
+                            {(() => {
+                                const h = new Date().getHours();
+                                const gr = h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
+                                const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
+                                return (<><p className="text-sm font-bold text-slate-700">{gr}, {profileName} ☀️</p><p className="text-xs text-slate-400">{d}</p></>);
+                            })()}
+                        </div>
 
                         {/* כותרת ואפרמציה - מרכז */}
-                        <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center"}}>
+                        <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center"}}>
                             {/* כותרת ראשית - מרכז */}
                             <div style={{width:"100%",textAlign:"center",marginBottom:"8px"}}>
                                 {editingTitle
@@ -1174,16 +1184,8 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        {/* ברכה ותאריך - צד שמאל */}
-                        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",justifyContent:"space-between",gap:"8px",flexShrink:0}}>
-                            <div className="text-right hidden md:block">
-                                {(() => {
-                                    const h = new Date().getHours();
-                                    const gr = h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
-                                    const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
-                                    return (<><p className="text-sm font-bold text-slate-700">{gr}, {profileName} ☀️</p><p className="text-xs text-slate-400">{d}</p></>);
-                                })()}
-                            </div>
+                        {/* כפתורים - עמודה שמאלית */}
+                        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",justifyContent:"flex-end",gap:"8px"}}>
                             <div style={{display:"flex",gap:"8px"}}>
                                 <button onClick={undo} disabled={undoStack.length === 0} title="בטל" className={undoStack.length > 0 ? "w-10 h-10 rounded-full shadow bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all" : "w-10 h-10 rounded-full shadow bg-slate-100 text-slate-300 cursor-not-allowed flex items-center justify-center"}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
                                 <button onClick={saveAllData} title="שמירת נתונים" className="w-10 h-10 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
