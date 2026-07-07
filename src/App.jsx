@@ -1142,9 +1142,20 @@ import { supabase } from './lib/supabaseClient.js';
                                     : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center"}} className="bg-gradient-to-r from-violet-600 via-pink-500 to-amber-500 gradient-text tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
                                 }
                             </div>
-                            <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#8b5cf6,#ec4899,#f59e0b)",borderRadius:"9999px",opacity:0.6,margin:"0 auto 12px"}}></div>
+                            <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#8b5cf6,#ec4899,#f59e0b)",borderRadius:"9999px",opacity:0.6,margin:"0 auto 8px"}}></div>
 
-                            {/* אפרמציה - מרכז */}
+                            {/* ציטוטים תחת הכותרת — רק בדף הבית */}
+                            {activeTab === 'home' && (
+                                <div className="text-center space-y-1 mb-1">
+                                    {visionText && (editingVision
+                                        ? <div className="flex items-center gap-2 justify-center"><textarea value={visionText} onChange={e => setVisionText(e.target.value)} rows={2} className="text-sm border border-violet-200 rounded-xl px-3 py-1 outline-none resize-none bg-violet-50 text-center" /><button onClick={() => setEditingVision(false)} className="px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">שמור</button></div>
+                                        : <p onClick={() => setEditingVision(true)} className="text-sm text-slate-500 italic cursor-pointer hover:text-slate-700 transition-colors">{visionText}</p>
+                                    )}
+                                    {headerAffirmation && <p className="text-xs text-slate-400 font-medium">{headerAffirmation}</p>}
+                                </div>
+                            )}
+
+                            {/* אפרמציה - מרכז (שאר הכרטיסיות) */}
                             {headerAffirmation && activeTab !== 'home' ? (
                                 <div style={{textAlign:"center",width:"100%"}}>
                                     {editingAffirmation
@@ -1183,22 +1194,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* TABS */}
 
-                {/* QUOTE - only on home tab */}
-                {activeTab === 'home' && (
-                <div className="max-w-5xl mx-auto mb-2 animate-slide-in-up">
-                    <div className="relative group text-center px-2 py-1.5 rounded-xl hover:bg-white/60 transition-all">
-                        {editingVision ? (
-                            <div className="flex items-center gap-2">
-                                <textarea value={visionText} onChange={e => setVisionText(e.target.value)} rows={2} className="flex-1 text-sm text-slate-600 border border-violet-200 rounded-xl px-3 py-1.5 outline-none resize-none bg-violet-50" />
-                                <button onClick={() => setEditingVision(false)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shrink-0">שמור ✓</button>
-                            </div>
-                        ) : (
-                            <><p onClick={() => setEditingVision(true)} className="text-sm text-slate-500 italic leading-relaxed cursor-pointer hover:text-slate-700 transition-colors">{visionText}</p>
-                            {headerAffirmation && <p className="text-xs text-slate-400 text-center mt-1 font-medium">{headerAffirmation}</p>}</>
-                        )}
-                    </div>
-                </div>
-                )}
+                {/* quotes now appear inside the title section above */}
 
                 {/* SEARCH — only on non-home tabs */}
                 {activeTab !== 'home' && (
