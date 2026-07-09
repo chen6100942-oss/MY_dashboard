@@ -238,7 +238,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
-        const [collapsedHomeBlocks, setCollapsedHomeBlocks] = useState({morning: true, affirmations: true});
+        const [collapsedHomeBlocks, setCollapsedHomeBlocks] = useState({morning: false, affirmations: false, gamechangers: false});
         const [profileName, setProfileName] = useState('חן זרח');
         const [visionBoardItems, setVisionBoardItems] = useState([]);
         const [vbNewText, setVbNewText] = useState('');
@@ -1124,8 +1124,61 @@ import { supabase } from './lib/supabaseClient.js';
                     </div>
                 </aside>
 
+                {/* QUICK ACTIONS PANEL — left side */}
+                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'white',borderRight:'1px solid #f1f5f9',boxShadow:'1px 0 8px rgba(0,0,0,0.04)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
+                    {/* Save + Undo buttons */}
+                    <div style={{padding:'16px 12px 12px',borderBottom:'1px solid #f1f5f9'}}>
+                        <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>פעולות</p>
+                        <div style={{display:'flex',gap:'6px'}}>
+                            <button onClick={undo} disabled={undoStack.length===0} title="בטל" style={{flex:1,height:'30px',borderRadius:'10px',border:'none',cursor:undoStack.length>0?'pointer':'not-allowed',background:undoStack.length>0?'#f8fafc':'#f1f5f9',color:undoStack.length>0?'#475569':'#cbd5e1',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:undoStack.length>0?'0 1px 4px rgba(0,0,0,0.07)':'none',transition:'all 0.2s'}}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
+                                <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>בטל</span>
+                            </button>
+                            <button onClick={saveAllData} title="שמירה" style={{flex:1,height:'30px',borderRadius:'10px',border:'none',cursor:'pointer',background:'#7c3aed',color:'white',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(124,58,237,0.3)',transition:'all 0.2s'}}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>שמור</span>
+                            </button>
+                        </div>
+                        {saveNotification && <div style={{marginTop:'8px',padding:'6px 8px',background:'#ecfdf5',borderRadius:'8px',color:'#059669',fontSize:'10px',fontWeight:700,textAlign:'center'}}>✓ נשמר!</div>}
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div style={{padding:'14px 12px',borderBottom:'1px solid #f1f5f9',flex:1}}>
+                        <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>⚡ פעולות מהירות</p>
+                        <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
+                            {[
+                                {icon:'✅',label:'משימה חדשה',tab:'tasks',color:'#3b82f6'},
+                                {icon:'📂',label:'פרויקט חדש',tab:'tasks',color:'#8b5cf6'},
+                                {icon:'📓',label:'רשומה ביומן',tab:'mindset',color:'#ec4899'},
+                                {icon:'🎯',label:'יעד ל-2026',action:()=>setShowAddGoalModal(true),color:'#f59e0b'},
+                            ].map((item,i)=>(
+                                <button key={i}
+                                    onClick={()=>{ if(item.action) item.action(); else setActiveTab(item.tab); }}
+                                    style={{width:'100%',padding:'7px 10px',borderRadius:'10px',border:'1px solid #f1f5f9',background:'#fafbff',cursor:'pointer',display:'flex',alignItems:'center',gap:'7px',textAlign:'right',transition:'all 0.2s',fontFamily:'inherit'}}
+                                    onMouseEnter={e=>{e.currentTarget.style.background='#f5f3ff';e.currentTarget.style.borderColor='#ddd6fe';}}
+                                    onMouseLeave={e=>{e.currentTarget.style.background='#fafbff';e.currentTarget.style.borderColor='#f1f5f9';}}>
+                                    <span style={{width:'24px',height:'24px',borderRadius:'8px',background:`${item.color}18`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',flexShrink:0}}>{item.icon}</span>
+                                    <span style={{fontSize:'11px',fontWeight:700,color:'#374151'}}>{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Daily Inspiration */}
+                    {affirmations.length > 0 && (
+                        <div style={{padding:'14px 12px'}}>
+                            <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>💗 השראה יומית</p>
+                            <div style={{background:'linear-gradient(135deg,#fdf2f8,#f5f3ff)',borderRadius:'12px',padding:'10px',border:'1px solid #f3e8ff'}}>
+                                <p style={{fontSize:'11px',fontWeight:600,color:'#6d28d9',lineHeight:1.5,textAlign:'center'}}>
+                                    {affirmations[new Date().getDate() % affirmations.length]?.text || affirmations[0]?.text}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </aside>
+
                 {/* MAIN CONTENT */}
-                <div className="flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px'}}>
+                <div className="flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px',marginLeft:'185px'}}>
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
 
                 {/* TITLE */}
@@ -1149,10 +1202,10 @@ import { supabase } from './lib/supabaseClient.js';
                             <div style={{width:"100%",textAlign:"center",marginBottom:"8px"}}>
                                 {editingTitle
                                     ? (<input autoFocus value={headerTitle} onChange={function(e){setHeaderTitle(e.target.value);}} onBlur={function(){setEditingTitle(false);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,background:"transparent",border:"none",borderBottom:"2px solid #8b5cf6",outline:"none",width:"100%",textAlign:"center"}} className="gradient-text tracking-tight" />)
-                                    : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center"}} className="bg-gradient-to-r from-violet-600 via-pink-500 to-amber-500 gradient-text tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
+                                    : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center",color:"#6d28d9"}} className="tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
                                 }
                             </div>
-                            <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#8b5cf6,#ec4899,#f59e0b)",borderRadius:"9999px",opacity:0.6,margin:"0 auto 8px"}}></div>
+                            <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#4c1d95,#7c3aed)",borderRadius:"9999px",opacity:0.7,margin:"0 auto 8px"}}></div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
                             {activeTab === 'home' && (
@@ -1184,13 +1237,8 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        {/* כפתורים - עמודה שמאלית */}
-                        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",justifyContent:"flex-end",gap:"8px"}}>
-                            <div style={{display:"flex",gap:"8px"}}>
-                                <button onClick={undo} disabled={undoStack.length === 0} title="בטל" className={undoStack.length > 0 ? "w-10 h-10 rounded-full shadow bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center transition-all" : "w-10 h-10 rounded-full shadow bg-slate-100 text-slate-300 cursor-not-allowed flex items-center justify-center"}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg></button>
-                                <button onClick={saveAllData} title="שמירת נתונים" className="w-10 h-10 bg-violet-600 hover:bg-violet-700 active:scale-95 text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
-                            </div>
-                        </div>
+                        {/* עמודה שמאלית - ריקה (כפתורים עברו לפאנל הצד) */}
+                        <div></div>
 
                     </div>
                 </div>
@@ -1390,24 +1438,24 @@ import { supabase } from './lib/supabaseClient.js';
                                                 <div className="flex items-center gap-1.5"><Icon name="target" size={15} className="text-violet-500" /><h2 className="font-bold text-slate-700 text-sm">יעדים לשנת 2026</h2></div>
                                                 <button onClick={() => setShowAddGoalModal(true)} className="w-9 h-9 bg-violet-100 hover:bg-violet-200 rounded-xl flex items-center justify-center text-violet-600 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                                             </div>
-                                            <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+                                            <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
                                                 {projects.filter(p=>p.showOnHome).map(project => { const progress = calculateProgress(project.id); return (
-                                                <div key={project.id} className="card p-2 text-center group relative overflow-visible">
-                                                    <div className="flex justify-end gap-1 mb-2 h-5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-5 h-5 bg-blue-100 rounded-md flex items-center justify-center text-blue-600 text-xs">✏️</button>
-                                                        <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-5 h-5 bg-rose-100 rounded-md flex items-center justify-center text-rose-500 text-xs">🗑️</button>
+                                                <div key={project.id} className="card text-center group relative overflow-visible flex-shrink-0" style={{width:'88px',padding:'8px 6px'}}>
+                                                    <div className="flex justify-end gap-0.5 mb-1 h-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center text-blue-600" style={{fontSize:'9px'}}>✏️</button>
+                                                        <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-4 h-4 bg-rose-100 rounded flex items-center justify-center text-rose-500" style={{fontSize:'9px'}}>🗑️</button>
                                                     </div>
                                                     {editingHomeGoal === project.id ? (
-                                                        <div className="space-y-2"><div className="flex justify-center"><EmojiPicker value={editingHomeGoalEmoji} onChange={setEditingHomeGoalEmoji} size="lg" /></div><input value={editingHomeGoalTitle} onChange={e=>setEditingHomeGoalTitle(e.target.value)} className="w-full text-center text-xs font-bold border-b border-violet-300 outline-none bg-transparent py-1"/><div className="flex gap-1 justify-center mt-1"><button onClick={()=>{setProjects(prev=>prev.map(p=>p.id===project.id?{...p,title:editingHomeGoalTitle,emoji:editingHomeGoalEmoji}:p));setEditingHomeGoal(null);}} className="px-3 py-1 bg-emerald-500 text-white rounded-lg text-xs font-semibold">שמור</button><button onClick={()=>setEditingHomeGoal(null)} className="px-3 py-1 bg-slate-100 rounded-lg text-xs">ביטול</button></div></div>
+                                                        <div className="space-y-1"><div className="flex justify-center"><EmojiPicker value={editingHomeGoalEmoji} onChange={setEditingHomeGoalEmoji} size="sm" /></div><input value={editingHomeGoalTitle} onChange={e=>setEditingHomeGoalTitle(e.target.value)} className="w-full text-center text-[10px] font-bold border-b border-violet-300 outline-none bg-transparent py-0.5"/><div className="flex gap-1 justify-center mt-1"><button onClick={()=>{setProjects(prev=>prev.map(p=>p.id===project.id?{...p,title:editingHomeGoalTitle,emoji:editingHomeGoalEmoji}:p));setEditingHomeGoal(null);}} className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[9px] font-semibold">שמור</button><button onClick={()=>setEditingHomeGoal(null)} className="px-2 py-0.5 bg-slate-100 rounded text-[9px]">ביטול</button></div></div>
                                                     ):(<>
-                                                        <span className="text-xl mb-1 block">{project.emoji}</span>
-                                                        <h3 className="font-bold text-slate-700 mb-1 leading-tight text-xs">{project.title}</h3>
-                                                        <span className={`font-extrabold bg-gradient-to-r ${project.gradient} gradient-text text-base`}>{progress}%</span>
-                                                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2"><div className={`h-full bg-gradient-to-r ${project.gradient} rounded-full`} style={{width:`${progress}%`}}></div></div>
+                                                        <span className="text-lg mb-0.5 block">{project.emoji}</span>
+                                                        <h3 className="font-bold text-slate-700 mb-0.5 leading-tight text-[10px]">{project.title}</h3>
+                                                        <span className={`font-extrabold bg-gradient-to-r ${project.gradient} gradient-text text-sm`}>{progress}%</span>
+                                                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-1"><div className={`h-full bg-gradient-to-r ${project.gradient} rounded-full`} style={{width:`${progress}%`}}></div></div>
                                                     </>)}
                                                 </div>);})}
                                                 {showWeightCard && (
-                                                    <div className="card p-5 text-center relative group">
+                                                    <div className="card text-center relative group flex-shrink-0" style={{width:'88px',padding:'8px 6px'}}>
                                                         {editingWeightCard ? (<div className="space-y-3"><p className="text-xs font-bold text-slate-600 mb-2">עריכת יעד משקל</p><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">התחלתי:</span><input type="number" value={weightStart} onChange={e=>setWeightStart(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">יעד הורדה:</span><input type="number" value={weightGoal} onChange={e=>setWeightGoal(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><button onClick={()=>setEditingWeightCard(false)} className="w-full py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold">שמור</button></div>):(<React.Fragment>
                                                             <span className="text-3xl mb-2 block animate-float">⚖️</span>
                                                             <h3 className={`font-bold text-slate-700 mb-1 ${sz}`}>לרדת {(!isNaN(parseFloat(currentWeight))&&parseFloat(currentWeight)>0)?Math.max(0,weightGoal-Math.max(0,weightStart-parseFloat(currentWeight))):weightGoal} קג</h3>
@@ -1432,8 +1480,8 @@ import { supabase } from './lib/supabaseClient.js';
                                                 <span className="flex items-center gap-2 text-sm font-bold text-slate-700"><span>{morningRitualEmoji}</span>{morningRitualTitle}<span className="text-xs font-normal text-slate-400">{morningRitual.filter(i=>i.completed).length}/{morningRitual.length} ✓</span></span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 transition-transform ${collapsedHomeBlocks.morning?'':'rotate-180'}`}><polyline points="6 9 12 15 18 9"/></svg>
                                             </button>
-                                            {!collapsedHomeBlocks.morning && <div className="p-5">
-                                            <div className="flex items-center justify-between mb-4">
+                                            {!collapsedHomeBlocks.morning && <div className="p-4" style={{maxHeight:'270px',overflowY:'auto'}}>
+                                            <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2.5 flex-1">
                                                     <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-amber-600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
                                                     {editingMorningTitle?(<div className="flex items-center gap-2 flex-1"><EmojiPicker value={morningRitualEmoji} onChange={setMorningRitualEmoji} size="sm" /><input value={morningRitualTitle} onChange={e=>setMorningRitualTitle(e.target.value)} className="flex-1 p-1 border-b-2 border-amber-300 outline-none font-bold text-sm"/><button onClick={()=>setEditingMorningTitle(false)} className="text-emerald-500 text-xl font-bold ml-1">✓</button></div>):(<h2 className={`font-bold text-slate-800 ${sz}`}>{morningRitualTitle} {morningRitualEmoji}</h2>)}
@@ -1455,7 +1503,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                 <span className="flex items-center gap-2 text-sm font-bold text-slate-700"><span>💗</span>אפורמציות<span className="text-xs font-normal text-slate-400">{affirmations.filter(a=>a.completed).length}/{affirmations.length} ✓</span></span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 transition-transform ${collapsedHomeBlocks.affirmations?'':'rotate-180'}`}><polyline points="6 9 12 15 18 9"/></svg>
                                             </button>
-                                            {!collapsedHomeBlocks.affirmations && <div className="p-5">
+                                            {!collapsedHomeBlocks.affirmations && <div className="p-4" style={{maxHeight:'270px',overflowY:'auto'}}>
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-xl bg-pink-100 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-pink-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><h2 className={`font-bold bg-gradient-to-r from-pink-500 to-violet-500 gradient-text ${sz}`}>אפורמציות 💗</h2></div>
                                                 <button onClick={()=>setAffirmations(prev=>prev.map(a=>({...a,completed:false})))} className="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 text-xs" title="אפס">↺</button>
@@ -1559,15 +1607,21 @@ import { supabase } from './lib/supabaseClient.js';
                                     if(blockId==='gamechangers') return (
                                         <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
                                         {DragHint}
-                                        <div className="card p-5 group relative h-full">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-2.5 flex-1">
-                                                    <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-                                                    {editingGameChangersTitle?(<div className="flex items-center gap-2 flex-1"><EmojiPicker value={gameChangersEmoji} onChange={setGameChangersEmoji} size="sm" /><input value={gameChangersTitle} onChange={e=>setGameChangersTitle(e.target.value)} className="flex-1 p-1 border-b-2 border-violet-300 outline-none font-bold text-sm"/><button onClick={()=>setEditingGameChangersTitle(false)} className="text-emerald-500 text-xl font-bold ml-1">✓</button></div>):(<h2 className={`font-bold bg-gradient-to-r from-violet-600 to-pink-500 gradient-text ${sz}`}>{gameChangersTitle} {gameChangersEmoji}</h2>)}
+                                        <div className="card overflow-hidden group relative">
+                                            <button onClick={() => setCollapsedHomeBlocks(p=>({...p,gamechangers:!p.gamechangers}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 transition-all">
+                                                <span className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                                    <span>{gameChangersEmoji}</span>
+                                                    {gameChangersTitle}
+                                                    <span className="text-xs font-normal text-slate-400">{gameChangers.filter(g=>g.text.trim()).length}/{gameChangers.length}</span>
+                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    <button onClick={e=>{e.stopPropagation();addGameChanger();}} className="w-6 h-6 bg-violet-100 hover:bg-violet-200 rounded-lg flex items-center justify-center text-violet-600 font-bold text-base">+</button>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 transition-transform ${collapsedHomeBlocks.gamechangers?'':'rotate-180'}`}><polyline points="6 9 12 15 18 9"/></svg>
                                                 </div>
-                                                <div className="flex gap-1 shrink-0"><button onClick={()=>setEditingGameChangersTitle(!editingGameChangersTitle)} className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-blue-500 opacity-0 group-hover:opacity-100 text-xs">✏️</button><button onClick={addGameChanger} className="w-7 h-7 bg-violet-100 hover:bg-violet-200 rounded-lg flex items-center justify-center text-violet-600 font-bold text-lg">+</button></div>
-                                            </div>
+                                            </button>
+                                            {!collapsedHomeBlocks.gamechangers && <div className="p-4" style={{maxHeight:'270px',overflowY:'auto'}}>
                                             <div className="grid grid-cols-3 gap-2">{gameChangers.map((gc,i)=>(<div key={gc.id} className="p-3 bg-slate-50 rounded-xl text-center border border-slate-100 relative group/gc"><button onClick={()=>deleteGameChanger(gc.id)} className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full items-center justify-center hidden group-hover/gc:flex text-xs">✕</button><span className="text-[10px] font-bold text-slate-400 block mb-1">#{i+1}</span><textarea className={`bg-transparent w-full text-center font-semibold text-slate-700 outline-none resize-none placeholder:text-slate-300 min-h-[40px] ${sz}`} placeholder={gc.placeholder} value={gc.text} onChange={e=>updateGameChanger(gc.id,e.target.value)}/>{gc.text.trim()&&(<button onClick={()=>archiveGameChanger(gc)} className="mt-1 text-[9px] font-bold text-violet-400 hover:text-violet-600 flex items-center gap-0.5 mx-auto">📦 ארכיון</button>)}</div>))}</div>
+                                            </div>}
                                         </div>
                                         </div>
                                     );
