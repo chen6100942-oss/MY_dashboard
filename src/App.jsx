@@ -337,24 +337,10 @@ import { supabase } from './lib/supabaseClient.js';
             const sl = document.getElementById('static-loader');
             if (sl) sl.style.display = 'none';
 
-            // Real Supabase auth
-            (async () => {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    setUser({ displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null });
-                }
-                setLoading(false);
-            })();
-
-            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-                if (session?.user) {
-                    setUser({ displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null });
-                } else {
-                    setUser(null);
-                    setLoading(false);
-                }
-            });
-            return () => subscription.unsubscribe();
+            // פתיחה ישירה בלי התחברות — נתונים נשמרים ב-localStorage
+            setUser({ displayName: 'חן', uid: 'local', email: 'local', photoURL: null });
+            setLoading(false);
+            return () => {};
         }, []);
 
         // ── HELPER: ensure built-in tabs (added after a user's last save) always exist ──────────────
