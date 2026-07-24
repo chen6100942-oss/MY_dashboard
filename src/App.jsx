@@ -1062,10 +1062,10 @@ import { supabase } from './lib/supabaseClient.js';
         };
 
         return (
-            <div className="flex min-h-screen" style={{background:'linear-gradient(135deg,#fafbff 0%,#f0f4ff 30%,#fdf2f8 60%,#faf5ff 100%)'}}>
+            <div className="flex min-h-screen" style={{background:'transparent',position:'relative',zIndex:1}}>
 
                 {/* SIDEBAR */}
-                <aside style={{width:'240px',flexShrink:0}} className="bg-white shadow-md fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
+                <aside style={{width:'240px',flexShrink:0,backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}} className="bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
                     {/* Brand */}
                     <div className="p-5 border-b border-slate-100">
                         <div className="flex items-center gap-3">
@@ -1111,12 +1111,12 @@ import { supabase } from './lib/supabaseClient.js';
                 </aside>
 
                 {/* QUICK ACTIONS PANEL — left side */}
-                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'white',borderRight:'1px solid #f1f5f9',boxShadow:'1px 0 8px rgba(0,0,0,0.04)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
+                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'rgba(7,10,28,0.92)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',borderRight:'1px solid rgba(139,92,246,0.2)',boxShadow:'4px 0 40px rgba(0,0,0,0.7)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
                     {/* Save + Undo buttons */}
-                    <div style={{padding:'16px 12px 12px',borderBottom:'1px solid #f1f5f9'}}>
+                    <div style={{padding:'16px 12px 12px',borderBottom:'1px solid rgba(139,92,246,0.15)'}}>
                         <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>פעולות</p>
                         <div style={{display:'flex',gap:'6px'}}>
-                            <button onClick={undo} disabled={undoStack.length===0} title="בטל" style={{flex:1,height:'30px',borderRadius:'10px',border:'none',cursor:undoStack.length>0?'pointer':'not-allowed',background:undoStack.length>0?'#f8fafc':'#f1f5f9',color:undoStack.length>0?'#475569':'#cbd5e1',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:undoStack.length>0?'0 1px 4px rgba(0,0,0,0.07)':'none',transition:'all 0.2s'}}>
+                            <button onClick={undo} disabled={undoStack.length===0} title="בטל" style={{flex:1,height:'30px',borderRadius:'10px',border:'1px solid rgba(139,92,246,0.2)',cursor:undoStack.length>0?'pointer':'not-allowed',background:undoStack.length>0?'rgba(139,92,246,0.1)':'rgba(139,92,246,0.03)',color:undoStack.length>0?'#a78bfa':'#4a5568',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:undoStack.length>0?'0 0 12px rgba(139,92,246,0.15)':'none',transition:'all 0.2s'}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                                 <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>בטל</span>
                             </button>
@@ -1125,11 +1125,11 @@ import { supabase } from './lib/supabaseClient.js';
                                 <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>שמור</span>
                             </button>
                         </div>
-                        {saveNotification && <div style={{marginTop:'8px',padding:'6px 8px',background:'#ecfdf5',borderRadius:'8px',color:'#059669',fontSize:'10px',fontWeight:700,textAlign:'center'}}>✓ נשמר!</div>}
+                        {saveNotification && <div style={{marginTop:'8px',padding:'6px 8px',background:'rgba(16,185,129,0.12)',border:'1px solid rgba(16,185,129,0.3)',borderRadius:'8px',color:'#34d399',fontSize:'10px',fontWeight:700,textAlign:'center'}}>✓ נשמר!</div>}
                     </div>
 
                     {/* Quick Actions */}
-                    <div style={{padding:'14px 12px',borderBottom:'1px solid #f1f5f9',flex:1}}>
+                    <div style={{padding:'14px 12px',borderBottom:'1px solid rgba(139,92,246,0.12)',flex:1}}>
                         <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>⚡ פעולות מהירות</p>
                         <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
                             {[
@@ -1140,11 +1140,11 @@ import { supabase } from './lib/supabaseClient.js';
                             ].map((item,i)=>(
                                 <button key={i}
                                     onClick={()=>{ if(item.action) item.action(); else setActiveTab(item.tab); }}
-                                    style={{width:'100%',padding:'7px 10px',borderRadius:'10px',border:'1px solid #f1f5f9',background:'#fafbff',cursor:'pointer',display:'flex',alignItems:'center',gap:'7px',textAlign:'right',transition:'all 0.2s',fontFamily:'inherit'}}
-                                    onMouseEnter={e=>{e.currentTarget.style.background='#f5f3ff';e.currentTarget.style.borderColor='#ddd6fe';}}
-                                    onMouseLeave={e=>{e.currentTarget.style.background='#fafbff';e.currentTarget.style.borderColor='#f1f5f9';}}>
+                                    style={{width:'100%',padding:'7px 10px',borderRadius:'10px',border:'1px solid rgba(139,92,246,0.18)',background:'rgba(139,92,246,0.06)',cursor:'pointer',display:'flex',alignItems:'center',gap:'7px',textAlign:'right',transition:'all 0.2s',fontFamily:'inherit'}}
+                                    onMouseEnter={e=>{e.currentTarget.style.background='rgba(139,92,246,0.15)';e.currentTarget.style.borderColor='rgba(139,92,246,0.4)';e.currentTarget.style.boxShadow='0 0 16px rgba(139,92,246,0.15)';}}
+                                    onMouseLeave={e=>{e.currentTarget.style.background='rgba(139,92,246,0.06)';e.currentTarget.style.borderColor='rgba(139,92,246,0.18)';e.currentTarget.style.boxShadow='none';}}>
                                     <span style={{width:'24px',height:'24px',borderRadius:'8px',background:`${item.color}18`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',flexShrink:0}}>{item.icon}</span>
-                                    <span style={{fontSize:'11px',fontWeight:700,color:'#374151'}}>{item.label}</span>
+                                    <span style={{fontSize:'11px',fontWeight:700,color:'#cbd5e1'}}>{item.label}</span>
                                 </button>
                             ))}
                         </div>
@@ -1154,8 +1154,8 @@ import { supabase } from './lib/supabaseClient.js';
                     {affirmations.length > 0 && (
                         <div style={{padding:'14px 12px'}}>
                             <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>💗 השראה יומית</p>
-                            <div style={{background:'linear-gradient(135deg,#fdf2f8,#f5f3ff)',borderRadius:'12px',padding:'10px',border:'1px solid #f3e8ff'}}>
-                                <p style={{fontSize:'11px',fontWeight:600,color:'#6d28d9',lineHeight:1.5,textAlign:'center'}}>
+                            <div style={{background:'rgba(139,92,246,0.1)',borderRadius:'12px',padding:'10px',border:'1px solid rgba(139,92,246,0.25)',boxShadow:'0 0 20px rgba(139,92,246,0.06)'}}>
+                                <p style={{fontSize:'11px',fontWeight:600,color:'#c4b5fd',lineHeight:1.5,textAlign:'center'}}>
                                     {affirmations[new Date().getDate() % affirmations.length]?.text || affirmations[0]?.text}
                                 </p>
                             </div>
@@ -1188,10 +1188,10 @@ import { supabase } from './lib/supabaseClient.js';
                             <div style={{width:"100%",textAlign:"center",marginBottom:"8px"}}>
                                 {editingTitle
                                     ? (<input autoFocus value={headerTitle} onChange={function(e){setHeaderTitle(e.target.value);}} onBlur={function(){setEditingTitle(false);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,background:"transparent",border:"none",borderBottom:"2px solid #8b5cf6",outline:"none",width:"100%",textAlign:"center"}} className="gradient-text tracking-tight" />)
-                                    : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center",color:"#6d28d9"}} className="tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
+                                    : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center",color:"#c4b5fd",textShadow:"0 0 30px rgba(139,92,246,0.8),0 0 60px rgba(139,92,246,0.4),0 0 100px rgba(6,182,212,0.2)"}} className="tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
                                 }
                             </div>
-                            <div style={{height:"3px",width:"120px",background:"linear-gradient(to left,#4c1d95,#7c3aed)",borderRadius:"9999px",opacity:0.7,margin:"0 auto 8px"}}></div>
+                            <div style={{height:"2px",width:"160px",background:"linear-gradient(to left,#06b6d4,#7c3aed,#ec4899)",borderRadius:"9999px",margin:"0 auto 8px",boxShadow:"0 0 16px rgba(139,92,246,0.8),0 0 32px rgba(6,182,212,0.4)"}}></div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
                             {activeTab === 'home' && (
