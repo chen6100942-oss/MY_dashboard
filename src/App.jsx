@@ -1111,7 +1111,7 @@ import { supabase } from './lib/supabaseClient.js';
                 </aside>
 
                 {/* QUICK ACTIONS PANEL — left side */}
-                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'rgba(7,10,28,0.92)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',borderRight:'1px solid rgba(139,92,246,0.2)',boxShadow:'4px 0 40px rgba(0,0,0,0.7)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
+                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'rgba(10,15,35,0.92)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',borderRight:'1px solid rgba(139,92,246,0.2)',boxShadow:'4px 0 40px rgba(0,0,0,0.7)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
                     {/* Save + Undo buttons */}
                     <div style={{padding:'16px 12px 12px',borderBottom:'1px solid rgba(139,92,246,0.15)'}}>
                         <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>פעולות</p>

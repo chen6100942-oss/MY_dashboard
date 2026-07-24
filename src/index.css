@@ -7,7 +7,7 @@
 
 /* ═══ DARK FUTURISTIC FOUNDATION ════════════════════════════ */
 body {
-  background: #030712;
+  background: #0a0f1e;
   color: #e2e8f0;
   min-height: 100vh;
   color-scheme: dark;
@@ -36,7 +36,7 @@ body::before {
 
 /* ═══ GLASS CARD ════════════════════════════════════════════ */
 .card {
-  background: rgba(12,17,42,0.82) !important;
+  background: rgba(14,21,50,0.80) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 1.25rem;
@@ -61,10 +61,10 @@ body::before {
 }
 
 /* ═══ SOFT-BG OVERRIDE ══════════════════════════════════════ */
-.soft-bg { background: #030712 !important; }
+.soft-bg { background: #0a0f1e !important; }
 
 /* ═══ BG COLOR OVERRIDES ════════════════════════════════════ */
-.bg-white        { background: rgba(12,17,42,0.88) !important; }
+.bg-white        { background: rgba(14,21,50,0.88) !important; }
 .bg-slate-50     { background: rgba(139,92,246,0.05) !important; }
 .bg-slate-100    { background: rgba(139,92,246,0.08) !important; }
 .bg-violet-50    { background: rgba(139,92,246,0.1) !important; }
@@ -141,7 +141,7 @@ body::before {
 input:not([style*="transparent"]),
 textarea:not([style*="transparent"]),
 select {
-  background: rgba(12,17,42,0.7) !important;
+  background: rgba(14,21,50,0.7) !important;
   border-color: rgba(139,92,246,0.25) !important;
   color: #e2e8f0 !important;
 }
