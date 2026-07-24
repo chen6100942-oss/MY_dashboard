@@ -226,6 +226,18 @@ import { supabase } from './lib/supabaseClient.js';
         const [builtinLayoutEditTab, setBuiltinLayoutEditTab] = useState(null); // tabId
         const [settingsSection, setSettingsSection] = useState('profile'); // profile|design|tabs|domains|backup
         const [themeAccent, setThemeAccent] = useState('violet'); // violet|blue|rose|emerald|amber|cyan
+        const [darkMode, setDarkMode] = useState(() => {
+            const stored = localStorage.getItem('dashboardTheme');
+            const isDark = stored === null ? false : stored === 'true';
+            document.documentElement.classList.toggle('dark-mode', isDark);
+            return isDark;
+        });
+        const toggleDarkMode = () => setDarkMode(prev => {
+            const next = !prev;
+            document.documentElement.classList.toggle('dark-mode', next);
+            localStorage.setItem('dashboardTheme', String(next));
+            return next;
+        });
         const [monthNotes, setMonthNotes] = useState({}); // {"2026-1": "הערה לחודש"}
         const [quarterlyGoals, setQuarterlyGoals] = useState({
             'Q1-goal':'', 'Q2-goal':'', 'Q3-goal':'', 'Q4-goal':'',
@@ -1062,10 +1074,10 @@ import { supabase } from './lib/supabaseClient.js';
         };
 
         return (
-            <div className="flex min-h-screen" style={{background:'transparent',position:'relative',zIndex:1}}>
+            <div className="dashboard-shell flex min-h-screen" style={{background:'transparent',position:'relative',zIndex:1}}>
 
                 {/* SIDEBAR */}
-                <aside style={{width:'240px',flexShrink:0,backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}} className="bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
+                <aside style={{width:'240px',flexShrink:0,...(darkMode?{backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}:{boxShadow:'0 0 10px rgba(0,0,0,0.08)'})}} className="primary-sidebar bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
                     {/* Brand */}
                     <div className="p-5 border-b border-slate-100">
                         <div className="flex items-center gap-3">
@@ -1111,12 +1123,12 @@ import { supabase } from './lib/supabaseClient.js';
                 </aside>
 
                 {/* QUICK ACTIONS PANEL — left side */}
-                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,background:'rgba(10,15,35,0.92)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',borderRight:'1px solid rgba(139,92,246,0.2)',boxShadow:'4px 0 40px rgba(0,0,0,0.7)',display:'flex',flexDirection:'column',overflowY:'auto'}} className="no-scrollbar hidden xl:flex">
+                <aside style={{width:'185px',flexShrink:0,position:'fixed',left:0,top:0,height:'100vh',zIndex:30,display:'flex',flexDirection:'column',overflowY:'auto',...(darkMode?{background:'rgba(10,15,35,0.92)',backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',borderRight:'1px solid rgba(139,92,246,0.2)',boxShadow:'4px 0 40px rgba(0,0,0,0.7)'}:{background:'white',borderRight:'1px solid #f1f5f9',boxShadow:'1px 0 8px rgba(0,0,0,0.04)'})}} className="quick-panel no-scrollbar hidden xl:flex">
                     {/* Save + Undo buttons */}
-                    <div style={{padding:'16px 12px 12px',borderBottom:'1px solid rgba(139,92,246,0.15)'}}>
+                    <div style={{padding:'16px 12px 12px',borderBottom:darkMode?'1px solid rgba(139,92,246,0.15)':'1px solid #f1f5f9'}}>
                         <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>פעולות</p>
                         <div style={{display:'flex',gap:'6px'}}>
-                            <button onClick={undo} disabled={undoStack.length===0} title="בטל" style={{flex:1,height:'30px',borderRadius:'10px',border:'1px solid rgba(139,92,246,0.2)',cursor:undoStack.length>0?'pointer':'not-allowed',background:undoStack.length>0?'rgba(139,92,246,0.1)':'rgba(139,92,246,0.03)',color:undoStack.length>0?'#a78bfa':'#4a5568',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:undoStack.length>0?'0 0 12px rgba(139,92,246,0.15)':'none',transition:'all 0.2s'}}>
+                            <button onClick={undo} disabled={undoStack.length===0} title="בטל" style={{flex:1,height:'30px',borderRadius:'10px',border:darkMode?'1px solid rgba(139,92,246,0.2)':'none',cursor:undoStack.length>0?'pointer':'not-allowed',background:darkMode?(undoStack.length>0?'rgba(139,92,246,0.1)':'rgba(139,92,246,0.03)'):(undoStack.length>0?'#f8fafc':'#f1f5f9'),color:darkMode?(undoStack.length>0?'#a78bfa':'#4a5568'):(undoStack.length>0?'#475569':'#cbd5e1'),display:'flex',alignItems:'center',justifyContent:'center',boxShadow:undoStack.length>0?'0 1px 4px rgba(0,0,0,0.07)':'none',transition:'all 0.2s'}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
                                 <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>בטל</span>
                             </button>
@@ -1125,11 +1137,11 @@ import { supabase } from './lib/supabaseClient.js';
                                 <span style={{fontSize:'10px',fontWeight:700,marginRight:'4px'}}>שמור</span>
                             </button>
                         </div>
-                        {saveNotification && <div style={{marginTop:'8px',padding:'6px 8px',background:'rgba(16,185,129,0.12)',border:'1px solid rgba(16,185,129,0.3)',borderRadius:'8px',color:'#34d399',fontSize:'10px',fontWeight:700,textAlign:'center'}}>✓ נשמר!</div>}
+                        {saveNotification && <div style={{marginTop:'8px',padding:'6px 8px',background:darkMode?'rgba(16,185,129,0.12)':'#ecfdf5',border:darkMode?'1px solid rgba(16,185,129,0.3)':'none',borderRadius:'8px',color:darkMode?'#34d399':'#059669',fontSize:'10px',fontWeight:700,textAlign:'center'}}>✓ נשמר!</div>}
                     </div>
 
                     {/* Quick Actions */}
-                    <div style={{padding:'14px 12px',borderBottom:'1px solid rgba(139,92,246,0.12)',flex:1}}>
+                    <div style={{padding:'14px 12px',borderBottom:darkMode?'1px solid rgba(139,92,246,0.12)':'1px solid #f1f5f9',flex:1}}>
                         <p style={{fontSize:'10px',fontWeight:700,color:'#94a3b8',marginBottom:'8px',letterSpacing:'0.05em'}}>⚡ פעולות מהירות</p>
                         <div style={{display:'flex',flexDirection:'column',gap:'6px'}}>
                             {[
@@ -1140,9 +1152,9 @@ import { supabase } from './lib/supabaseClient.js';
                             ].map((item,i)=>(
                                 <button key={i}
                                     onClick={()=>{ if(item.action) item.action(); else setActiveTab(item.tab); }}
-                                    style={{width:'100%',padding:'7px 10px',borderRadius:'10px',border:'1px solid rgba(139,92,246,0.18)',background:'rgba(139,92,246,0.06)',cursor:'pointer',display:'flex',alignItems:'center',gap:'7px',textAlign:'right',transition:'all 0.2s',fontFamily:'inherit'}}
-                                    onMouseEnter={e=>{e.currentTarget.style.background='rgba(139,92,246,0.15)';e.currentTarget.style.borderColor='rgba(139,92,246,0.4)';e.currentTarget.style.boxShadow='0 0 16px rgba(139,92,246,0.15)';}}
-                                    onMouseLeave={e=>{e.currentTarget.style.background='rgba(139,92,246,0.06)';e.currentTarget.style.borderColor='rgba(139,92,246,0.18)';e.currentTarget.style.boxShadow='none';}}>
+                                    style={{width:'100%',padding:'7px 10px',borderRadius:'10px',border:darkMode?'1px solid rgba(139,92,246,0.18)':'1px solid #f1f5f9',background:darkMode?'rgba(139,92,246,0.06)':'#fafbff',cursor:'pointer',display:'flex',alignItems:'center',gap:'7px',textAlign:'right',transition:'all 0.2s',fontFamily:'inherit'}}
+                                    onMouseEnter={e=>{e.currentTarget.style.background=darkMode?'rgba(139,92,246,0.15)':'#f5f3ff';e.currentTarget.style.borderColor=darkMode?'rgba(139,92,246,0.4)':'#ddd6fe';e.currentTarget.style.boxShadow=darkMode?'0 0 16px rgba(139,92,246,0.15)':'none';}}
+                                    onMouseLeave={e=>{e.currentTarget.style.background=darkMode?'rgba(139,92,246,0.06)':'#fafbff';e.currentTarget.style.borderColor=darkMode?'rgba(139,92,246,0.18)':'#f1f5f9';e.currentTarget.style.boxShadow='none';}}>
                                     <span style={{width:'24px',height:'24px',borderRadius:'8px',background:`${item.color}18`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',flexShrink:0}}>{item.icon}</span>
                                     <span style={{fontSize:'11px',fontWeight:700,color:'#cbd5e1'}}>{item.label}</span>
                                 </button>
@@ -1164,11 +1176,11 @@ import { supabase } from './lib/supabaseClient.js';
                 </aside>
 
                 {/* MAIN CONTENT */}
-                <div className="flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px',marginLeft:'185px'}}>
+                <main className="dashboard-main flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px',marginLeft:'185px'}}>
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
 
                 {/* TITLE */}
-                <div className="max-w-5xl mx-auto mb-2 pt-3 animate-slide-in-up">
+                <div className="dashboard-hero max-w-5xl mx-auto mb-2 pt-3 animate-slide-in-up">
                     <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"start",gap:"12px"}}>
 
 
@@ -1250,7 +1262,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* HOME */}
                 {activeTab === 'home' && (
-                    <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up">
+                    <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
                         {/* COMPACT TOOLBAR */}
                         {(() => {
@@ -1258,7 +1270,7 @@ import { supabase } from './lib/supabaseClient.js';
                             const d2026 = Math.max(0, Math.ceil((e2026-now)/864e5));
                             const w2026 = Math.floor(d2026/7);
                             return (
-                            <div className="flex items-center gap-2 flex-wrap">
+                            <div className="home-toolbar flex items-center gap-2 flex-wrap">
                                 {/* Search */}
                                 <div className="relative flex-1 min-w-48">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1273,6 +1285,14 @@ import { supabase } from './lib/supabaseClient.js';
                                 <button onClick={() => setShowAddHomeBlock(p=>!p)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shadow-sm transition-all bg-white text-emerald-600 hover:bg-emerald-50 border border-slate-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                                     הוסף בלוק
+                                </button>
+                                <button
+                                    onClick={toggleDarkMode}
+                                    className="theme-toggle"
+                                    title={darkMode ? 'מצב בהיר' : 'מצב שחור'}
+                                    aria-label={darkMode ? 'מעבר למצב בהיר' : 'מעבר למצב שחור'}
+                                    aria-pressed={darkMode}>
+                                    {darkMode ? '☀️' : '🌙'}
                                 </button>
                                 {/* Mini countdown */}
                                 <div className="flex items-center gap-1.5 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm text-xs font-bold text-slate-600">
@@ -3761,7 +3781,7 @@ import { supabase } from './lib/supabaseClient.js';
                     <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-[9px] font-bold text-white">Me</div><span className="text-sm font-medium italic text-slate-400">"הכל מתחיל מבפנים החוצה." ✨</span></div>
                     <div className="font-medium flex items-center gap-2 text-slate-400 bg-white/80 px-3.5 py-1.5 rounded-full border border-slate-100 text-[11px]"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026</div>
                 </footer>
-                </div>
+                </main>
             </div>
         );
     };
