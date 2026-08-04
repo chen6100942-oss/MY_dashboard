@@ -368,7 +368,8 @@ html .dashboard-main .goal-mini-card button {
 @media(prefers-reduced-motion:reduce){.enso-world-dot{transition:none}}
 
 /* Greeting on the right, wheel beside it on the left, instead of stacked */
-.life-os-row{display:flex;direction:ltr;flex-wrap:wrap;align-items:center;justify-content:center;gap:32px}
+.life-os-row{display:flex;direction:ltr;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:32px}
+.life-os-greeting-top{padding-top:26px}
 .life-os-row > *{direction:rtl}
 .life-os-greeting-top{flex:1 1 240px;max-width:340px;margin:0;text-align:center}
 .life-wheel-standalone{flex:0 0 auto;width:min(360px,88vw);margin:0}
