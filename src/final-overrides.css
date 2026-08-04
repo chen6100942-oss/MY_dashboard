@@ -1,0 +1,321 @@
+/* Stable final overrides kept separate from the legacy stylesheet. */
+html .dashboard-main .goals-strip-title,
+html .dashboard-main .goal-mini-card,
+html .dashboard-main .goal-mini-card h3,
+html .dashboard-main .goal-mini-card p,
+html .dashboard-main .goal-mini-card span,
+html .dashboard-main .goal-mini-card label,
+html .dashboard-main .goal-mini-card input,
+html .dashboard-main .goal-mini-card button {
+  font-family: 'Heebo', 'Nunito', sans-serif !important;
+  font-style: normal !important;
+  letter-spacing: 0 !important;
+}
+
+.primary-sidebar > .language-switcher {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.weekly-life-planner .plan-next-week {
+  padding-inline: 12px !important;
+  color: #fffaf5 !important;
+  border-color: #8b6c5d !important;
+  background: #8b6c5d !important;
+}
+
+.weekly-free-notes {
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(113, 53, 31, .12);
+}
+.weekly-free-notes > b {
+  display: block;
+  margin-bottom: 7px;
+  color: #71351f;
+  font-size: 10px;
+}
+.weekly-free-notes textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px !important;
+  resize: vertical;
+  border: 1px solid rgba(113, 53, 31, .12) !important;
+  border-radius: 12px !important;
+  outline: none;
+  color: #655954;
+  background: rgba(255, 255, 255, .42) !important;
+  font-size: 9px;
+  line-height: 1.7;
+  box-shadow: none !important;
+}
+.weekly-free-notes textarea:focus {
+  border-color: rgba(113, 53, 31, .32) !important;
+  background: rgba(255, 255, 255, .62) !important;
+}
+
+/* Calendar controls stay at the top, followed by the new weekly planner. */
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+}
+.calendar-page > * {
+  order: 3;
+}
+.calendar-page > .card:first-of-type {
+  order: 1;
+}
+.calendar-page > .weekly-life-planner {
+  order: 2;
+}
+
+.weekly-life-planner > header nav button:first-child,
+.weekly-life-planner > header nav button:last-child {
+  min-width: 28px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .5);
+}
+.weekly-life-planner > header nav button:first-child > span,
+.weekly-life-planner > header nav button:last-child > span {
+  display: block;
+  color: #71351f;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.week-notes-label,
+.week-day-notes {
+  min-height: 82px;
+  padding: 6px;
+  border-bottom: 1px solid rgba(113, 53, 31, .1);
+  border-left: 1px solid rgba(113, 53, 31, .07);
+  background: rgba(246, 237, 228, .38);
+}
+.week-notes-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f796f;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+.week-day-notes textarea {
+  width: 100%;
+  height: 68px;
+  padding: 5px !important;
+  resize: none;
+  border: 0 !important;
+  border-radius: 7px !important;
+  outline: none;
+  color: #6c5a52;
+  background: rgba(255, 255, 255, .4) !important;
+  box-shadow: none !important;
+  font-size: 8px;
+  line-height: 1.45;
+}
+.week-day-notes textarea:focus {
+  background: rgba(255, 255, 255, .75) !important;
+}
+
+.week-cell-free-text {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 4px 5px !important;
+  resize: vertical;
+  border: 0 !important;
+  border-radius: 6px !important;
+  outline: none;
+  color: #675850;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 8px;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity .16s ease, background .16s ease;
+}
+.week-cell-free-text::placeholder {
+  color: rgba(112, 91, 82, .35);
+}
+.week-cell-free-text:focus {
+  opacity: 1;
+  background: rgba(255, 255, 255, .58) !important;
+}
+.week-cell:hover .week-cell-free-text,
+.week-cell-free-text.has-text {
+  opacity: 1;
+}
+
+/* Inside Out — Life Operating System */
+.life-os {
+  --ink: #4d403a;
+  --muted: #8d7f78;
+  position: relative;
+  overflow: hidden;
+  padding: 34px;
+  border: 1px solid rgba(74, 60, 53, .1);
+  border-radius: 30px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 12% 5%, rgba(255,255,255,.82), transparent 29%),
+    linear-gradient(135deg, rgba(238,229,219,.92), rgba(248,244,238,.95) 54%, rgba(226,220,216,.88));
+  box-shadow: 0 26px 70px rgba(74, 55, 44, .1);
+}
+.life-os::after {
+  content: '';
+  position: absolute;
+  top: -90px;
+  left: -60px;
+  width: 280px;
+  height: 280px;
+  border: 1px solid rgba(103, 87, 78, .12);
+  border-radius: 50%;
+  box-shadow: inset 18px 8px 30px rgba(255,255,255,.35);
+  pointer-events: none;
+}
+.life-os-intro { display:flex; align-items:center; justify-content:space-between; gap:30px; }
+.life-os-greeting > span,
+.life-os-guidance article > span,
+.identity-path > div > span,
+.life-worlds header span { color:#8d7468; font-size:9px; font-weight:800; letter-spacing:.13em; }
+.life-os-greeting h2 { margin:6px 0 2px; font-family:'Bodoni MT','Didot','Baskerville',serif; font-size:34px; font-weight:400; letter-spacing:-.025em; }
+.life-os-greeting p { color:var(--muted); font-size:11px; }
+.life-os-greeting p b { color:#72574b; font-size:14px; }
+.life-os-status { display:grid; place-items:center; width:92px; height:92px; flex:0 0 92px; border:1px solid rgba(94,75,66,.14); border-radius:50%; background:rgba(255,255,255,.34); }
+.life-os-status strong { margin-top:12px; font-family:'Bodoni MT','Didot',serif; font-size:30px; font-weight:400; line-height:1; }
+.life-os-status span { align-self:start; color:var(--muted); font-size:8px; }
+.identity-path { display:grid; grid-template-columns:1fr 100px 1fr; align-items:center; gap:18px; margin:30px 0 24px; padding:24px 26px; border-top:1px solid rgba(83,66,58,.1); border-bottom:1px solid rgba(83,66,58,.1); }
+.identity-now textarea,.identity-action textarea { display:block; width:100%; min-height:54px; margin:7px 0 6px; padding:0!important; resize:none; border:0!important; outline:0; color:#493d38; background:transparent!important; box-shadow:none!important; font:400 21px/1.35 'Bodoni MT','Didot','Baskerville',serif; }
+.identity-now small { color:var(--muted); font-size:8px; }
+.identity-line { display:flex; align-items:center; justify-content:center; gap:7px; }
+.identity-line::before,.identity-line::after { content:''; flex:1; height:1px; background:rgba(113,83,68,.22); }
+.identity-line i { width:5px; height:5px; border-radius:50%; background:#927469; }
+.identity-line i:nth-child(2),.identity-line i:nth-child(4){opacity:.55}.identity-line i:nth-child(3){width:9px;height:9px;background:#6d7989}
+.identity-action button { padding:7px 13px; border:1px solid rgba(78,66,60,.15); border-radius:999px; color:#65534a; background:rgba(255,255,255,.48); font-size:9px; font-weight:800; transition:.2s ease; }
+.identity-action button:hover,.identity-action.is-done button { color:white; background:#718879; transform:translateY(-1px); }
+.life-os-guidance { display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:12px; }
+.life-os-guidance article { min-height:148px; padding:18px; border:1px solid rgba(83,66,58,.09); border-radius:18px; background:rgba(255,255,255,.31); }
+.life-os-guidance article p { margin-top:10px; color:#5c4e47; font:400 15px/1.5 'Bodoni MT','Didot','Baskerville',serif; }
+.life-os-guidance article small { display:block; margin-top:9px; color:var(--muted); font-size:8px; line-height:1.5; }
+.journey-note h3 { margin:8px 0; font-size:12px; }.journey-note > div { overflow:hidden; height:3px; border-radius:4px; background:rgba(77,64,58,.1); }.journey-note > div i { display:block; height:100%; border-radius:4px; background:#7b899b; }
+.journey-note p { margin:7px 0!important; font:500 9px/1.4 inherit!important; color:var(--muted)!important; }.journey-note button { color:#765f54; border-bottom:1px solid rgba(118,95,84,.25); font-size:8px; font-weight:800; }
+.life-worlds { margin-top:28px; padding-top:24px; border-top:1px solid rgba(83,66,58,.1); }
+.life-worlds header { display:flex; justify-content:space-between; align-items:end; gap:20px; }.life-worlds header h3 { margin-top:4px; font:400 20px 'Bodoni MT','Didot','Baskerville',serif; }.life-worlds header p { color:var(--muted); font-size:8px; }
+.life-world-rings { display:grid; grid-template-columns:repeat(6,1fr); gap:13px; margin-top:19px; }
+.life-world-rings button { display:flex; flex-direction:column; align-items:center; gap:8px; padding:8px 4px; border-radius:18px; transition:.22s ease; }.life-world-rings button:hover,.life-world-rings button.active { background:rgba(255,255,255,.38); transform:translateY(-2px); }
+.life-world-rings button i { display:grid; place-items:center; width:58px; height:58px; border-radius:50%; background:conic-gradient(var(--world) var(--score),rgba(255,255,255,.52) 0); position:relative; }.life-world-rings button i::after { content:''; position:absolute; inset:5px; border-radius:50%; background:#eee8e1; }.life-world-rings button b { z-index:1; color:#544842; font:400 16px 'Bodoni MT','Didot',serif; }.life-world-rings button span { color:#655750; font-size:8px; font-weight:800; }
+.world-score-editor { display:flex; align-items:center; gap:10px; width:min(420px,100%); margin:17px auto 0; }.world-score-editor span { width:74px; font-size:9px; font-weight:800; }.world-score-editor input { flex:1; height:3px; accent-color:var(--world); }.world-score-editor b { width:40px; color:var(--muted); font-size:8px; }
+@media(max-width:760px){.life-os{padding:23px 18px}.identity-path{grid-template-columns:1fr;padding-inline:4px}.identity-line{transform:rotate(90deg);width:50px;margin:auto}.life-os-guidance{grid-template-columns:1fr}.life-world-rings{grid-template-columns:repeat(3,1fr)}.life-os-greeting h2{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.life-os *{transition:none!important}}
+
+/* Life map now follows the greeting; the overall index lives inside the map */
+.life-os-intro{display:block}.life-worlds{margin-top:16px;padding-top:15px}.life-worlds header{align-items:center;justify-content:flex-start}.life-worlds header>p{margin-right:auto}.life-worlds .life-os-status{width:64px;height:64px;flex:0 0 64px;margin-inline-start:8px}.life-worlds .life-os-status strong{margin-top:8px;font-size:22px}.life-worlds .life-os-status span{font-size:7px}.identity-path{margin-top:24px}
+
+/* Interactive wheel of life */
+.life-worlds header{justify-content:space-between}.life-wheel-wrap{display:grid;place-items:center;margin:10px auto 2px}.life-wheel{display:block;width:min(410px,86vw);height:auto;overflow:visible;filter:drop-shadow(0 15px 27px rgba(76,56,46,.09))}.life-wheel g{cursor:pointer;outline:none}.wheel-segment-base{fill:rgba(255,255,255,.48);stroke:rgba(94,72,60,.08);stroke-width:1}.wheel-segment-value{opacity:.9;transition:.3s ease}.life-wheel g:hover .wheel-segment-value,.life-wheel g.active .wheel-segment-value{opacity:1;filter:brightness(1.06)}.life-wheel g.active .wheel-segment-base{stroke:#72584b;stroke-width:2}.wheel-label{fill:#fffaf4;font:700 8px Arial,sans-serif;pointer-events:none;text-shadow:0 1px 4px rgba(65,45,35,.35)}.wheel-value{fill:#fffaf4;font:700 8px Arial,sans-serif;pointer-events:none}.wheel-center{fill:#eee2d3;stroke:rgba(100,76,63,.13);stroke-width:1}.wheel-center-title{fill:#755b4e;font:400 11px 'Bodoni MT','Didot','Baskerville',serif}.wheel-center-value{fill:#5a463d;font:400 27px 'Bodoni MT','Didot','Baskerville',serif}.world-score-editor{margin-top:7px}
+
+.daily-version-update { padding:28px 32px; border-top:1px solid rgba(75,58,50,.14); border-bottom:1px solid rgba(75,58,50,.14); color:#51443e; background:rgba(255,255,255,.16); }
+.daily-version-update > header { display:flex; align-items:end; justify-content:space-between; gap:18px; margin-bottom:20px; }.daily-version-update > header span { color:#8c7468; font-size:8px; font-weight:900; letter-spacing:.16em; }.daily-version-update > header h2 { margin-top:3px; font:400 24px 'Bodoni MT','Didot','Baskerville',serif; }.daily-version-update > header p { color:#998981; font-size:8px; }
+.pearl-scene { width:min(100%,660px); min-height:310px; margin:auto; perspective:1400px; }.pearl-card { position:relative; min-height:310px; transform-style:preserve-3d; transition:transform .85s cubic-bezier(.2,.75,.25,1); }.pearl-scene.is-revealed .pearl-card { transform:rotateY(180deg); }
+.pearl-back,.pearl-front { position:absolute; inset:0; overflow:hidden; border:1px solid rgba(76,59,50,.12); border-radius:24px; backface-visibility:hidden; box-shadow:0 18px 48px rgba(64,47,39,.1); }
+.pearl-back { display:flex; flex-direction:column; align-items:center; justify-content:center; color:#f8f3ed; background:linear-gradient(145deg,#564943,#78685f); }.pearl-back::before { content:''; position:absolute; inset:13px; border:1px solid rgba(255,255,255,.16); border-radius:17px; }.pearl-back i { width:68px; height:68px; margin-bottom:15px; border:2px solid rgba(255,255,255,.72); border-right-color:transparent; border-radius:50%; transform:rotate(-22deg); }.pearl-back span { font-size:9px; font-weight:800; letter-spacing:.22em; }.pearl-back h3 { margin:5px 0 15px; font:italic 400 28px 'Bodoni MT','Didot',serif; }.pearl-back small { opacity:.66; font-size:8px; }
+.pearl-front { display:grid; grid-template-columns:155px 1fr; grid-template-rows:1fr auto; transform:rotateY(180deg); background:linear-gradient(135deg,#f7f1ea,#eee6de); }.pearl-front > header { display:flex; flex-direction:column; justify-content:center; padding:24px; color:white; background:var(--pearl); }.pearl-front > header span { font-size:9px; font-weight:800; }.pearl-front > header h3 { margin-top:7px; font:400 25px 'Bodoni MT','Didot',serif; }
+.pearl-layers { display:grid; grid-template-columns:1fr 1fr; gap:0; }.pearl-layers section { min-height:102px; padding:18px; border-right:1px solid rgba(75,58,50,.08); border-bottom:1px solid rgba(75,58,50,.08); }.pearl-layers b { color:#775e52; font-size:9px; }.pearl-layers p { margin-top:6px; color:#62544d; font-size:9px; line-height:1.55; }.pearl-layers .pearl-action { background:color-mix(in srgb,var(--pearl) 8%,transparent); }
+.pearl-front > footer { grid-column:1/-1; display:flex; justify-content:flex-end; gap:8px; padding:10px 16px; }.pearl-front > footer button { padding:7px 12px; border:1px solid rgba(75,58,50,.12); border-radius:999px; color:#725c51; background:rgba(255,255,255,.44); font-size:8px; font-weight:800; }.pearl-front > footer button.done { color:white; background:var(--pearl); }
+.pearl-after { display:grid; grid-template-columns:auto 1fr auto 1fr auto; align-items:center; gap:9px; width:min(100%,660px); margin:15px auto 0; }.pearl-after span { color:#9a877d; font-size:7px; }.pearl-after b { color:#65564f; font-size:8px; }.pearl-after small { color:#8c7468; font-size:8px; font-weight:800; }
+@media(max-width:700px){.daily-version-update{padding:22px 14px}.pearl-front{grid-template-columns:1fr}.pearl-front>header{padding:14px;text-align:center}.pearl-layers section{min-height:auto}.pearl-after{grid-template-columns:1fr 2fr}.pearl-after small{grid-column:1/-1;text-align:center}.daily-version-update>header{align-items:start;flex-direction:column}.pearl-scene,.pearl-card{min-height:430px}}
+@media(prefers-reduced-motion:reduce){.pearl-card{transition:none}}
+
+.voice-dictation-button {
+  display:grid;
+  place-items:center;
+  flex:0 0 38px;
+  width:38px;
+  height:38px;
+  border:1px solid rgba(105,82,70,.14);
+  border-radius:50%;
+  color:#755e53;
+  background:rgba(255,255,255,.62);
+  font-size:15px;
+  box-shadow:0 5px 14px rgba(67,48,39,.06);
+  transition:.2s ease;
+}
+.voice-dictation-button:hover { transform:translateY(-1px); background:#fff; }
+.voice-dictation-button.is-listening { color:#fff; background:#a46f70; animation:dictationPulse 1.25s ease-in-out infinite; }
+.voice-support-note { margin:2px 0 5px; padding:7px 9px; border-radius:9px; color:#725d53; background:rgba(164,111,112,.09); font-size:9px; line-height:1.5; }
+@keyframes dictationPulse { 50% { box-shadow:0 0 0 7px rgba(164,111,112,.14); } }
+@media(prefers-reduced-motion:reduce){.voice-dictation-button.is-listening{animation:none}}
+
+.opening-film-overlay { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; padding:28px; background:rgba(28,23,20,.86); backdrop-filter:blur(18px); }
+.opening-film-frame { position:relative; overflow:hidden; width:min(1040px,94vw); height:min(670px,86vh); border:1px solid rgba(255,255,255,.16); border-radius:28px; background:#342c28; box-shadow:0 35px 110px rgba(0,0,0,.48); }
+.opening-film-image { position:absolute; inset:0; background-size:300% 200%; animation:filmReveal 2.3s ease both,filmBreath 7s ease-in-out infinite alternate; }
+.opening-film-frame::after { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(16,13,12,.35),transparent 60%),linear-gradient(0deg,rgba(16,13,12,.35),transparent 45%); }
+.opening-film-copy { position:absolute; z-index:2; right:8%; bottom:14%; max-width:500px; color:#fffaf4; animation:filmCopy .75s ease both; }.opening-film-copy span { font-size:9px; font-weight:800; letter-spacing:.2em; opacity:.72; }.opening-film-copy h1 { margin:10px 0 7px; font:400 clamp(36px,5.5vw,72px)/.98 'Bodoni MT','Didot','Baskerville',serif; letter-spacing:-.03em; }.opening-film-copy p { max-width:390px; font-size:13px; line-height:1.7; opacity:.82; }
+.opening-film-progress { position:absolute; z-index:3; right:8%; left:8%; bottom:6%; display:flex; gap:6px; }.opening-film-progress i { height:2px; flex:1; background:rgba(255,255,255,.24); transition:.45s ease; }.opening-film-progress i.active { background:rgba(255,255,255,.88); }
+.opening-film-skip { position:fixed; z-index:10002; top:36px; left:42px; padding:8px 13px; border:1px solid rgba(255,255,255,.25); border-radius:999px; color:rgba(255,255,255,.78); background:rgba(255,255,255,.08); font-size:9px; font-weight:700; }
+.opening-film-continue { position:absolute; z-index:4; left:7%; bottom:13%; padding:10px 16px; border:1px solid rgba(255,255,255,.26); border-radius:999px; color:#fff; background:rgba(255,255,255,.1); font-size:9px; font-weight:800; backdrop-filter:blur(8px); }.opening-film-continue:hover { background:rgba(255,255,255,.2); }
+@keyframes filmReveal { from { opacity:.15; transform:scale(1.07); filter:blur(5px); } to { opacity:1; transform:scale(1); filter:blur(0); } }
+@keyframes filmBreath { to { transform:scale(1.035); } }
+@keyframes filmCopy { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+@media(max-width:700px){.opening-film-overlay{padding:0}.opening-film-frame{width:100vw;height:100vh;border:0;border-radius:0}.opening-film-copy{right:8%;left:8%;bottom:18%}.opening-film-skip{top:20px;left:20px}.opening-film-continue{left:8%;bottom:10%}.opening-film-progress{bottom:5%}}
+@media(prefers-reduced-motion:reduce){.opening-film-image,.opening-film-copy{animation:none}}
+
+.daily-soul-footer-actions { display:flex; align-items:center; justify-content:center; gap:9px; margin-top:16px; }
+.daily-soul-footer-actions .daily-soul-skip { margin:0; }
+.daily-soul-film-replay { padding:9px 14px; border:1px solid rgba(111,82,67,.2); border-radius:999px; color:#765b4e; background:rgba(255,255,255,.54); font-size:10px; font-weight:800; transition:.2s ease; }
+.daily-soul-film-replay:hover { transform:translateY(-1px); background:rgba(255,255,255,.82); }
+@media(max-width:520px){.daily-soul-footer-actions{flex-direction:column}}
+
+/* Vacation mode */
+.vacation-side-button{position:fixed;z-index:72;left:194px;top:50%;display:grid;grid-template-columns:28px auto;grid-template-rows:auto auto;align-items:center;column-gap:8px;min-width:126px;padding:10px 12px;border:1px solid rgba(109,81,65,.16);border-radius:0 16px 16px 0;color:#725345;background:rgba(250,245,238,.91);box-shadow:0 12px 34px rgba(76,52,39,.13);backdrop-filter:blur(16px);transform:translateY(-50%);transition:.25s ease}.vacation-side-button:hover{padding-left:17px;background:#fffaf3}.vacation-side-button>span{grid-row:1/3;font-size:25px;color:#b78865}.vacation-side-button b{font:600 10px/1.2 Arial,sans-serif}.vacation-side-button small{margin-top:2px;color:#a18c7e;font-size:8px}.vacation-side-button.is-active{color:#fff;background:linear-gradient(145deg,#8a6049,#bb8c67)}.vacation-side-button.is-active>span,.vacation-side-button.is-active small{color:#fff4e7}
+.vacation-overlay{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:22px;background:rgba(47,37,31,.54);backdrop-filter:blur(17px);animation:vacationFade .35s ease both}.vacation-dialog{position:relative;overflow:hidden;width:min(570px,94vw);min-height:585px;padding:38px 46px 34px;border:1px solid rgba(255,255,255,.72);border-radius:30px;text-align:center;color:#5b463b;background:linear-gradient(150deg,#fbf7f0 0%,#f2e5d6 58%,#e5ccb8 100%);box-shadow:0 36px 100px rgba(44,31,24,.28)}.vacation-dialog::before{content:'';position:absolute;width:260px;height:260px;top:-145px;left:-90px;border-radius:50%;background:rgba(222,174,116,.2)}.vacation-close{position:absolute;z-index:3;top:17px;left:19px;width:30px;height:30px;border-radius:50%;color:#826a5d;background:rgba(255,255,255,.5);font-size:20px}.vacation-kicker{font-size:8px;font-weight:800;letter-spacing:.2em}.vacation-sun{margin:10px 0 2px;color:#b98256;font-size:36px;animation:vacationSpin 14s linear infinite}.vacation-dialog h2{margin:4px 0 7px;font:400 31px/1.15 'Bodoni MT','Didot','Baskerville',serif}.vacation-dialog>p{color:#927d70;font-size:10px}
+.vacation-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0 18px}.vacation-choices button{display:grid;grid-template-columns:31px 1fr 18px;align-items:center;gap:8px;min-height:76px;padding:12px;border:1px solid rgba(103,76,61,.12);border-radius:17px;text-align:right;color:#725c50;background:rgba(255,255,255,.45);transition:.2s ease}.vacation-choices button:hover{transform:translateY(-2px);background:rgba(255,255,255,.75)}.vacation-choices button.selected{border-color:#ae7d5d;background:#fffaf4;box-shadow:0 9px 24px rgba(116,77,55,.1)}.vacation-choices i{display:grid;place-items:center;width:31px;height:31px;border-radius:50%;color:#a36f50;background:#f2e4d4;font-style:normal;font-size:17px}.vacation-choices b,.vacation-choices small{display:block}.vacation-choices b{font-size:11px}.vacation-choices small{margin-top:4px;color:#a08c80;font-size:8px}.vacation-choices em{color:#99694e;font-style:normal}.vacation-confirm,.vacation-celebration>button{padding:10px 26px;border-radius:999px;color:#fff;background:#76513f;font-size:10px;font-weight:800;box-shadow:0 9px 23px rgba(90,55,38,.18)}.vacation-end{display:block;margin:11px auto 0;color:#9b7967;background:transparent;font-size:8px;text-decoration:underline}
+.vacation-dialog.is-celebrating{display:grid;place-items:center;padding:0;background:linear-gradient(#f7dfbd 0 52%,#acd8d1 52% 69%,#5da9a5 69%)}.vacation-celebration{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;min-height:585px;padding:40px;color:#fff;text-shadow:0 2px 13px rgba(45,68,65,.18)}.vacation-sky{position:absolute;inset:0;overflow:hidden}.vacation-sky .vacation-orbit{position:absolute;top:65px;right:75px;color:#fff3c9;font-style:normal;font-size:66px;animation:vacationPulse 2.5s ease-in-out infinite}.vacation-sky span{position:absolute;bottom:150px;color:rgba(255,255,255,.7);font-size:100px;animation:vacationWave 3s ease-in-out infinite}.vacation-sky span:nth-child(2){left:8%}.vacation-sky span:nth-child(3){left:36%;animation-delay:-1s}.vacation-sky span:nth-child(4){left:68%;animation-delay:-2s}.vacation-palm{position:absolute;left:38px;bottom:67px;font-size:105px;transform:rotate(-19deg);opacity:.65}.vacation-label{z-index:1;font-size:8px;font-weight:900;letter-spacing:.25em}.vacation-celebration h2{z-index:1;margin:13px 0 9px;font-size:49px;color:#fff}.vacation-celebration p{z-index:1;max-width:360px;min-height:52px;font-size:12px;line-height:1.75}.vacation-celebration>button{z-index:1;margin-top:25px;color:#6d5145;background:rgba(255,255,255,.88)}.vacation-mode-active body::after{content:'';position:fixed;z-index:25;right:240px;left:185px;bottom:0;height:3px;background:linear-gradient(90deg,#d9b78f,#80bdb5,#d9b78f);opacity:.75}
+@keyframes vacationFade{from{opacity:0}to{opacity:1}}@keyframes vacationSpin{to{transform:rotate(360deg)}}@keyframes vacationPulse{50%{transform:scale(1.08);filter:drop-shadow(0 0 20px rgba(255,243,201,.6))}}@keyframes vacationWave{50%{transform:translateY(9px)}}
+@media(max-width:1280px){.vacation-side-button{left:0}.vacation-mode-active body::after{left:0}}@media(max-width:600px){.vacation-side-button{top:auto;bottom:18px;transform:none;border-radius:0 15px 15px 0}.vacation-dialog{padding:34px 18px 25px;min-height:550px}.vacation-choices{grid-template-columns:1fr}.vacation-choices button{min-height:61px}.vacation-dialog h2{font-size:27px}}@media(prefers-reduced-motion:reduce){.vacation-sun,.vacation-sky *{animation:none!important}}
+
+/* Vacation control sits directly below the contextual-help control */
+.vacation-side-button{top:64px;left:267px;transform:none;border-radius:15px;min-width:150px}
+@media(max-width:1279px){.vacation-side-button{top:60px;left:83px}}
+@media(max-width:700px){.vacation-side-button{top:56px;right:auto;bottom:auto;left:75px;transform:none;border-radius:14px}}
+
+/* Compact iOS-style vacation switch */
+.vacation-side-button{top:61px;left:277px;display:flex;grid-template:none;align-items:center;justify-content:center;gap:9px;min-width:0;width:132px;height:33px;padding:5px 9px;border-radius:999px;background:rgba(250,247,243,.93)}
+.vacation-side-button:hover{padding:5px 9px;background:#fffaf5}.vacation-side-button b{font:650 9px/1 Arial,sans-serif;white-space:nowrap}.vacation-side-button>span.vacation-toggle{position:relative;display:block;flex:0 0 35px;width:35px;height:20px;border-radius:999px;background:#d7d1cc;transition:.25s ease}.vacation-side-button>span.vacation-toggle i{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(62,47,39,.25);transition:.25s ease}.vacation-side-button.is-active{color:#76513f;background:rgba(250,247,243,.96)}.vacation-side-button.is-active>span.vacation-toggle{background:#a9785d}.vacation-side-button.is-active>span.vacation-toggle i{right:17px}
+@media(max-width:1279px){.vacation-side-button{top:57px;left:93px}}@media(max-width:700px){.vacation-side-button{top:53px;left:85px}}
+
+/* Vacation switch above the date, at the top-right of the page */
+.vacation-side-button{top:18px;right:266px;left:auto}
+@media(max-width:1279px){.vacation-side-button{top:14px;right:258px;left:auto}}@media(max-width:700px){.vacation-side-button{top:10px;right:14px;left:auto}}
+.vacation-ambient{position:fixed;z-index:40;inset:0;pointer-events:none;display:grid;place-items:center;background:linear-gradient(rgba(255,250,244,.47),rgba(255,250,244,.47)),url('/vacation-beach.png') center/cover no-repeat;animation:vacationFade .7s ease both}.vacation-ambient::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.16);backdrop-filter:blur(1.5px)}.vacation-ambient>div{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;max-width:470px;padding:25px 34px;border:1px solid rgba(255,255,255,.55);border-radius:25px;text-align:center;color:#654a3c;background:rgba(255,250,244,.62);box-shadow:0 22px 70px rgba(72,52,39,.16);backdrop-filter:blur(15px)}.vacation-ambient span{font-size:8px;font-weight:900;letter-spacing:.25em}.vacation-ambient b{margin:7px 0;font:400 32px 'Bodoni MT','Didot',serif}.vacation-ambient small{max-width:350px;font-size:10px;line-height:1.7}.vacation-returning{background:linear-gradient(rgba(65,106,100,.27),rgba(84,63,52,.2)),url('/vacation-beach.png') center/cover no-repeat}.vacation-returning h2{font-size:45px}.vacation-returning p{font-size:14px;font-weight:650}
+
+/* Wheel of Life — kept at a legible size, moved beside the greeting instead of centered full-width below it */
+.life-os-columns{display:flex;direction:ltr;flex-wrap:wrap;align-items:flex-start;gap:28px}
+.life-os-columns > *{direction:rtl}
+.life-wheel-side{flex:0 0 auto;width:min(320px,80vw)}
+.life-wheel-side-label{display:block;margin-bottom:2px;color:#8d7468;font-size:9px;font-weight:800;letter-spacing:.1em}
+.life-wheel-side .life-wheel-wrap{margin:6px auto 0}
+.life-wheel-side .life-wheel{width:100%}
+.life-wheel-side .wheel-icon{font-size:11px;pointer-events:none}
+.life-os-intro{flex:1 1 260px;min-width:0;padding-top:4px}
+@media(max-width:639px){.life-os-columns{flex-wrap:wrap}.life-wheel-side{width:min(300px,86vw);margin:0 auto}}
+
+/* Vacation control now lives in normal page flow right under the "how to use this tab" trigger, centered, and scrolls away with the page instead of staying pinned */
+.vacation-side-button{position:static;top:auto;left:auto;right:auto;transform:none;display:flex;margin:10px auto 0;width:132px}
+@media(max-width:1279px){.vacation-side-button{top:auto;left:auto}}
+@media(max-width:700px){.vacation-side-button{top:auto;left:auto;bottom:auto}}
+
+/* Wheel of Life — glossy "3D" shading (gradient fill + drop shadow + ambient contact shadow) and rise/fall trend markers per world */
+.wheel-segment-rim{fill:rgba(255,255,255,.55);pointer-events:none}
+.wheel-center-ring{fill:none;stroke:rgba(255,255,255,.65);stroke-width:2}
+.wheel-trend{font:700 6.5px Arial,sans-serif}
+.wheel-trend-up{fill:#5c7a5f;color:#5c7a5f}
+.wheel-trend-down{fill:#a15b4c;color:#a15b4c}
+.world-score-editor{position:relative;flex-wrap:wrap}
+.world-score-editor em{margin-inline-start:2px;font-style:normal;font-size:8px;font-weight:800}

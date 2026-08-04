@@ -3,6 +3,12 @@ import EmojiPicker from './components/EmojiPicker.jsx';
 import Icon from './components/Icon.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
 import WorldMap from './components/WorldMap.jsx';
+import MorningRitualJourney from './components/MorningRitualJourney.jsx';
+import WeeklyLifePlanner from './components/WeeklyLifePlanner.jsx';
+import LifeOperatingSystem from './components/LifeOperatingSystem.jsx';
+import DailyPearl from './components/DailyPearl.jsx';
+import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
+import VacationMode from './components/VacationMode.jsx';
 import { supabase } from './lib/supabaseClient.js';
 
     const App = () => {
@@ -10,8 +16,8 @@ import { supabase } from './lib/supabaseClient.js';
         // THE FIX: ALL useState/useEffect HOOKS BEFORE ANY EARLY RETURN
         // This was the cause of React error #310
         // ============================================================
-        const [user, setUser] = useState(null);
-        const [loading, setLoading] = useState(true);
+        const [user, setUser] = useState(() => ({ displayName: 'חן', uid: 'local', email: 'local', photoURL: null }));
+        const [loading, setLoading] = useState(false);
         const [activeTab, setActiveTab] = useState('home');
         const [showConfetti, setShowConfetti] = useState(false);
         const [saveNotification, setSaveNotification] = useState(false);
@@ -23,9 +29,13 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
             { id: 'future-self', name: 'אני העתידית', icon: 'sparkles', color: 'rose', emoji: '✨' },
+            { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
+            { id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' },
+            { id: 'inspiration', name: 'מוטיבציה והשראה', icon: 'flame', color: 'amber', emoji: '✦' },
+            { id: 'book-wisdom', name: 'סיכומי ספרים', icon: 'book-open', color: 'indigo', emoji: '◈' },
             { id: 'mindset', name: 'Mindset', icon: 'brain', color: 'purple', emoji: '🧠' },
             { id: 'ideas', name: 'רעיונות', icon: 'lightbulb', color: 'yellow', emoji: '💡' },
-            { id: 'resources', name: 'כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
+            { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
             { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' },
             { id: 'vision-board', name: 'לוח חזון', icon: 'image', color: 'pink', emoji: '🖼️' }
@@ -40,6 +50,247 @@ import { supabase } from './lib/supabaseClient.js';
         const [editingTabTitle, setEditingTabTitle] = useState(null);
         const [searchQuery, setSearchQuery] = useState('');
         const [searchResults, setSearchResults] = useState([]);
+        const [uiLanguage, setUiLanguage] = useState(() => localStorage.getItem('dashboardLanguage') || 'he');
+        const applyGoogleTranslation = (language, attempts = 0) => {
+            const select = document.querySelector('#google_translate_element select, .goog-te-combo');
+            if (select) {
+                select.value = language;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+            if (attempts < 30) {
+                window.setTimeout(() => applyGoogleTranslation(language, attempts + 1), 250);
+            }
+        };
+        useEffect(() => {
+            document.documentElement.lang = uiLanguage;
+            document.documentElement.dir = uiLanguage === 'he' ? 'rtl' : 'ltr';
+            window.googleTranslateElementInit = () => {
+                if (window.google?.translate && !document.querySelector('#google_translate_element select')) {
+                    try {
+                        new window.google.translate.TranslateElement({
+                            pageLanguage:'he',
+                            includedLanguages:'he,en,es,ru',
+                            autoDisplay:false
+                        }, 'google_translate_element');
+                    } catch (error) {
+                        console.warn('Google Translate initialization failed:', error);
+                    }
+                }
+                window.setTimeout(() => applyGoogleTranslation(uiLanguage), 300);
+            };
+            if (!document.getElementById('google-translate-script')) {
+                const script = document.createElement('script');
+                script.id = 'google-translate-script';
+                script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                script.async = true;
+                document.head.appendChild(script);
+            } else if (window.google?.translate) {
+                window.googleTranslateElementInit();
+            }
+        }, []);
+        const changeUiLanguage = (language) => {
+            localStorage.setItem('dashboardLanguage', language);
+            setUiLanguage(language);
+            const translation = language === 'he' ? '/he/he' : `/he/${language}`;
+            document.cookie = `googtrans=${translation};path=/`;
+            if (window.location.hostname && window.location.hostname !== 'localhost') {
+                document.cookie = `googtrans=${translation};path=/;domain=${window.location.hostname}`;
+            }
+            document.documentElement.lang = language;
+            document.documentElement.dir = language === 'he' ? 'rtl' : 'ltr';
+            applyGoogleTranslation(language);
+        };
+        const [showDailySoulOpening, setShowDailySoulOpening] = useState(() => {
+            const today = new Date().toISOString().slice(0,10);
+            return localStorage.getItem('dailySoulOpeningDateV2') !== today;
+        });
+        const [showMotivationFilm, setShowMotivationFilm] = useState(() => {
+            const today = new Date().toISOString().slice(0,10);
+            return localStorage.getItem('openingMotivationFilmDate') !== today;
+        });
+        const finishMotivationFilm = () => {
+            localStorage.setItem('openingMotivationFilmDate', new Date().toISOString().slice(0,10));
+            setShowMotivationFilm(false);
+            setShowDailySoulOpening(true);
+        };
+        const [ambientSound, setAmbientSound] = useState('off');
+        const youtubeAmbientTracks = [
+            { id:'qDP10U39rDA', label:'מים זורמים', note:'נחל עדין וצלילי טבע' },
+            { id:'pwVXI96HSs8', label:'ZEN', note:'נוכחות, נשימה ואיזון' },
+            { id:'5BLZNhGVbEk', label:'OM', note:'חיבור פנימי ומדיטציה' },
+            { id:'-4rtl36Cz48', label:'קערות טיבטיות', note:'רוגע ושלווה' },
+            { id:'cXS3fBmnMNo', label:'הרגעת המיינד', note:'קערות טיבטיות שקטות' },
+            { id:'TyiA4aEkPuk', label:'968 Hz', note:'תדר הריפוי' },
+            { id:'pSAy7e4NN4Q', label:'432 Hz', note:'עומק, ריכוז וחיבור לעצמך' },
+            { id:'NVPrxcR_RZI', label:'ויזואליזציה וזימון', note:'לראות את הרצון כאילו כבר התממש', scope:'manifesting' },
+            { id:'co2WEMtfMAc', label:'מדיטציית הגשמה', note:'להתחבר לכוונה ולתחושה', scope:'manifesting' },
+            { id:'UwGSgJytufY', label:'יצירת המציאות הרצויה', note:'מיקוד בתודעה ובאפשרות', scope:'manifesting' },
+            { id:'04z6pCMqLQc', label:'תדר 11:11', note:'סנכרון, כוונה ופתיחת אפשרויות', scope:'manifesting' },
+            { id:'D2KRO0qRDhU', label:'העלאת הרטט', note:'חוק המשיכה ואנרגיה גבוהה', scope:'manifesting' }
+        ];
+        const manifestingAmbientTracks = youtubeAmbientTracks.filter(track => track.scope === 'manifesting');
+        const [youtubeAmbientId, setYoutubeAmbientId] = useState(() => localStorage.getItem('youtubeAmbientId') || '');
+        const activeYoutubeTrack = youtubeAmbientTracks.find(track => track.id === youtubeAmbientId);
+        const recommendedTrackByTab = {
+            home:'pwVXI96HSs8', tasks:'pSAy7e4NN4Q', schedule:'qDP10U39rDA', metrics:'pSAy7e4NN4Q',
+            goals:'TyiA4aEkPuk', gantt:'pSAy7e4NN4Q', 'future-self':'TyiA4aEkPuk', manifesting:'NVPrxcR_RZI',
+            ikigai:'pSAy7e4NN4Q', mindset:'cXS3fBmnMNo', ideas:'pwVXI96HSs8', resources:'pwVXI96HSs8',
+            archive:'-4rtl36Cz48', 'my-world':'qDP10U39rDA', 'vision-board':'TyiA4aEkPuk',
+            inspiration:'pwVXI96HSs8', 'book-wisdom':'pSAy7e4NN4Q'
+        };
+        const recommendedTrack = youtubeAmbientTracks.find(track => track.id === (recommendedTrackByTab[activeTab] || 'pwVXI96HSs8'));
+        const toggleYoutubeAmbient = (trackId) => {
+            setAmbientSound('off');
+            setYoutubeAmbientId(current => current === trackId ? '' : trackId);
+        };
+        useEffect(() => localStorage.setItem('youtubeAmbientId', youtubeAmbientId), [youtubeAmbientId]);
+        const audioContextRef = useRef(null);
+        const ambientAudioRef = useRef({ nodes: [], interval: null });
+        const openingPlayedRef = useRef(false);
+        const getAudioContext = () => {
+            if (!audioContextRef.current) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioContextRef.current = new AudioContextClass();
+            }
+            return audioContextRef.current;
+        };
+        const stopAmbientAudio = () => {
+            if (ambientAudioRef.current.interval) window.clearInterval(ambientAudioRef.current.interval);
+            ambientAudioRef.current.nodes.forEach(node => {
+                try { if (typeof node.stop === 'function') node.stop(); } catch {}
+                try { node.disconnect(); } catch {}
+            });
+            ambientAudioRef.current = { nodes: [], interval: null };
+        };
+        const playJapaneseOpening = () => {
+            if (openingPlayedRef.current) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            ctx.resume().then(() => {
+                openingPlayedRef.current = true;
+                const notes = [523.25, 659.25, 783.99, 880, 783.99, 659.25];
+                notes.forEach((frequency, index) => {
+                    const start = ctx.currentTime + index * .31;
+                    const oscillator = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    oscillator.type = index % 2 ? 'sine' : 'triangle';
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gain.gain.setValueAtTime(.0001, start);
+                    gain.gain.exponentialRampToValueAtTime(.055, start + .025);
+                    gain.gain.exponentialRampToValueAtTime(.0001, start + 1.15);
+                    oscillator.connect(gain).connect(ctx.destination);
+                    oscillator.start(start);
+                    oscillator.stop(start + 1.2);
+                });
+            }).catch(() => {});
+        };
+        useEffect(() => {
+            if (!showDailySoulOpening || openingPlayedRef.current) return;
+            playJapaneseOpening();
+            const beginAfterFirstTouch = () => playJapaneseOpening();
+            window.addEventListener('pointerdown', beginAfterFirstTouch, { once: true });
+            return () => window.removeEventListener('pointerdown', beginAfterFirstTouch);
+        }, [showDailySoulOpening]);
+        useEffect(() => {
+            localStorage.setItem('dashboardAmbientSound', ambientSound);
+            stopAmbientAudio();
+            if (ambientSound === 'off') return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            ctx.resume().then(() => {
+                const master = ctx.createGain();
+                master.gain.value = ambientSound === 'water' ? .075 : ambientSound === 'frequencies' ? .14 : .11;
+                master.connect(ctx.destination);
+                const nodes = [master];
+                let interval = null;
+                if (ambientSound === 'water') {
+                    const buffer = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    let last = 0;
+                    for (let i = 0; i < data.length; i++) {
+                        const white = Math.random() * 2 - 1;
+                        last = last * .972 + white * .028;
+                        data[i] = last * 3.4;
+                    }
+                    const source = ctx.createBufferSource();
+                    const filter = ctx.createBiquadFilter();
+                    source.buffer = buffer;
+                    source.loop = true;
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 1350;
+                    filter.Q.value = .55;
+                    source.connect(filter).connect(master);
+                    source.start();
+                    nodes.push(source, filter);
+                    const chirpBird = () => {
+                        const base = 1450 + Math.random() * 520;
+                        [0, .16, .38].forEach((delay, index) => {
+                            const oscillator = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            const now = ctx.currentTime + delay;
+                            oscillator.type = 'sine';
+                            oscillator.frequency.setValueAtTime(base * (1 + index * .06), now);
+                            oscillator.frequency.exponentialRampToValueAtTime(base * (1.42 + index * .04), now + .09);
+                            oscillator.frequency.exponentialRampToValueAtTime(base * 1.12, now + .22);
+                            gain.gain.setValueAtTime(.0001, now);
+                            gain.gain.exponentialRampToValueAtTime(.08 - index * .012, now + .025);
+                            gain.gain.exponentialRampToValueAtTime(.0001, now + .25);
+                            oscillator.connect(gain).connect(master);
+                            oscillator.start(now);
+                            oscillator.stop(now + .27);
+                        });
+                    };
+                    window.setTimeout(chirpBird, 900);
+                    interval = window.setInterval(chirpBird, 4600);
+                } else if (ambientSound === 'frequencies') {
+                    [108, 216, 432, 528].forEach((frequency, index) => {
+                        const oscillator = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = frequency;
+                        gain.gain.value = [.34,.18,.075,.035][index];
+                        oscillator.connect(gain).connect(master);
+                        oscillator.start();
+                        nodes.push(oscillator, gain);
+                    });
+                } else if (ambientSound === 'bowls') {
+                    const strikeBowl = () => {
+                        [174, 261.63, 392, 523.25].forEach((frequency, index) => {
+                            const oscillator = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            const now = ctx.currentTime + index * .04;
+                            oscillator.type = 'sine';
+                            oscillator.frequency.value = frequency;
+                            gain.gain.setValueAtTime(.0001, now);
+                            gain.gain.exponentialRampToValueAtTime(.4 / (index + 1), now + .04);
+                            gain.gain.exponentialRampToValueAtTime(.0001, now + 6.4);
+                            oscillator.connect(gain).connect(master);
+                            oscillator.start(now);
+                            oscillator.stop(now + 6.6);
+                        });
+                    };
+                    strikeBowl();
+                    interval = window.setInterval(strikeBowl, 7800);
+                }
+                ambientAudioRef.current = { nodes, interval };
+            }).catch(() => setAmbientSound('off'));
+            return stopAmbientAudio;
+        }, [ambientSound]);
+        const closeDailySoulOpening = () => {
+            localStorage.setItem('dailySoulOpeningDateV2', new Date().toISOString().slice(0,10));
+            setShowDailySoulOpening(false);
+        };
+        const [tabHelpVideos, setTabHelpVideos] = useState(() => {
+            try { return JSON.parse(localStorage.getItem('tabHelpVideos') || '{}'); } catch { return {}; }
+        });
+        const [tabHelpOpen, setTabHelpOpen] = useState({});
+        const [tabHelpEditing, setTabHelpEditing] = useState(null);
+        const [tabHelpDraft, setTabHelpDraft] = useState('');
+        const [tabHelpFiles, setTabHelpFiles] = useState({});
+        useEffect(() => {
+            localStorage.setItem('tabHelpVideos', JSON.stringify(tabHelpVideos));
+        }, [tabHelpVideos]);
         const [domains, setDomains] = useState([
             { id: 'd1', value: 'general', emoji: '🌍', label: 'כללי' },
             { id: 'd2', value: 'project-graduation', emoji: '🎓', label: 'פרויקט גמר' },
@@ -89,6 +340,9 @@ import { supabase } from './lib/supabaseClient.js';
         const [newProjectDueDate, setNewProjectDueDate] = useState('');
         const [newProjectDomain, setNewProjectDomain] = useState('general');
         const [newProjectColor, setNewProjectColor] = useState('from-violet-500 to-purple-500');
+        const [dictationTarget, setDictationTarget] = useState('');
+        const recognitionRef = useRef(null);
+        const speechRecognitionSupported = typeof window !== 'undefined' && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
         const [newResourceTitle, setNewResourceTitle] = useState('');
         const [newResourceEmoji, setNewResourceEmoji] = useState('🔗');
         const [newResourceUrl, setNewResourceUrl] = useState('');
@@ -128,6 +382,8 @@ import { supabase } from './lib/supabaseClient.js';
         const [affirmationUrl, setAffirmationUrl] = useState('https://www.youtube.com/watch?v=');
         const [editingAffirmationUrl, setEditingAffirmationUrl] = useState(false);
         const [affirmations, setAffirmations] = useState([
+            { id: 'af-header-vision', text: '✨ "לטייל בכל העולם תוך יצירת השפעה והעצמה של אנשים להגשים את ייעודם." 🌍', completed: false },
+            { id: 'af-header-positive', text: '"אני נחושה, טובה, מקצועית, אהובה. שווה המון כסף. אני הולכת לקראת החזון שלי בביטחון ובאומץ." 💪', completed: false },
             { id: 'af1', text: 'אני אוהבת, מקבלת ומעריכה את עצמי ברגע זה ותמיד', completed: false },
             { id: 'af2', text: 'היקום תומך בי וברצונותיי', completed: false },
             { id: 'af3', text: 'אני בטוחה ומוגנת תמיד', completed: false },
@@ -179,11 +435,12 @@ import { supabase } from './lib/supabaseClient.js';
         const [showWeightCard, setShowWeightCard] = useState(true);
         const [bannerImg, setBannerImg] = useState(null);
         const [headerTitle, setHeaderTitle] = useState('מרכז הבקרה של חיי');
+        const [brandMarkerColor, setBrandMarkerColor] = useState(() => localStorage.getItem('brandMarkerColor') || '#dfb7d5');
         const [editingTitle, setEditingTitle] = useState(false);
-        const [headerAffirmation, setHeaderAffirmation] = useState('"אני נחושה, טובה, מקצועית, אהובה. שווה המון כסף. אני הולכת לקראת החזון שלי בביטחון ובאומץ." 💪');
+        const [headerAffirmation, setHeaderAffirmation] = useState('');
         const [editingAffirmation, setEditingAffirmation] = useState(false);
         const [visionNotes, setVisionNotes] = useState('');
-        const [visionText, setVisionText] = useState('✨ "לטייל בכל העולם תוך יצירת השפעה והעצמה של אנשים להגשים את ייעודם." 🌍');
+        const [visionText, setVisionText] = useState('');
         const [editingVision, setEditingVision] = useState(false);
         const [permanentArchive, setPermanentArchive] = useState([]);
         const [editingWeightCard, setEditingWeightCard] = useState(false);
@@ -204,6 +461,27 @@ import { supabase } from './lib/supabaseClient.js';
         const [selectedItem, setSelectedItem] = useState(null);
         const [typeFilter, setTypeFilter] = useState('all');
         const [addingType, setAddingType] = useState('task');
+        const [inspirationSearch, setInspirationSearch] = useState('');
+        const [bookWisdomSearch, setBookWisdomSearch] = useState('');
+        const [inspirationDraft, setInspirationDraft] = useState({title:'',person:'',type:'סיפור הצלחה',lesson:'',action:'',url:''});
+        const [bookWisdomDraft, setBookWisdomDraft] = useState({title:'',author:'',status:'רוצה לקרוא',impression:'',lesson:'',action:'',url:''});
+        const [inspirationItems, setInspirationItems] = useState(() => {
+            try { const saved=JSON.parse(localStorage.getItem('inspirationLibrary')||'null'); if(saved) return saved; } catch {}
+            return [
+                {id:'ins-disney',title:'להמשיך ליצור גם אחרי כישלונות',person:'וולט דיסני',type:'סיפור הצלחה',lesson:'כישלון של מיזם אחד אינו מגדיר את היכולת או את הרעיון הבא.',action:'לחזור היום לרעיון אחד שוויתרתי עליו מוקדם מדי.',url:''},
+                {id:'ins-kroc',title:'אף פעם לא מאוחר להתחיל בגדול',person:'ריי קרוק · McDonald’s',type:'סיפור הצלחה',lesson:'ניסיון מצטבר יכול להפוך להזדמנות משמעותית גם באמצע החיים.',action:'לזהות ניסיון שכבר צברתי ולהפוך אותו ליתרון.',url:''},
+                {id:'ins-jobs',title:'לחבר את הנקודות',person:'סטיב ג׳ובס · נאום סטנפורד 2005',type:'נאום',lesson:'לא תמיד מבינים את הדרך קדימה; לעיתים המשמעות מתבהרת רק במבט לאחור.',action:'לבחור החלטה אחת שמרגישה נכונה גם בלי ודאות מלאה.',url:'https://www.youtube.com/watch?v=UF8uR6Z6KLc'}
+            ];
+        });
+        const [bookWisdomItems, setBookWisdomItems] = useState(() => {
+            try { const saved=JSON.parse(localStorage.getItem('bookWisdomLibrary')||'null'); if(saved) return saved; } catch {}
+            return [
+                {id:'book-habits',title:'הרגלים אטומיים',author:'ג׳יימס קליר',status:'סיימתי',impression:'שינוי קטן ועקבי יכול לבנות זהות חדשה לאורך זמן.',lesson:'להתמקד במערכת ובהרגל היומי, לא רק בתוצאה הרחוקה.',action:'לבחור הרגל של שתי דקות שאוכל לבצע כבר היום.',url:''},
+                {id:'book-meaning',title:'האדם מחפש משמעות',author:'ויקטור פרנקל',status:'רוצה לקרוא',impression:'',lesson:'גם כשאין שליטה על הנסיבות, אפשר לבחור את העמדה ואת התגובה.',action:'לכתוב מה מעניק משמעות ליום שלי עכשיו.',url:''}
+            ];
+        });
+        useEffect(()=>localStorage.setItem('inspirationLibrary',JSON.stringify(inspirationItems)),[inspirationItems]);
+        useEffect(()=>localStorage.setItem('bookWisdomLibrary',JSON.stringify(bookWisdomItems)),[bookWisdomItems]);
 
         // ── DRAG & DROP / LAYOUT EDIT ────────────────────────────────
         const [layoutEditMode, setLayoutEditMode] = useState(false);
@@ -238,6 +516,9 @@ import { supabase } from './lib/supabaseClient.js';
             localStorage.setItem('dashboardTheme', String(next));
             return next;
         });
+        useEffect(() => {
+            localStorage.setItem('brandMarkerColor', brandMarkerColor);
+        }, [brandMarkerColor]);
         const [monthNotes, setMonthNotes] = useState({}); // {"2026-1": "הערה לחודש"}
         const [quarterlyGoals, setQuarterlyGoals] = useState({
             'Q1-goal':'', 'Q2-goal':'', 'Q3-goal':'', 'Q4-goal':'',
@@ -250,9 +531,33 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
+        const [worldSearch, setWorldSearch] = useState('');
+        const [selectedWorldCountry, setSelectedWorldCountry] = useState('');
         const [collapsedHomeBlocks, setCollapsedHomeBlocks] = useState({morning: false, affirmations: false, gamechangers: false});
+        useEffect(() => {
+            setAffirmations(prev => prev.filter(item => item.text !== 'אני בוחרת להיות עשירה ומאושרת'));
+        }, []);
         const [profileName, setProfileName] = useState('חן זרח');
         const [visionBoardItems, setVisionBoardItems] = useState([]);
+        const [manifestations, setManifestations] = useState([]);
+        const [manifestDailyDone, setManifestDailyDone] = useState({});
+        const [manifestWizardOpen, setManifestWizardOpen] = useState(false);
+        const [manifestStep, setManifestStep] = useState(1);
+        const [manifestEditingId, setManifestEditingId] = useState(null);
+        const [ikigaiWizardOpen, setIkigaiWizardOpen] = useState(false);
+        const [ikigaiStep, setIkigaiStep] = useState(1);
+        const [ikigaiData, setIkigaiData] = useState(() => {
+            const blank = {love:'',skills:'',impact:'',expression:'',connection:'',statement:'',experiment:'',experimentType:'ליצור משהו',completed:false};
+            try { return {...blank, ...JSON.parse(localStorage.getItem('ikigaiData') || '{}')}; } catch { return blank; }
+        });
+        const emptyManifestDraft = {
+            category: '', desire: '', vision: '', feelings: [], why: '',
+            statement: '', action: '', timing: 'היום', customDate: ''
+        };
+        const [manifestDraft, setManifestDraft] = useState(emptyManifestDraft);
+        useEffect(() => {
+            localStorage.setItem('ikigaiData', JSON.stringify(ikigaiData));
+        }, [ikigaiData]);
         const [vbNewText, setVbNewText] = useState('');
         const [vbBg, setVbBg] = useState('#f5f3ff');
         const [vbEditingId, setVbEditingId] = useState(null);
@@ -263,6 +568,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const dragItem = useRef(null);
         const dragOverItem = useRef(null);
+        const draggedSidebarTab = useRef(null);
         const autoSaveTimer = useRef(null);
         const isFirstRender = useRef(true);
         const userRef = useRef(user);
@@ -357,22 +663,44 @@ import { supabase } from './lib/supabaseClient.js';
 
         // ── HELPER: ensure built-in tabs (added after a user's last save) always exist ──────────────
         const ensureBuiltinTabs = (tabsArr) => {
-            const result = [...tabsArr];
-            if (!result.some(t => t.id === 'my-world')) {
+            let deletedIds = [];
+            try { deletedIds = JSON.parse(localStorage.getItem('deleted_tab_ids') || '[]'); } catch(e) {}
+            const deleted = new Set(deletedIds);
+            const result = [...tabsArr]
+                .filter(tab => !deleted.has(tab.id))
+                .map(tab => tab.id === 'manifesting' ? {...tab, name: 'Manifesting'} : tab)
+                .map(tab => tab.id === 'ikigai' ? {...tab, name: 'IKIGAI', icon: 'flower-2', emoji: '🪷'} : tab)
+                .map(tab => tab.id === 'resources' ? {...tab, name: 'ספריית כלים'} : tab)
+                .map(tab => tab.id === 'inspiration' ? {...tab, name: 'מוטיבציה והשראה'} : tab)
+                .map(tab => tab.id === 'book-wisdom' ? {...tab, name: 'סיכומי ספרים'} : tab);
+            if (!deleted.has('my-world') && !result.some(t => t.id === 'my-world')) {
                 result.push({ id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' });
             }
-            if (!result.some(t => t.id === 'vision-board')) {
+            if (!deleted.has('vision-board') && !result.some(t => t.id === 'vision-board')) {
                 result.push({ id: 'vision-board', name: 'לוח חזון', icon: 'image', color: 'pink', emoji: '🖼️' });
+            }
+            if (!deleted.has('manifesting') && !result.some(t => t.id === 'manifesting')) {
+                result.push({ id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' });
+            }
+            if (!deleted.has('ikigai') && !result.some(t => t.id === 'ikigai')) {
+                result.push({ id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' });
+            }
+            if (!deleted.has('inspiration') && !result.some(t => t.id === 'inspiration')) {
+                result.push({ id:'inspiration', name:'מוטיבציה והשראה', icon:'flame', color:'amber', emoji:'✦' });
+            }
+            if (!deleted.has('book-wisdom') && !result.some(t => t.id === 'book-wisdom')) {
+                result.push({ id:'book-wisdom', name:'סיכומי ספרים', icon:'book-open', color:'indigo', emoji:'◈' });
             }
             return result;
         };
 
         // ── HELPER: apply loaded data object to state ──────────────
         const applyDataToState = (d) => {
-            if (d.visionText) setVisionText(d.visionText);
+            const movedHeaderSentences = [d.visionText, d.headerAffirmation].filter(text => typeof text === 'string' && text.trim());
+            setVisionText('');
             if (d.bannerImg) setBannerImg(d.bannerImg);
             if (d.headerTitle) setHeaderTitle(d.headerTitle);
-            if (d.headerAffirmation !== undefined) setHeaderAffirmation(d.headerAffirmation);
+            setHeaderAffirmation('');
             if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t)));
             if (d.projects) setProjects(d.projects);
             if (d.tasks) setTasks(d.tasks);
@@ -398,7 +726,17 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.weekSchedule) setWeekSchedule(d.weekSchedule);
             if (d.customTabData) setCustomTabData(d.customTabData);
             if (d.currentWeight !== undefined) setCurrentWeight(d.currentWeight);
-            if (d.affirmations) setAffirmations(d.affirmations);
+            if (d.affirmations || movedHeaderSentences.length) {
+                setAffirmations(prev => {
+                    const next = d.affirmations ? [...d.affirmations] : [...prev];
+                    movedHeaderSentences.forEach((text, index) => {
+                        if (!next.some(item => item.text === text)) {
+                            next.unshift({ id: `af-header-moved-${index}-${Date.now()}`, text, completed: false });
+                        }
+                    });
+                    return next;
+                });
+            }
             if (d.affirmationUrl) setAffirmationUrl(d.affirmationUrl);
             if (d.homeBlockOrder) {
                 const order = [...d.homeBlockOrder];
@@ -423,6 +761,8 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.profileName) setProfileName(d.profileName);
             if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
             if (d.vbBg) setVbBg(d.vbBg);
+            if (d.manifestations) setManifestations(d.manifestations);
+            if (d.manifestDailyDone) setManifestDailyDone(d.manifestDailyDone);
         };
 
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
@@ -434,7 +774,7 @@ import { supabase } from './lib/supabaseClient.js';
             } catch (e) { console.error('localStorage load error:', e); }
 
             // שלב 2: אם מחוברת — טוען מהענן (הענן גובר)
-            if (!supabase || !user || !user.uid || user.uid === 'preview') return;
+            if (!supabase || !user || !user.uid || user.uid === 'preview' || user.uid === 'local') return;
             (async () => {
                 try {
                     const { data: row, error } = await supabase
@@ -487,7 +827,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
                     if (supabase && u?.uid && u.uid !== 'local') {
@@ -496,7 +836,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg]);
+        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone]);
 
 
         // lucide icons handled per-component
@@ -599,7 +939,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -645,6 +985,8 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.worldNotes) setWorldNotes(d.worldNotes);
                     if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
                     if (d.vbBg) setVbBg(d.vbBg);
+                    if (d.manifestations) setManifestations(d.manifestations);
+                    if (d.manifestDailyDone) setManifestDailyDone(d.manifestDailyDone);
                 }
             } catch (error) { console.error('Error loading data:', error); }
         };
@@ -773,6 +1115,26 @@ import { supabase } from './lib/supabaseClient.js';
             setNewTaskText(''); setNewTaskDomain('general'); setNewTaskDueDate(''); setNewTaskPriority('normal');
         };
         const addNewProject = () => { if (!newProjectTitle.trim()) return; saveSnapshot(); const dueMonth = newProjectDueDate ? new Date(newProjectDueDate).getMonth()+1 : 12; setProjects(prev => [...prev, { id: `p${Date.now()}`, title: newProjectTitle, color: newProjectColor, gradient: newProjectColor, emoji: newProjectEmoji, startMonth: new Date().getMonth()+1, endMonth: dueMonth, showOnHome: false, dueDate: newProjectDueDate, domain: newProjectDomain }]); setNewProjectTitle(''); setNewProjectEmoji('✨'); setNewProjectDueDate(''); setNewProjectDomain('general'); setNewProjectColor('from-violet-500 to-purple-500'); };
+        const startDictation = (target) => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert('הדפדפן הזה אינו תומך בהכתבה קולית. מומלץ להשתמש ב-Chrome או Edge.'); return; }
+            if (recognitionRef.current && dictationTarget) { recognitionRef.current.stop(); return; }
+            const recognition = new SpeechRecognition();
+            recognition.lang = uiLanguage === 'en' ? 'en-US' : uiLanguage === 'es' ? 'es-ES' : uiLanguage === 'ru' ? 'ru-RU' : 'he-IL';
+            recognition.interimResults = true;
+            recognition.continuous = false;
+            const original = target === 'project' ? newProjectTitle : newTaskText;
+            recognition.onstart = () => setDictationTarget(target);
+            recognition.onresult = event => {
+                const transcript = Array.from(event.results).map(result => result[0].transcript).join(' ').trim();
+                const value = [original, transcript].filter(Boolean).join(original ? ' ' : '');
+                if (target === 'project') setNewProjectTitle(value); else setNewTaskText(value);
+            };
+            recognition.onerror = () => setDictationTarget('');
+            recognition.onend = () => { setDictationTarget(''); recognitionRef.current = null; };
+            recognitionRef.current = recognition;
+            recognition.start();
+        };
         const addNewResource = () => { if (!newResourceTitle.trim()) return; saveSnapshot(); setResources(prev => [...prev, { id: `r${Date.now()}`, title: newResourceTitle, url: newResourceUrl || '#', domain: newResourceDomain, projectId: newResourceDomain === 'general' ? null : newResourceDomain, completed: false, emoji: newResourceEmoji || '🔗' }]); setNewResourceTitle(''); setNewResourceUrl(''); setNewResourceDomain('general'); setNewResourceEmoji('🔗'); };
         const deleteResource = (id) => { saveSnapshot(); const r = resources.find(r => r.id === id); if (r) { addToArchive(r.title, 'resource'); setResources(prev => prev.filter(r => r.id !== id)); } };
         const deleteProject = (projectId) => { { saveSnapshot(); const p = projects.find(p => p.id === projectId); if (p) addToArchive(p.title, 'project'); setTasks(prev => prev.map(t => t.projectId === projectId ? {...t, projectId: null} : t)); setProjects(prev => prev.filter(p => p.id !== projectId)); } };
@@ -844,7 +1206,37 @@ import { supabase } from './lib/supabaseClient.js';
         const deleteCustomListItem = (tabId, blockId, itemId) => { const items = (((customTabData[tabId]||{})[blockId]||{}).items||[]); const item = items.find(i=>i.id===itemId); if (item) addToArchive(item.text||item.title||'פריט', 'task'); updateCustomTabData(tabId, blockId, 'items', items.filter(i=>i.id!==itemId)); };
         const addCustomFile = (tabId, blockId, fileObj) => { const existing = (((customTabData[tabId]||{})[blockId]||{}).files||[]); updateCustomTabData(tabId, blockId, 'files', [...existing, fileObj]); };
         const deleteCustomFile = (tabId, blockId, fileId) => { const files = (((customTabData[tabId]||{})[blockId]||{}).files||[]); updateCustomTabData(tabId, blockId, 'files', files.filter(f=>f.id!==fileId)); };
-        const deleteTab = (id) => { const t = tabs.find(t => t.id === id); if (t) addToArchive(t.label, 'task'); setTabs(prev => prev.filter(t => t.id !== id)); if (activeTab === id) setActiveTab('home'); };
+        const deleteTab = (id) => {
+            const t = tabs.find(t => t.id === id);
+            if (t) addToArchive(t.name, 'task');
+            try {
+                const deleted = new Set(JSON.parse(localStorage.getItem('deleted_tab_ids') || '[]'));
+                deleted.add(id);
+                localStorage.setItem('deleted_tab_ids', JSON.stringify([...deleted]));
+            } catch(e) {}
+            setTabs(prev => prev.filter(t => t.id !== id));
+            if (activeTab === id) setActiveTab('home');
+        };
+        const handleSidebarTabDragStart = (e, id) => {
+            draggedSidebarTab.current = id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+        };
+        const handleSidebarTabDrop = (e, targetId) => {
+            e.preventDefault();
+            const sourceId = draggedSidebarTab.current;
+            if (!sourceId || sourceId === targetId) return;
+            setTabs(prev => {
+                const next = [...prev];
+                const from = next.findIndex(tab => tab.id === sourceId);
+                const to = next.findIndex(tab => tab.id === targetId);
+                if (from < 0 || to < 0) return prev;
+                const [moved] = next.splice(from, 1);
+                next.splice(to, 0, moved);
+                return next;
+            });
+            draggedSidebarTab.current = null;
+        };
         const updateTab = (id, field, value) => setTabs(prev => prev.map(t => t.id === id ? {...t, [field]: value} : t));
         const addDomain = () => { if (!newDomainLabel.trim() || !newDomainEmoji.trim()) return; setDomains(prev => [...prev, { id: `d${Date.now()}`, value: newDomainLabel.toLowerCase().replace(/\s+/g,'-'), emoji: newDomainEmoji, label: newDomainLabel }]); setNewDomainEmoji(''); setNewDomainLabel(''); };
         const deleteDomain = (id) => { const d = domains.find(d => d.id === id); if (d) addToArchive(d.label, 'task'); setDomains(prev => prev.filter(d => d.id !== id)); };
@@ -1075,51 +1467,93 @@ import { supabase } from './lib/supabaseClient.js';
 
         return (
             <div className="dashboard-shell flex min-h-screen" style={{background:'transparent',position:'relative',zIndex:1}}>
+                {showMotivationFilm && <OpeningMotivationFilm onFinish={finishMotivationFilm} />}
+
+                {showDailySoulOpening && !showMotivationFilm && (() => {
+                    const soulChoices = [
+                        {label:'לזמן', note:'להבהיר רצון ולחבר אותו לפעולה', icon:'sparkles', tab:'manifesting'},
+                        {label:'לגלות את האיקיגאי שלי', note:'להקשיב למה שנותן לי משמעות', icon:'flower-2', tab:'ikigai'},
+                        {label:'לכתוב ולשחרר', note:'לתת למחשבות מקום לצאת', icon:'edit-3', tab:'mindset'},
+                        {label:'לקבל מסר יומי', note:'לעצור לרגע של השראה', icon:'sun', tab:'home'},
+                        {label:'להכיר את עצמי', note:'לפגוש את האישה שאני הופכת להיות', icon:'heart', tab:'future-self'},
+                        {label:'להפוך כוונה לפעולה', note:'לבחור את הצעד המדויק להיום', icon:'arrow-up-right', tab:'tasks'}
+                    ];
+                    return <div className="daily-soul-overlay" role="dialog" aria-modal="true" aria-labelledby="daily-soul-title">
+                        <div className="daily-soul-aura aura-one"/><div className="daily-soul-aura aura-two"/>
+                        <section className="daily-soul-sheet">
+                            <button className="daily-soul-close" onClick={closeDailySoulOpening} aria-label="סגירה">×</button>
+                            <div className="daily-soul-symbol" aria-hidden="true">
+                                <svg viewBox="0 0 80 80">
+                                    <path className="daily-enso-main" d="M64 58 C51 75 27 73 12 57 C-1 42 5 19 25 10"/>
+                                    <path className="daily-enso-upper" d="M23 11 C38 3 57 6 68 20"/>
+                                    <path className="daily-enso-dry" d="M67 52 C55 69 34 72 17 59 C2 47 5 26 21 14 C36 3 57 8 67 25"/>
+                                    <path className="daily-enso-dry thin" d="M60 65 C43 76 20 68 10 50 C2 34 10 17 28 8 C43 1 60 8 72 20"/>
+                                    <path className="daily-enso-bristle" d="M63 58 L73 51 M65 55 L75 47 M67 22 L74 27 M65 19 L73 22 M25 8 L18 11"/>
+                                </svg>
+                            </div>
+                            <p className="daily-soul-date">{new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})}</p>
+                            <h1 id="daily-soul-title">מה הנשמה שלך<br/>מבקשת היום?</h1>
+                            <p className="daily-soul-intro">אין צורך להספיק הכול. בחרי דבר אחד שנכון לך עכשיו.</p>
+                            <div className="daily-soul-grid">
+                                {soulChoices.map(choice=><button key={choice.label} onClick={()=>{setActiveTab(choice.tab);closeDailySoulOpening();}}>
+                                    <span className="daily-soul-choice-icon"><Icon name={choice.icon} size={18}/></span>
+                                    <span><b>{choice.label}</b><small>{choice.note}</small></span>
+                                    <i>←</i>
+                                </button>)}
+                            </div>
+                            <div className="daily-soul-footer-actions">
+                                <button className="daily-soul-film-replay" onClick={()=>setShowMotivationFilm(true)}>לצפות בפתיח ההשראה</button>
+                                <button className="daily-soul-skip" onClick={closeDailySoulOpening}>להיכנס לדף הבית</button>
+                            </div>
+                        </section>
+                    </div>;
+                })()}
 
                 {/* SIDEBAR */}
                 <aside style={{width:'240px',flexShrink:0,...(darkMode?{backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}:{boxShadow:'0 0 10px rgba(0,0,0,0.08)'})}} className="primary-sidebar bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
-                    {/* Brand */}
-                    <div className="p-5 border-b border-slate-100">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center shrink-0">
-                                <span style={{fontSize:'10px',fontWeight:'900',color:'white',lineHeight:1,textAlign:'center'}}>IN</span>
-                            </div>
-                            <div>
-                                <div className="text-sm font-black text-slate-800 tracking-widest">INSIDE OUT</div>
-                                <div style={{fontSize:'10px'}} className="text-slate-400 font-medium">Design Your Life</div>
-                            </div>
-                        </div>
-                    </div>
-
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
-                        {[...tabs, {id:'tab-settings', name:'הגדרות', icon:'settings', emoji:'⚙️'}].map(tab => (
+                        {tabs.filter(tab => tab.id !== 'archive').map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                draggable={tab.id !== 'tab-settings'}
+                                onDragStart={tab.id !== 'tab-settings' ? e => handleSidebarTabDragStart(e, tab.id) : undefined}
+                                onDragOver={tab.id !== 'tab-settings' ? e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; } : undefined}
+                                onDrop={tab.id !== 'tab-settings' ? e => handleSidebarTabDrop(e, tab.id) : undefined}
+                                onDragEnd={() => { draggedSidebarTab.current = null; }}
+                                className={`nav-tab-${tab.id} w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
                                 {activeTab===tab.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'20px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
-                                <span className="text-lg leading-none w-6 text-center shrink-0">{tab.emoji || '📌'}</span>
+                                <span className="nav-line-icon" aria-hidden="true" style={{color:({
+                                    home:'#c07898', tasks:'#6f9bc2', schedule:'#d29a65', metrics:'#65a88f',
+                                    goals:'#b080ad', gantt:'#6fa7ae', 'future-self':'#cf8292', mindset:'#9b86bd',
+                                    ideas:'#c49a54', resources:'#718fbd', 'my-world':'#5e9e88',
+                                    'vision-board':'#c47d9d', manifesting:'#9d639d', ikigai:'#a95673'
+                                }[tab.id] || '#8f829c')}}><Icon name={tab.icon || 'circle'} size={17} /></span>
                                 <span className="text-xs">{tab.name}</span>
                             </button>
                         ))}
                     </nav>
 
-                    {/* User + logout */}
-                    <div className="p-4 border-t border-slate-100">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                {(user?.email?.[0]||'C').toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div style={{fontSize:'12px'}} className="font-semibold text-slate-700 truncate">{user?.displayName||user?.email||'חן'}</div>
-                                <div style={{fontSize:'10px'}} className="text-slate-400">{userProfile?.role==='admin'?'מנהל.ת':'משתמש.ת'}</div>
-                            </div>
-                        </div>
-                        <button onClick={() => supabase.auth.signOut()}
-                            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all" style={{fontSize:'12px',fontWeight:600}}>
-                            <Icon name="log-out" size={14} />
-                            <span>יציאה</span>
+                    {/* Settings — fixed below the reorderable navigation */}
+                    <div className="sidebar-settings-row">
+                        <button onClick={() => setActiveTab('archive')}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab==='archive' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                            <span className="nav-line-icon" aria-hidden="true" style={{color:'#8b8580'}}><Icon name="archive" size={17} /></span>
+                            <span className="text-xs">ארכיון</span>
+                        </button>
+                        <button onClick={() => setActiveTab('tab-settings')}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab==='tab-settings' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                            <span className="nav-line-icon" aria-hidden="true" style={{color:'#747b86'}}><Icon name="settings" size={17} /></span>
+                            <span className="text-xs">הגדרות</span>
                         </button>
                     </div>
+                    <div className="language-switcher" aria-label="בחירת שפה">
+                        <button className={uiLanguage==='he'?'active':''} onClick={()=>changeUiLanguage('he')} title="עברית">עב</button>
+                        <button className={uiLanguage==='en'?'active':''} onClick={()=>changeUiLanguage('en')} title="English">EN</button>
+                        <button className={uiLanguage==='es'?'active':''} onClick={()=>changeUiLanguage('es')} title="Español">ES</button>
+                        <button className={uiLanguage==='ru'?'active':''} onClick={()=>changeUiLanguage('ru')} title="Русский">RU</button>
+                    </div>
+                    <div id="google_translate_element" aria-hidden="true"/>
+
                 </aside>
 
                 {/* QUICK ACTIONS PANEL — left side */}
@@ -1178,46 +1612,73 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* MAIN CONTENT */}
                 <main className="dashboard-main flex-1 min-h-screen text-slate-700 p-4 md:p-6" style={{marginRight:'240px',marginLeft:'185px'}}>
                 {showConfetti && <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"><div className="text-6xl animate-bounce-in">🎉</div></div>}
+                {activeYoutubeTrack && !(activeTab==='manifesting' && activeYoutubeTrack.scope==='manifesting') && <div className="ambient-youtube-player" aria-live="polite">
+                    <iframe title={`צלילי מרחב — ${activeYoutubeTrack.label}`} src={`https://www.youtube-nocookie.com/embed/${activeYoutubeTrack.id}?autoplay=1&loop=1&playlist=${activeYoutubeTrack.id}&controls=0&playsinline=1&rel=0`} allow="autoplay; encrypted-media"/>
+                    <Icon name="volume-2" size={14}/><i className="sound-monitor is-playing" aria-hidden="true"><b/><b/><b/><b/><b/></i><span><b>{activeYoutubeTrack.label}</b><small>{activeYoutubeTrack.note}</small></span>
+                    <button onClick={()=>setYoutubeAmbientId('')} aria-label="עצירת המוזיקה">עצירה</button>
+                </div>}
 
                 {/* TITLE */}
                 <div className="dashboard-hero max-w-5xl mx-auto mb-2 pt-3 animate-slide-in-up">
                     <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"start",gap:"12px"}}>
 
 
-                        {/* ברכה ותאריך - עמודה ימנית */}
-                        <div className="text-right hidden md:block pt-1">
+                        {/* תאריך - עמודה ימנית */}
+                        <div className="text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
                             {(() => {
-                                const h = new Date().getHours();
-                                const gr = h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב';
                                 const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
-                                return (<><p className="text-sm font-bold text-slate-700">{gr}, {profileName} ☀️</p><p className="text-xs text-slate-400">{d}</p></>);
+                                const year = new Date().getFullYear();
+                                return (<div className="header-date"><p className="text-xs">{d}</p><p className="header-year">{year}</p></div>);
                             })()}
                         </div>
 
                         {/* כותרת ואפרמציה - מרכז */}
-                        <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center"}}>
-                            {/* כותרת ראשית - מרכז */}
-                            <div style={{width:"100%",textAlign:"center",marginBottom:"8px"}}>
-                                {editingTitle
-                                    ? (<input autoFocus value={headerTitle} onChange={function(e){setHeaderTitle(e.target.value);}} onBlur={function(){setEditingTitle(false);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,background:"transparent",border:"none",borderBottom:"2px solid #8b5cf6",outline:"none",width:"100%",textAlign:"center"}} className="gradient-text tracking-tight" />)
-                                    : (<h1 onClick={function(){setEditingTitle(true);}} style={{fontSize:"clamp(1.8rem,4vw,3rem)",fontWeight:900,cursor:"pointer",lineHeight:1.1,textAlign:"center",color:"#c4b5fd",textShadow:"0 0 30px rgba(139,92,246,0.8),0 0 60px rgba(139,92,246,0.4),0 0 100px rgba(6,182,212,0.2)"}} className="tracking-tight hover:opacity-80 transition-opacity">{headerTitle}</h1>)
-                                }
+                        <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",textAlign:"center",gridColumn:"2",minWidth:0}}>
+                            {/* Brand lockup */}
+                            <div className="inside-out-lockup">
+                                <div className="brand-title-line">
+                                    <h1 className="inside-out-flowing">INSIDE <span className="enso-o" aria-label="O">
+                                        <svg viewBox="0 0 80 80" aria-hidden="true">
+                                            <path className="enso-main-stroke" d="M66 55 C56 72 31 77 14 60 C-4 43 6 17 27 9"/>
+                                            <path className="enso-upper-stroke" d="M25 10 C43 2 63 10 71 27"/>
+                                            <path className="enso-dry-stroke enso-dry-one" d="M69 51 C57 68 34 72 18 58 C4 45 8 23 25 14 C43 5 61 13 68 29"/>
+                                            <path className="enso-dry-stroke enso-dry-two" d="M63 62 C47 76 21 70 10 51 C1 34 11 15 30 8 C46 2 62 10 72 22"/>
+                                            <path className="enso-dry-stroke enso-dry-three" d="M28 5 C44 0 61 6 73 20"/>
+                                            <path className="enso-bristle" d="M68 48 L75 41 M67 52 L76 47 M70 29 L75 35"/>
+                                        </svg>
+                                    </span>UT</h1>
+                                </div>
+                                <strong className="design-your-life-brush" style={{'--marker-color': brandMarkerColor}}>
+                                    Design your life
+                                    <label className="paintbrush-mark" title="שינוי צבע המרקר">
+                                        <svg className="highlighter-svg" viewBox="0 0 92 42" aria-hidden="true">
+                                            <path d="M7 8h58l19 13-19 13H7z" fill={brandMarkerColor}/>
+                                            <path d="M65 8l19 13-19 13 7-13z" fill="#3f3740"/>
+                                            <path d="M78 17l9 4-9 4-6-4z" fill="#18151a"/>
+                                            <path d="M7 8h10v26H7z" fill="rgba(255,255,255,.28)"/>
+                                            <path d="M18 11h43" stroke="rgba(255,255,255,.34)" strokeWidth="3" strokeLinecap="round"/>
+                                        </svg>
+                                        <input type="color" value={brandMarkerColor} onChange={e => setBrandMarkerColor(e.target.value)} aria-label="בחירת צבע המרקר"/>
+                                    </label>
+                                </strong>
                             </div>
-                            <div style={{height:"2px",width:"160px",background:"linear-gradient(to left,#06b6d4,#7c3aed,#ec4899)",borderRadius:"9999px",margin:"0 auto 8px",boxShadow:"0 0 16px rgba(139,92,246,0.8),0 0 32px rgba(6,182,212,0.4)"}}></div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
-                            {activeTab === 'home' && (
+                            {false && activeTab === 'home' && (
                                 <div className="text-center space-y-1 mb-1">
                                     {visionText && (editingVision
                                         ? <div className="flex items-center gap-2 justify-center"><textarea value={visionText} onChange={e => setVisionText(e.target.value)} rows={2} className="text-sm border border-violet-200 rounded-xl px-3 py-1 outline-none resize-none bg-violet-50 text-center" /><button onClick={() => setEditingVision(false)} className="px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">שמור</button></div>
                                         : <p onClick={() => setEditingVision(true)} className="text-sm text-slate-500 italic cursor-pointer hover:text-slate-700 transition-colors">{visionText}</p>
                                     )}
-                                    {headerAffirmation && <p className="text-xs text-slate-400 font-medium">{headerAffirmation}</p>}
+                                    {headerAffirmation && (editingAffirmation
+                                        ? <div className="flex items-center gap-2 justify-center"><textarea autoFocus value={headerAffirmation} onChange={e=>setHeaderAffirmation(e.target.value)} rows={2} className="text-xs border border-pink-200 rounded-xl px-3 py-1 outline-none resize-none bg-white/70 text-center" /><button onClick={()=>setEditingAffirmation(false)} className="px-3 py-1.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">שמור</button></div>
+                                        : <p onClick={()=>setEditingAffirmation(true)} className="text-xs text-slate-400 font-medium cursor-pointer hover:text-slate-600">{headerAffirmation}</p>
+                                    )}
                                 </div>
                             )}
 
                             {/* אפרמציה - מרכז (שאר הכרטיסיות) */}
-                            {headerAffirmation && activeTab !== 'home' ? (
+                            {false && headerAffirmation && activeTab !== 'home' ? (
                                 <div style={{textAlign:"center",width:"100%"}}>
                                     {editingAffirmation
                                         ? (<div style={{display:"flex",alignItems:"center",gap:"8px"}}><textarea autoFocus value={headerAffirmation} onChange={function(e){setHeaderAffirmation(e.target.value);}} rows={2} style={{flex:1,fontSize:"13px",fontWeight:600,border:"1px solid #c4b5fd",borderRadius:"12px",padding:"8px 12px",outline:"none",resize:"none",background:"#f5f3ff",textAlign:"center"}} /><button onClick={function(){setEditingAffirmation(false);}} style={{padding:"6px 12px",background:"#10b981",color:"#fff",borderRadius:"12px",fontSize:"12px",fontWeight:700,border:"none",cursor:"pointer",flexShrink:0}}>שמור</button></div>)
@@ -1236,7 +1697,7 @@ import { supabase } from './lib/supabaseClient.js';
                         </div>
 
                         {/* עמודה שמאלית - ריקה (כפתורים עברו לפאנל הצד) */}
-                        <div></div>
+                        <div style={{gridColumn:"3"}}></div>
 
                     </div>
                 </div>
@@ -1244,6 +1705,87 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* TABS */}
 
                 {/* quotes now appear inside the title section above */}
+
+                {/* Contextual help video — available inside every tab */}
+                {activeTab !== 'tab-settings' && (() => {
+                    const currentTab = tabs.find(t => t.id === activeTab);
+                    const savedUrl = tabHelpVideos[activeTab] || '';
+                    const localFile = tabHelpFiles[activeTab];
+                    const isOpen = !!tabHelpOpen[activeTab];
+                    const isEditing = tabHelpEditing === activeTab;
+                    const youtubeMatch = savedUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&?/]+)/);
+                    const embedUrl = youtubeMatch ? `https://www.youtube.com/embed/${youtubeMatch[1]}` : savedUrl;
+                    const hasVideo = !!(savedUrl || localFile);
+                    return (
+                        <section className={`tab-help-video max-w-5xl mx-auto mb-5 ${isOpen ? 'is-open' : ''}`}>
+                            <button className="tab-help-trigger" onClick={() => setTabHelpOpen(prev => ({...prev,[activeTab]:!prev[activeTab]}))}>
+                                <span className="tab-help-play"><Icon name="play" size={14}/></span>
+                                <span className="tab-help-copy">
+                                    <b>איך משתמשים בכרטיסייה הזו?</b>
+                                    <small className="tab-help-click-hint">← לחצו עליי</small>
+                                    <small className="tab-help-video-meta">{hasVideo ? `סרטון הסבר · ${currentTab?.name || ''}` : 'אפשר להוסיף כאן סרטון הסבר קצר'}</small>
+                                </span>
+                                <span className="tab-help-chevron">{isOpen ? '⌃' : '⌄'}</span>
+                            </button>
+                            <VacationMode />
+                            {isOpen && <div className="tab-help-body">
+                                {hasVideo && !isEditing && <div className="tab-help-player">
+                                    {localFile ? (
+                                        <video controls src={localFile.url} />
+                                    ) : youtubeMatch ? (
+                                        <iframe src={embedUrl} title={`סרטון הסבר ${currentTab?.name || ''}`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/>
+                                    ) : (
+                                        <video controls src={savedUrl} />
+                                    )}
+                                </div>}
+                                {!hasVideo && !isEditing && <div className="tab-help-empty"><Icon name="video" size={23}/><p>עדיין לא נוסף סרטון הסבר לכרטיסייה הזו.</p></div>}
+                                {isEditing ? <div className="tab-help-editor">
+                                    <label>קישור לסרטון</label>
+                                    <div className="tab-help-link-row">
+                                        <input autoFocus value={tabHelpDraft} onChange={e=>setTabHelpDraft(e.target.value)} placeholder="הדביקי קישור ל־YouTube או לקובץ וידאו..." />
+                                        <button onClick={()=>{setTabHelpVideos(prev=>({...prev,[activeTab]:tabHelpDraft.trim()}));setTabHelpFiles(prev=>({...prev,[activeTab]:null}));setTabHelpEditing(null);}}>שמירה</button>
+                                    </div>
+                                    <div className="tab-help-or"><span>או</span></div>
+                                    <label className="tab-help-upload">
+                                        <Icon name="upload" size={16}/>
+                                        בחירת קובץ וידאו מהמחשב
+                                        <input type="file" accept="video/*" onChange={e=>{
+                                            const file=e.target.files?.[0]; if(!file)return;
+                                            const old=tabHelpFiles[activeTab]; if(old?.url) URL.revokeObjectURL(old.url);
+                                            setTabHelpFiles(prev=>({...prev,[activeTab]:{url:URL.createObjectURL(file),name:file.name}}));
+                                            setTabHelpVideos(prev=>({...prev,[activeTab]:''}));
+                                            setTabHelpEditing(null);
+                                        }}/>
+                                    </label>
+                                    <button className="tab-help-cancel" onClick={()=>setTabHelpEditing(null)}>ביטול</button>
+                                </div> : <div className="tab-help-actions">
+                                    <button onClick={()=>{setTabHelpDraft(savedUrl);setTabHelpEditing(activeTab);}}><Icon name="edit-3" size={13}/>{hasVideo?'החלפת הסרטון':'הוספת סרטון'}</button>
+                                    {hasVideo && <button className="remove" onClick={()=>{if(window.confirm('להסיר את סרטון ההסבר מהכרטיסייה?')){setTabHelpVideos(prev=>({...prev,[activeTab]:''}));const old=tabHelpFiles[activeTab];if(old?.url)URL.revokeObjectURL(old.url);setTabHelpFiles(prev=>({...prev,[activeTab]:null}));}}}><Icon name="trash-2" size={13}/>הסרה</button>}
+                                </div>}
+                            </div>}
+                        </section>
+                    );
+                })()}
+
+                {activeTab !== 'home' && recommendedTrack && <section className={`tab-soundscape max-w-5xl mx-auto ${activeTab==='manifesting'?'manifesting-sound-library':''}`}>
+                    <div><Icon name="headphones" size={15}/><i className={`sound-monitor ${youtubeAmbientId?'is-playing':''}`} aria-hidden="true"><b/><b/><b/><b/><b/></i><span>{activeTab==='manifesting'?'צלילי Manifesting':'צליל המרחב של הכרטיסייה'}</span><small>{activeTab==='manifesting'?'בחרי את האנרגיה שמתאימה לזימון שלך':`${recommendedTrack.label} · ${recommendedTrack.note}`}</small></div>
+                    {activeTab==='manifesting' ? <div className="manifesting-sound-options">
+                        {manifestingAmbientTracks.map(track => <button key={track.id} title={track.note} className={youtubeAmbientId===track.id?'active':''} onClick={()=>toggleYoutubeAmbient(track.id)}>{track.label}</button>)}
+                        <button className={!youtubeAmbientId?'active':''} onClick={()=>setYoutubeAmbientId('')}>שקט</button>
+                    </div> : <button className={youtubeAmbientId===recommendedTrack.id?'active':''} onClick={()=>toggleYoutubeAmbient(recommendedTrack.id)}>
+                        {youtubeAmbientId===recommendedTrack.id ? 'עצירת הצליל' : 'הפעלת הצליל'}
+                    </button>}
+                </section>}
+                {activeTab==='manifesting' && activeYoutubeTrack?.scope==='manifesting' && <section className="manifesting-caption-player max-w-3xl mx-auto" aria-label="נגן עם כתוביות מתורגמות">
+                    <div className="manifesting-caption-heading">
+                        <div><Icon name="captions" size={16}/><span>האזנה עם כתוביות</span><small>שפת הכתוביות המועדפת: {uiLanguage==='he'?'עברית':uiLanguage==='es'?'ספרדית':uiLanguage==='ru'?'רוסית':'אנגלית'}</small></div>
+                        <button onClick={()=>setYoutubeAmbientId('')}>סגירה</button>
+                    </div>
+                    <div className="manifesting-video-frame">
+                        <iframe title={`${activeYoutubeTrack.label} — כתוביות`} src={`https://www.youtube-nocookie.com/embed/${activeYoutubeTrack.id}?autoplay=1&loop=1&playlist=${activeYoutubeTrack.id}&controls=1&playsinline=1&rel=0&cc_load_policy=1&cc_lang_pref=${uiLanguage}&hl=${uiLanguage}`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen/>
+                    </div>
+                    <p>אם התרגום אינו מופיע, לחצי על CC בנגן ובחרי בתפריט ההגדרות תרגום אוטומטי לשפה הרצויה.</p>
+                </section>}
 
                 {/* SEARCH — only on non-home tabs */}
                 {activeTab !== 'home' && (
@@ -1263,6 +1805,9 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* HOME */}
                 {activeTab === 'home' && (
                     <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
+
+                        <LifeOperatingSystem userName={user?.user_metadata?.full_name?.split(' ')[0] || 'חן'} />
+                        <DailyPearl />
 
                         {/* COMPACT TOOLBAR */}
                         {(() => {
@@ -1305,6 +1850,26 @@ import { supabase } from './lib/supabaseClient.js';
                             </div>
                             );
                         })()}
+
+                        <section className="home-soundscape" aria-label="בחירת מוזיקת רקע">
+                            <div className="home-soundscape-title"><Icon name="volume-2" size={15}/><i className={`sound-monitor ${youtubeAmbientId?'is-playing':''}`} aria-hidden="true"><b/><b/><b/><b/><b/></i><span>צלילי מרחב</span><small>בחרי את האנרגיה שנכונה לך עכשיו</small></div>
+                            <div className="home-soundscape-options">
+                                {youtubeAmbientTracks.filter(track=>!track.scope).map(track => <button key={track.id} title={track.note} className={youtubeAmbientId===track.id?'active':''} onClick={()=>toggleYoutubeAmbient(track.id)}>{track.label}</button>)}
+                                <button className={!youtubeAmbientId?'active':''} onClick={()=>setYoutubeAmbientId('')}>שקט</button>
+                            </div>
+                        </section>
+
+                        {/* Quick actions moved from the left rail onto the canvas */}
+                        <div className="canvas-actions">
+                            <button onClick={saveAllData}><span>💾</span><b>שמור</b></button>
+                            <button onClick={undo} disabled={undoStack.length===0}><span>↩️</span><b>בטל</b></button>
+                            {[
+                                {icon:'✅',label:'משימה חדשה',tab:'tasks'},
+                                {icon:'📁',label:'פרויקט חדש',tab:'tasks'},
+                                {icon:'📓',label:'רשומה ביומן',tab:'mindset'},
+                                {icon:'🎯',label:'יעד ל-2026',action:()=>setShowAddGoalModal(true)},
+                            ].map((item,i)=><button key={i} onClick={()=>item.action ? item.action() : setActiveTab(item.tab)}><span>{item.icon}</span><b>{item.label}</b></button>)}
+                        </div>
                         {/* Search results (home) */}
                         {searchResults.length > 0 && (<div className="mt-2 card p-4 max-h-64 overflow-y-auto"><div className="flex items-center justify-between mb-2"><h3 className="text-sm font-bold text-slate-700">תוצאות ({searchResults.length})</h3><button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="text-xs text-slate-500">סגור</button></div><div className="space-y-1.5">{searchResults.map((result, idx) => (<div key={idx} onClick={() => { setActiveTab(result.tab); setSearchQuery(''); setSearchResults([]); }} className="p-2.5 bg-slate-50 hover:bg-violet-50 rounded-lg cursor-pointer transition-all"><p className="text-xs font-semibold text-slate-700">{result.item.text || result.item.title}</p></div>))}</div></div>)}
 
@@ -1380,12 +1945,18 @@ import { supabase } from './lib/supabaseClient.js';
                             const TEXT_SIZES = ['text-xs','text-sm','text-base','text-lg','text-xl'];
                             const tsz = (id) => TEXT_SIZES[homeBlockTextSize[id]??1];
                             const colSpanOf = (id) => {
+                                if (['morning','affirmations','gamechangers'].includes(id)) return 'col-span-6 md:col-span-2';
                                 const w = homeBlockWidths[id]||'full';
                                 if (w==='third') return 'col-span-6 md:col-span-2';
                                 if (w==='half') return 'col-span-6 md:col-span-3';
                                 return 'col-span-6';
                             };
-                            const visibleBlocks = homeBlockOrder.filter(id=>!hiddenHomeBlocks.includes(id) && id!=='countdown');
+                            const visibleBlocks = homeBlockOrder
+                                .filter(id=>!hiddenHomeBlocks.includes(id) && id!=='countdown' && id!=='affirmations' && id!=='gamechangers')
+                                .sort((a,b) => {
+                                    const priority = {goals:0, 'today-tasks':1};
+                                    return (priority[a] ?? 2) - (priority[b] ?? 2);
+                                });
 
                             return (
                             <div className="grid grid-cols-6 gap-5">
@@ -1393,7 +1964,7 @@ import { supabase } from './lib/supabaseClient.js';
                                     const sz=tsz(blockId);
                                     const cs = colSpanOf(blockId);
                                     const dragAttrs = layoutEditMode ? { draggable:true, onDragStart:e=>handleDragStart(e,blockId), onDragEnd:handleDragEnd, onDragOver:e=>handleDragOver(e,blockId), onDrop:e=>handleDrop(e,homeBlockOrder,setHomeBlockOrder) } : {};
-                                    const editStyle = layoutEditMode ? {outline:'2px dashed #c4b5fd',borderRadius:'1.25rem',cursor:'grab',position:'relative'} : {};
+                                    const editStyle = layoutEditMode ? {outline:'2px solid #d8cde6',borderRadius:'1.25rem',cursor:'grab',position:'relative'} : {};
                                     const DragHint = layoutEditMode ? <div style={{position:'absolute',top:6,right:8,fontSize:'10px',fontWeight:'bold',color:'#7c3aed',zIndex:5,pointerEvents:'none'}}>⠿</div> : null;
 
                                     /* ── COUNTDOWN ── */
@@ -1436,17 +2007,16 @@ import { supabase } from './lib/supabaseClient.js';
 
                                     /* ── GOALS ── */
                                     if(blockId==='goals') return (
-                                        <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
+                                        <div key={blockId} className={`${cs} home-block home-block-goals`} {...dragAttrs} style={editStyle}>
                                         {DragHint}
-                                        <section>
-                                            <div className="flex items-center justify-between mb-4 px-1">
-                                                <div className="w-9"></div>
-                                                <div className="flex items-center gap-1.5"><Icon name="target" size={15} className="text-violet-500" /><h2 className="font-bold text-slate-700 text-sm">יעדים לשנת 2026</h2></div>
+                                        <section className="goals-strip">
+                                            <h2 className="goals-strip-title">יעדים לשנת 2026</h2>
+                                            <div className="goals-add-row">
                                                 <button onClick={() => setShowAddGoalModal(true)} className="w-9 h-9 bg-violet-100 hover:bg-violet-200 rounded-xl flex items-center justify-center text-violet-600 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                                             </div>
                                             <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
                                                 {projects.filter(p=>p.showOnHome).map(project => { const progress = calculateProgress(project.id); return (
-                                                <div key={project.id} className="card text-center group relative overflow-visible flex-shrink-0" style={{width:'88px',padding:'8px 6px'}}>
+                                                <div key={project.id} className="goal-mini-card card text-center group relative overflow-visible flex-shrink-0">
                                                     <div className="flex justify-end gap-0.5 mb-1 h-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center text-blue-600" style={{fontSize:'9px'}}>✏️</button>
                                                         <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-4 h-4 bg-rose-100 rounded flex items-center justify-center text-rose-500" style={{fontSize:'9px'}}>🗑️</button>
@@ -1461,12 +2031,11 @@ import { supabase } from './lib/supabaseClient.js';
                                                     </>)}
                                                 </div>);})}
                                                 {showWeightCard && (
-                                                    <div className="card text-center relative group flex-shrink-0" style={{width:'88px',padding:'8px 6px'}}>
-                                                        {editingWeightCard ? (<div className="space-y-3"><p className="text-xs font-bold text-slate-600 mb-2">עריכת יעד משקל</p><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">התחלתי:</span><input type="number" value={weightStart} onChange={e=>setWeightStart(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">יעד הורדה:</span><input type="number" value={weightGoal} onChange={e=>setWeightGoal(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><button onClick={()=>setEditingWeightCard(false)} className="w-full py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold">שמור</button></div>):(<React.Fragment>
+                                                    <div className="goal-mini-card card text-center relative group flex-shrink-0">
+                                                        {editingWeightCard ? (<div className="space-y-3"><p className="text-xs font-bold text-slate-600 mb-2">עריכת יעד משקל</p><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">משקל התחלתי:</span><input type="number" value={weightStart} onChange={e=>setWeightStart(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">משקל נוכחי:</span><input type="number" value={currentWeight} onChange={e=>setCurrentWeight(e.target.value)} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">יעד הורדה:</span><input type="number" value={weightGoal} onChange={e=>setWeightGoal(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><button onClick={()=>setEditingWeightCard(false)} className="w-full py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold">שמור</button></div>):(<React.Fragment>
                                                             <span className="text-3xl mb-2 block animate-float">⚖️</span>
-                                                            <h3 className={`font-bold text-slate-700 mb-1 ${sz}`}>לרדת {(!isNaN(parseFloat(currentWeight))&&parseFloat(currentWeight)>0)?Math.max(0,weightGoal-Math.max(0,weightStart-parseFloat(currentWeight))):weightGoal} קג</h3>
-                                                            <div className="flex justify-center gap-3 mb-2 text-xs"><div className="text-center"><p className="text-slate-400 text-[10px]">התחלתי</p><p className="font-bold">{weightStart} קג</p></div><div className="text-center"><p className="text-slate-400 text-[10px]">ירדתי</p><p className="font-bold text-emerald-500">{(!isNaN(parseFloat(currentWeight))&&parseFloat(currentWeight)>0)?Math.max(0,weightStart-parseFloat(currentWeight)).toFixed(1):"0.0"} קג</p></div></div>
-                                                            <div className="flex items-center gap-2 justify-center mb-2"><span className="text-[10px] text-slate-400">נוכחי:</span><input type="number" value={currentWeight} onChange={e=>setCurrentWeight(e.target.value)} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-[10px] text-slate-400">קג</span></div>
+                                                            <h3 className={`font-bold text-slate-700 mb-2 ${sz}`}>יעד ירידה · {weightGoal} קג</h3>
+                                                            <div className="flex justify-center gap-4 mb-2 text-xs"><div className="text-center"><p className="text-slate-400 text-[10px]">ירדתי</p><p className="font-extrabold text-emerald-500">{(!isNaN(parseFloat(currentWeight))&&parseFloat(currentWeight)>0)?Math.max(0,weightStart-parseFloat(currentWeight)).toFixed(1):"0.0"} קג</p></div><div className="w-px bg-slate-200"></div><div className="text-center"><p className="text-slate-400 text-[10px]">נותר לי</p><p className="font-extrabold text-rose-500">{(!isNaN(parseFloat(currentWeight))&&parseFloat(currentWeight)>0)?Math.max(0,weightGoal-Math.max(0,weightStart-parseFloat(currentWeight))).toFixed(1):weightGoal.toFixed(1)} קג</p></div></div>
                                                             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full" style={{width:`${Math.min(100,Math.round((Math.max(0,weightStart-parseFloat(currentWeight))/weightGoal)*100))}%`}}></div></div>
                                                             <div className="opacity-0 group-hover:opacity-100 absolute top-2 left-2 flex gap-1 transition-all"><button onClick={()=>setEditingWeightCard(true)} className="w-7 h-7 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500 text-xs">✏️</button><button onClick={()=>{saveSnapshot();addToArchive("כרטיס משקל","idea");setShowWeightCard(false);}} className="w-7 h-7 bg-rose-100 rounded-xl flex items-center justify-center text-rose-500 text-xs">🗑️</button></div>
                                                         </React.Fragment>)}
@@ -1477,24 +2046,39 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                     );
 
-                                    /* ── MORNING RITUAL ── */
+                                    /* ── UNIFIED MORNING RITUAL ── */
                                     if(blockId==='morning') return (
-                                        <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
+                                        <div key="morning-unified" className="col-span-6" {...dragAttrs} style={editStyle}>
+                                            {DragHint}
+                                            <MorningRitualJourney
+                                                tracks={youtubeAmbientTracks.filter(track=>!track.scope)}
+                                                activeTrackId={youtubeAmbientId}
+                                                onSelectTrack={trackId=>{setAmbientSound('off');setYoutubeAmbientId(trackId);}}
+                                                affirmations={affirmations}
+                                                affirmationUrl={affirmationUrl}
+                                                gameChangers={gameChangers}
+                                                setGameChangers={setGameChangers}
+                                            />
+                                        </div>
+                                    );
+
+                                    /* ── LEGACY MORNING RITUAL (kept for saved data compatibility) ── */
+                                    if(blockId==='morning') return (
+                                        <div key={blockId} className={`${cs} home-block-morning`} {...dragAttrs} style={editStyle}>
                                         {DragHint}
-                                        <div className="card overflow-hidden">
-                                            <button onClick={() => setCollapsedHomeBlocks(p=>({...p,morning:!p.morning}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 transition-all">
-                                                <span className="flex items-center gap-2 text-sm font-bold text-slate-700"><span>{morningRitualEmoji}</span>{morningRitualTitle}<span className="text-xs font-normal text-slate-400">{morningRitual.filter(i=>i.completed).length}/{morningRitual.length} ✓</span></span>
+                                        <div className="card overflow-hidden morning-glass-card">
+                                            <button onClick={() => setCollapsedHomeBlocks(p=>({...p,morning:!p.morning}))} className="morning-glass-summary w-full flex items-center justify-between px-4 py-2.5 transition-all">
+                                                <span className="flex items-center gap-2 text-sm font-bold text-slate-700">{morningRitualTitle}<span className="text-xs font-normal text-slate-400">{morningRitual.filter(i=>i.completed).length}/{morningRitual.length}</span></span>
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={`text-slate-400 transition-transform ${collapsedHomeBlocks.morning?'':'rotate-180'}`}><polyline points="6 9 12 15 18 9"/></svg>
                                             </button>
-                                            {!collapsedHomeBlocks.morning && <div className="p-4" style={{maxHeight:'270px',overflowY:'auto'}}>
+                                            {!collapsedHomeBlocks.morning && <div className="p-4 morning-glass-body" style={{maxHeight:'270px',overflowY:'auto'}}>
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2.5 flex-1">
-                                                    <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-amber-600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
-                                                    {editingMorningTitle?(<div className="flex items-center gap-2 flex-1"><EmojiPicker value={morningRitualEmoji} onChange={setMorningRitualEmoji} size="sm" /><input value={morningRitualTitle} onChange={e=>setMorningRitualTitle(e.target.value)} className="flex-1 p-1 border-b-2 border-amber-300 outline-none font-bold text-sm"/><button onClick={()=>setEditingMorningTitle(false)} className="text-emerald-500 text-xl font-bold ml-1">✓</button></div>):(<h2 className={`font-bold text-slate-800 ${sz}`}>{morningRitualTitle} {morningRitualEmoji}</h2>)}
+                                                    {editingMorningTitle?(<div className="flex items-center gap-2 flex-1"><input value={morningRitualTitle} onChange={e=>setMorningRitualTitle(e.target.value)} className="flex-1 p-1 border-b border-white/40 outline-none font-bold text-sm"/><button onClick={()=>setEditingMorningTitle(false)} className="text-white text-sm font-bold ml-1">שמור</button></div>):(<h2 className={`font-bold text-slate-800 ${sz}`}>{morningRitualTitle}</h2>)}
                                                 </div>
-                                                <div className="flex gap-1 shrink-0"><button onClick={()=>setEditingMorningTitle(!editingMorningTitle)} className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-blue-500 opacity-0 group-hover:opacity-100 text-xs">✏️</button><button onClick={addMorningRitualItem} className="w-7 h-7 bg-amber-100 hover:bg-amber-200 rounded-lg flex items-center justify-center text-amber-600 font-bold text-lg">+</button></div>
+                                                <div className="flex gap-1 shrink-0"><button onClick={()=>setEditingMorningTitle(!editingMorningTitle)} className="morning-edit-button opacity-0 group-hover:opacity-100 text-xs">עריכה</button><button onClick={addMorningRitualItem} className="morning-add-button flex items-center justify-center font-bold text-lg">+</button></div>
                                             </div>
-                                            <div className="space-y-2">{morningRitual.map(item=>(<div key={item.id} className="flex items-center gap-2.5 group/i"><button onClick={()=>toggleItem(morningRitual,setMorningRitual,item.id)} className="shrink-0">{item.completed?<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>:<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-200" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}</button><input value={item.text} onChange={e=>updateMorningRitualText(item.id,e.target.value)} className={`flex-1 bg-transparent border-none outline-none font-medium ${sz} ${item.completed?'text-slate-400 line-through':'text-slate-600'}`}/><button onClick={()=>deleteMorningRitualItem(item.id)} className="opacity-0 group-hover/i:opacity-100 w-6 h-6 bg-rose-100 rounded-lg flex items-center justify-center text-rose-500 text-xs shrink-0">✕</button></div>))}</div>
+                                            <div className="ritual-glass-grid">{morningRitual.map(item=>(<div key={item.id} className="ritual-glass-window flex items-center gap-2.5 group/i"><button onClick={()=>toggleItem(morningRitual,setMorningRitual,item.id)} className="shrink-0">{item.completed?<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>:<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-200" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}</button><input value={item.text} onChange={e=>updateMorningRitualText(item.id,e.target.value)} className={`flex-1 bg-transparent border-none outline-none font-medium ${sz} ${item.completed?'text-slate-400 line-through':'text-slate-600'}`}/><button onClick={()=>deleteMorningRitualItem(item.id)} className="opacity-0 group-hover/i:opacity-100 w-6 h-6 bg-white/45 rounded-full flex items-center justify-center text-slate-500 text-xs shrink-0">✕</button></div>))}</div>
                                             </div>}
                                         </div>
                                         </div>
@@ -1502,7 +2086,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                                     /* ── AFFIRMATIONS ── */
                                     if(blockId==='affirmations') return (
-                                        <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
+                                        <div key={blockId} className={`${cs} home-block-affirmations`} {...dragAttrs} style={editStyle}>
                                         {DragHint}
                                         <div className="card overflow-hidden">
                                             <button onClick={() => setCollapsedHomeBlocks(p=>({...p,affirmations:!p.affirmations}))} className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 transition-all">
@@ -1553,7 +2137,7 @@ import { supabase } from './lib/supabaseClient.js';
                                             {DragHint}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {/* Monthly Calendar */}
-                                                <div className="card p-4">
+                                                <div className="card p-4 editorial-calendar home-editorial-calendar">
                                                     <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
                                                         <Icon name="calendar" size={15} className="text-violet-500" />
                                                         {monthName}
@@ -1578,7 +2162,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                 </div>
 
                                                 {/* Today's Tasks */}
-                                                <div className="card p-4">
+                                                <div className="card p-4 today-tasks-card">
                                                     <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
                                                         <Icon name="check-square" size={15} className="text-violet-500" />
                                                         משימות להיום
@@ -1603,6 +2187,10 @@ import { supabase } from './lib/supabaseClient.js';
                                                             ))}
                                                         </div>
                                                     )}
+                                                    <div className="today-gamechangers">
+                                                        <div className="today-gamechangers-title"><Icon name="target" size={13}/><b>3 משימות Game Changer</b><small>הפעולות שיקדמו אותי באמת היום</small></div>
+                                                        <div className="today-gamechangers-list">{[0,1,2].map(index=>{const gc=gameChangers[index]||{id:`gc-${index}`,text:'',completed:false};return <label key={gc.id}><button onClick={()=>setGameChangers(prev=>{const next=[...prev];while(next.length<3)next.push({id:`gc-${Date.now()}-${next.length}`,text:'',completed:false});next[index]={...next[index],completed:!next[index].completed};return next;})} className={gc.completed?'done':''}>{gc.completed?'✓':''}</button><input value={gc.text||''} onChange={e=>setGameChangers(prev=>{const next=[...prev];while(next.length<3)next.push({id:`gc-${Date.now()}-${next.length}`,text:'',completed:false});next[index]={...next[index],text:e.target.value};return next;})} placeholder={["המשימה שתיצור את ההתקדמות הגדולה ביותר","מה חשוב לעשות לפני שהיום מתמלא","מה יגרום לי לסיים את היום בגאווה"][index]}/></label>})}</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             </div>
@@ -1610,7 +2198,8 @@ import { supabase } from './lib/supabaseClient.js';
                                     }
 
                                     /* ── GAME CHANGERS ── */
-                                    if(blockId==='gamechangers') return (
+                                    if(blockId==='gamechangers') return null;
+                                    if(blockId==='gamechangers-legacy') return (
                                         <div key={blockId} className={cs} {...dragAttrs} style={editStyle}>
                                         {DragHint}
                                         <div className="card overflow-hidden group relative">
@@ -2295,9 +2884,10 @@ import { supabase } from './lib/supabaseClient.js';
                                 <button onClick={() => setAddingType('task')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='task' ? 'bg-blue-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-blue-300'}`}>✅ משימה חדשה</button>
                                 <button onClick={() => setAddingType('project')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='project' ? 'bg-violet-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-violet-300'}`}>📂 פרויקט חדש</button>
                             </div>
+                            {!speechRecognitionSupported && <p className="voice-support-note">הכתבה קולית אינה נתמכת בדפדפן הפנימי. כדי להשתמש במיקרופון, פתחי את גרסת ה־LOCAL ב־Chrome או Edge.</p>}
                             {addingType === 'task' ? (
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-2"><EmojiPicker value={newTaskEmoji} onChange={setNewTaskEmoji} size="sm" /><input type="text" value={newTaskText} onChange={e => setNewTaskText(e.target.value)} onKeyDown={e => e.key==='Enter' && addNewTask()} placeholder="שם המשימה..." className="flex-1 p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /></div>
+                                    <div className="flex items-center gap-2"><EmojiPicker value={newTaskEmoji} onChange={setNewTaskEmoji} size="sm" /><input type="text" value={newTaskText} onChange={e => setNewTaskText(e.target.value)} onKeyDown={e => e.key==='Enter' && addNewTask()} placeholder="שם המשימה..." className="flex-1 p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><button type="button" onClick={()=>startDictation('task')} className={`voice-dictation-button ${dictationTarget==='task'?'is-listening':''}`} title="הכתבת משימה" aria-label="הכתבת משימה">{dictationTarget==='task'?'●':'🎙'}</button></div>
                                     <select value={newTaskDomain} onChange={e => setNewTaskDomain(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer">{domains.map(d => (<option key={d.id} value={d.value}>{d.emoji} {d.label}</option>))}</select>
                                     <input type="date" value={newTaskDueDate} onChange={e => setNewTaskDueDate(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer" />
                                     <div className="flex gap-2">
@@ -2309,7 +2899,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    <input type="text" value={newProjectTitle} onChange={e => setNewProjectTitle(e.target.value)} placeholder="שם הפרויקט..." className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" />
+                                    <div className="flex items-center gap-2"><input type="text" value={newProjectTitle} onChange={e => setNewProjectTitle(e.target.value)} placeholder="שם הפרויקט..." className="flex-1 p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><button type="button" onClick={()=>startDictation('project')} className={`voice-dictation-button ${dictationTarget==='project'?'is-listening':''}`} title="הכתבת פרויקט" aria-label="הכתבת פרויקט">{dictationTarget==='project'?'●':'🎙'}</button></div>
                                     <div className="flex items-center gap-2"><EmojiPicker value={newProjectEmoji} onChange={setNewProjectEmoji} /><span className="text-xs text-slate-400">אימוג'י לפרויקט</span></div>
                                     <select value={newProjectDomain} onChange={e => setNewProjectDomain(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer">{domains.map(d => (<option key={d.id} value={d.value}>{d.emoji} {d.label}</option>))}</select>
                                     <select value={newProjectColor} onChange={e => setNewProjectColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select>
@@ -2621,7 +3211,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* SCHEDULE */}
                 {activeTab === 'schedule' && (
-                    <div className="max-w-4xl mx-auto space-y-6 animate-slide-in-up pb-16">
+                    <div className="max-w-7xl mx-auto space-y-6 animate-slide-in-up pb-16">
                         <div className="card p-5 flex items-center justify-between flex-wrap gap-3"><div className="flex items-center gap-3 mx-auto"><span className="text-3xl">📅</span><h2 className="text-xl font-bold text-slate-800">לו"ז מעצים</h2></div><div className="flex gap-2"><button onClick={exportToICS} className="bg-blue-500 text-white px-4 py-2 rounded-xl font-semibold text-xs hover:bg-blue-600 transition-all flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ייצוא לאייפון .ics</button><button onClick={saveScheduleToArchive} className="bg-violet-500 text-white px-4 py-2 rounded-xl font-semibold text-xs hover:bg-violet-600 transition-all flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> שמור לו"ז לארכיון</button></div></div>
                         <div className="card overflow-hidden">{dailySchedule.map(slot => (<div key={slot.id} className="flex group hover:bg-slate-50/60 transition-all items-center border-b border-slate-50 last:border-0"><button onClick={() => toggleScheduleItem(slot.id)} className="w-12 flex items-center justify-center shrink-0">{slot.completed ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-300" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}</button><div className="w-32 p-3 flex flex-col items-center border-l border-slate-50"><input value={slot.time} onChange={e => updateScheduleTime(slot.id, e.target.value)} className={`font-bold text-center text-[11px] bg-transparent border-none outline-none w-full ${slot.completed ? 'line-through text-slate-400' : 'text-slate-700'}`} /><div className="w-1.5 h-1.5 rounded-full mt-1" style={{backgroundColor:typeColor(slot.type)}}></div></div><div className="flex-1 p-3 flex flex-col gap-1"><input value={slot.activity} onChange={e => updateScheduleActivity(slot.id, e.target.value)} className={`text-sm font-semibold bg-transparent border-none outline-none ${slot.completed ? 'line-through text-slate-400' : 'text-slate-700'}`} /><div className="flex items-center gap-2"><span className={`text-[9px] font-bold uppercase tracking-wider shrink-0 ${slot.completed ? 'text-slate-300' : 'text-slate-400'}`}>{slot.domain}</span><input value={slot.note} onChange={e => updateScheduleNote(slot.id, e.target.value)} placeholder="הערה..." className={`text-[11px] bg-transparent border-none outline-none w-full italic ${slot.completed ? 'text-slate-300' : 'text-slate-400'}`} /></div></div><button onClick={() => deleteScheduleItem(slot.id)} className="w-10 flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 hover:bg-rose-50 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div>))}</div>
                     </div>
@@ -2649,10 +3239,28 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* CALENDAR */}
                 {activeTab === 'gantt' && (
-                    <div className="max-w-7xl mx-auto space-y-6 animate-slide-in-up pb-16">
+                    <div className="calendar-page max-w-7xl mx-auto space-y-6 animate-slide-in-up pb-16">
+                        <WeeklyLifePlanner onScheduleChange={weeklyEvents => setTasks(previous => {
+                            const existingWeekly = new Map(previous.filter(task => task.weeklyPlannerEventId).map(task => [task.weeklyPlannerEventId, task]));
+                            const regularTasks = previous.filter(task => !task.weeklyPlannerEventId);
+                            const scheduledTasks = Object.entries(weeklyEvents).flatMap(([slotKey, slotEvents]) => (slotEvents || []).map(event => {
+                                const existing = existingWeekly.get(event.id);
+                                return {
+                                    id: existing?.id || `weekly-task-${event.id}`,
+                                    text: event.title,
+                                    dueDate: slotKey.slice(0, 10),
+                                    scheduleTime: `${slotKey.slice(11).padStart(2, '0')}:00`,
+                                    completed: existing?.completed || false,
+                                    projectId: null,
+                                    domain: 'weekly-planner',
+                                    weeklyPlannerEventId: event.id
+                                };
+                            }));
+                            return [...regularTasks, ...scheduledTasks];
+                        })} />
                         <div className="card p-5"><div className="flex items-center gap-3 justify-center text-center mb-4"><h2 className="text-xl font-bold text-slate-800">📅 יומן 2026</h2></div><div className="flex items-center justify-center gap-2 flex-wrap"><button onClick={() => setCalendarView('year')} className={`px-4 py-2 rounded-xl font-semibold text-xs transition-all ${calendarView==='year'?'bg-cyan-500 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>שנה</button><button onClick={() => setCalendarView('month')} className={`px-4 py-2 rounded-xl font-semibold text-xs transition-all ${calendarView==='month'?'bg-cyan-500 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>חודש</button><button onClick={() => setCalendarView('week')} className={`px-4 py-2 rounded-xl font-semibold text-xs transition-all ${calendarView==='week'?'bg-cyan-500 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>שבוע</button><button onClick={() => setCalendarView('day')} className={`px-4 py-2 rounded-xl font-semibold text-xs transition-all ${calendarView==='day'?'bg-cyan-500 text-white':'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>יום</button></div></div>
-                        {(calendarView==='month') && (<div className="card p-4 flex items-center justify-between"><button onClick={() => { if(currentMonth===1){setCurrentMonth(12);setCurrentYear(currentYear-1);}else{setCurrentMonth(currentMonth-1);} }} className="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 rounded-xl font-semibold text-sm text-cyan-700 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button><h3 className="text-lg font-bold text-slate-800">{months[currentMonth-1]} {currentYear}</h3><button onClick={() => { if(currentMonth===12){setCurrentMonth(1);setCurrentYear(currentYear+1);}else{setCurrentMonth(currentMonth+1);} }} className="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 rounded-xl font-semibold text-sm text-cyan-700 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button></div>)}
-                        {calendarView==='week' && (() => {
+                        {(calendarView==='month') && (<div className="calendar-month-nav card p-4 flex items-center justify-between"><button onClick={() => { if(currentMonth===1){setCurrentMonth(12);setCurrentYear(currentYear-1);}else{setCurrentMonth(currentMonth-1);} }} className="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 rounded-xl font-semibold text-sm text-cyan-700 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button><h3 className="text-lg font-bold text-slate-800">{months[currentMonth-1]} {currentYear}</h3><button onClick={() => { if(currentMonth===12){setCurrentMonth(1);setCurrentYear(currentYear+1);}else{setCurrentMonth(currentMonth+1);} }} className="px-4 py-2 bg-cyan-100 hover:bg-cyan-200 rounded-xl font-semibold text-sm text-cyan-700 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button></div>)}
+                        {false && calendarView==='week' && (() => {
                             const dayNames = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
                             const dayColors = ['bg-cyan-50 border-cyan-200','bg-blue-50 border-blue-200','bg-violet-50 border-violet-200','bg-purple-50 border-purple-200','bg-indigo-50 border-indigo-200','bg-pink-50 border-pink-200','bg-amber-50 border-amber-200'];
                             const headerColors = ['bg-cyan-500','bg-blue-500','bg-violet-500','bg-purple-500','bg-indigo-500','bg-pink-500','bg-amber-500'];
@@ -2813,7 +3421,7 @@ import { supabase } from './lib/supabaseClient.js';
         </div>
     );
 })()}
-                        {calendarView==='month' && (() => { const dIM=getDaysInMonth(currentYear,currentMonth); const fD=getFirstDayOfMonth(currentYear,currentMonth); return (<div className="card p-6"><div className="grid grid-cols-7 gap-2 mb-2">{['א','ב','ג','ד','ה','ו','ש'].map(d=><div key={d} className="text-center font-bold text-slate-500 text-sm py-2">{d}</div>)}</div><div className="grid grid-cols-7 gap-2">{[...Array(fD)].map((_,i)=><div key={`e${i}`} className="aspect-square"></div>)}{[...Array(dIM)].map((_,i)=>{ const d=i+1; const dateStr=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const items=getItemsForDate(currentYear,currentMonth,d); const holiday=israeliHolidays[dateStr]; const isSab=getDayOfWeek(currentYear,currentMonth,d)===6; return (<div key={d} onClick={()=>setSelectedDate(dateStr)} className={`aspect-square border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md ${isSab?'bg-blue-50 border-blue-200':holiday?'bg-amber-50 border-amber-300':'bg-white border-slate-200 hover:border-cyan-300'}`}><div className="flex flex-col h-full"><div className="text-sm font-bold text-slate-700 mb-1">{d}</div>{holiday&&<div className="text-[9px] mb-1">{holiday}</div>}{items.length>0&&(<div className="flex-1 overflow-hidden">{items.slice(0,2).map(item=><div key={item.id} className="text-[8px] bg-violet-100 text-violet-700 px-1 py-0.5 rounded truncate mb-0.5">{item.type==='project'?`📂 ${item.title}`:item.type==='task'?`✓ ${item.text}`:item.text}</div>)}{items.length>2&&<div className="text-[8px] text-slate-400">+{items.length-2}</div>}</div>)}</div></div>); })}</div></div>); })()}
+                        {calendarView==='month' && (() => { const dIM=getDaysInMonth(currentYear,currentMonth); const fD=getFirstDayOfMonth(currentYear,currentMonth); return (<div className="calendar-month-grid editorial-calendar card p-6"><div className="grid grid-cols-7 gap-2 mb-2">{['א','ב','ג','ד','ה','ו','ש'].map(d=><div key={d} className="text-center font-bold text-slate-500 text-sm py-2">{d}</div>)}</div><div className="grid grid-cols-7 gap-2">{[...Array(fD)].map((_,i)=><div key={`e${i}`} className="aspect-square"></div>)}{[...Array(dIM)].map((_,i)=>{ const d=i+1; const dateStr=`${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const items=getItemsForDate(currentYear,currentMonth,d); const holiday=israeliHolidays[dateStr]; const isSab=getDayOfWeek(currentYear,currentMonth,d)===6; return (<div key={d} onClick={()=>setSelectedDate(dateStr)} className={`calendar-day aspect-square border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md ${isSab?'bg-blue-50 border-blue-200':holiday?'bg-amber-50 border-amber-300':'bg-white border-slate-200 hover:border-cyan-300'}`}><div className="flex flex-col h-full"><div className="text-sm font-bold text-slate-700 mb-1">{d}</div>{holiday&&<div className="text-[9px] mb-1">{holiday}</div>}{items.length>0&&(<div className="flex-1 overflow-hidden">{items.slice(0,2).map(item=><div key={item.id} className="text-[8px] bg-violet-100 text-violet-700 px-1 py-0.5 rounded truncate mb-0.5">{item.type==='project'?`📂 ${item.title}`:item.type==='task'?`✓ ${item.text}`:item.text}</div>)}{items.length>2&&<div className="text-[8px] text-slate-400">+{items.length-2}</div>}</div>)}</div></div>); })}</div></div>); })()}
                         {calendarView==='day' && selectedDate && (() => { const [y,m,d]=selectedDate.split('-').map(Number); const items=getItemsForDate(y,m,d); const holiday=israeliHolidays[selectedDate]; const dayNames=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת']; return (<div className="space-y-4"><div className="card p-6"><div className="text-center mb-4"><h3 className="text-2xl font-bold text-slate-800">יום {dayNames[getDayOfWeek(y,m,d)]}</h3><p className="text-slate-500">{d} {months[m-1]} {y}</p>{holiday&&<p className="text-amber-600 font-bold mt-2">{holiday}</p>}</div><div className="mb-4"><h4 className="font-bold text-slate-700 mb-3">לוז יומי:</h4><div className="space-y-2">{dailySchedule.map(slot=><div key={slot.id} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg"><span className="text-xs font-bold text-slate-600 w-24">{slot.time}</span><span className="text-sm text-slate-700">{slot.activity}</span></div>)}</div></div><div><h4 className="font-bold text-slate-700 mb-3">משימות ליום זה:</h4>{items.length>0?(<div className="space-y-2">{items.map(item=><div key={item.id} className="flex items-center gap-2 p-3 bg-violet-50 border border-violet-200 rounded-xl">{item.type==='daytask'?(<><button onClick={()=>toggleDayTask(selectedDate,item.id)} className="shrink-0">{item.completed?<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-emerald-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-300" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}</button><span className={`flex-1 text-sm ${item.completed?'line-through text-slate-400':'text-slate-700'}`}>{item.text}</span><button onClick={()=>removeDayTask(selectedDate,item.id)} className="shrink-0 text-rose-400 hover:text-rose-600"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></>):(<span className="text-sm text-slate-700">{item.type==='project'?`📂 ${item.title}`:`✓ ${item.text}`}</span>)}</div>)}</div>):<p className="text-slate-400 text-sm">אין משימות ליום זה</p>}<div className="mt-4"><input type="text" placeholder="הוסף משימה ליום זה..." className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm" onKeyPress={e=>{if(e.key==='Enter'&&e.target.value.trim()){addTaskToDate(selectedDate,e.target.value.trim());e.target.value='';}}} /></div></div></div><button onClick={()=>setSelectedDate(null)} className="w-full py-3 bg-slate-100 hover:bg-slate-200 rounded-xl font-semibold text-sm text-slate-600 transition-all">חזרה לתצוגת חודש</button></div>); })()}
                         {calendarView==='day'&&!selectedDate&&(<div className="card p-8 text-center"><p className="text-slate-500 text-sm">בחר יום מתצוגת החודש</p><button onClick={()=>setCalendarView('month')} className="mt-4 px-6 py-2 bg-cyan-500 text-white rounded-xl font-semibold text-sm hover:bg-cyan-600 transition-all">עבור לתצוגת חודש</button></div>)}
                     </div>
@@ -3108,6 +3716,301 @@ import { supabase } from './lib/supabaseClient.js';
                     </div>
                 )}
                 {/* VISION BOARD TAB */}
+                {activeTab === 'ikigai' && (() => {
+                    const steps = [
+                        {key:'love', eyebrow:'מה אני אוהבת', title:'מה גורם לך להרגיש חיה?', help:'חשבי על פעילויות, נושאים ורגעים שגורמים לך לאבד את תחושת הזמן או ממלאים אותך באנרגיה.', prompts:['מה את אוהבת לעשות?','על מה את יכולה לדבר שעות?','מתי את מרגישה הכי מחוברת לעצמך?'], placeholder:'לדוגמה: לעצב חללים, לכתוב, לטייל, ללמד, לעזור לאנשים...'},
+                        {key:'skills', eyebrow:'היכולות שלי', title:'אילו יכולות טבעיות יש בך?', help:'חשבי גם על דברים שנראים לך פשוטים, אבל לאחרים הם מיוחדים או מועילים.', prompts:['על מה אנשים מבקשים ממך עזרה?','במה את לומדת מהר?','אילו מחמאות את מקבלת שוב ושוב?'], placeholder:'לדוגמה: הקשבה, יצירתיות, סדר, כתיבה, תכנון, הובלה...'},
+                        {key:'impact', eyebrow:'התרומה שלי', title:'איזו השפעה היית רוצה ליצור?', help:'אין צורך לפתור בעיה עולמית. חשבי על האנשים שאת רוצה לעזור להם ועל השינוי שהיית רוצה לאפשר בחייהם.', prompts:['למי היית רוצה לעזור?','מה חסר בעולם שלך?','איך היית רוצה שאנשים ירגישו בזכותך?'], placeholder:'לדוגמה: לחזק ביטחון, ליצור יופי, להעניק תקווה...'},
+                        {key:'expression', eyebrow:'הביטוי בחיים', title:'כיצד הכישורים והערכים שלך יכולים לקבל ביטוי?', help:'האיקיגאי אינו חייב להפוך לעסק. הוא יכול לחיות בקריירה, בהתנדבות, בתחביב או בשגרה שלך.', prompts:['אילו תפקידים או שירותים יכולים להתאים?','מה אפשר ללמוד או לפתח?','איך ניתן לשלב זאת כבר היום?'], placeholder:'לדוגמה: ייעוץ, ליווי, עיצוב, כתיבה, הרצאות, סדנאות...'}
+                    ];
+                    const current = steps[ikigaiStep - 1];
+                    const experimentTypes = ['ליצור משהו','ללמוד נושא','לשוחח עם אדם בתחום','להציע עזרה או שירות','להתנסות למשך שבוע','לשתף תוכן','פעולה אחרת'];
+                    const buildStatement = () => `האיקיגאי שלי הוא להשתמש ב־${ikigaiData.skills || 'היכולות שלי'} כדי לעזור באמצעות ${ikigaiData.impact || 'ההשפעה שחשובה לי'}.\nאני מביאה זאת לעולם דרך ${ikigaiData.expression || 'העשייה שמתאימה לי'}.`;
+                    const nextIkigai = () => {
+                        if (ikigaiStep === 4 && !ikigaiData.statement) setIkigaiData(p => ({...p, statement: buildStatement()}));
+                        setIkigaiStep(s => Math.min(6, s + 1));
+                    };
+                    const addIkigaiToVision = () => {
+                        setVisionBoardItems(prev => [...prev, {id:Date.now(),type:'text',text:ikigaiData.statement,x:50,y:50,width:300,height:170,color:'#fff2f4'}]);
+                        setSaveNotification(true); setTimeout(()=>setSaveNotification(false),2200);
+                    };
+                    return <div className="ikigai-page max-w-5xl mx-auto animate-slide-in-up pb-20">
+                        {!ikigaiData.completed && !ikigaiWizardOpen && <section className="ikigai-hero">
+                            <div className="ikigai-sun"><span>生</span></div>
+                            <p className="ikigai-kicker">משמעות · שמחה · כיוון</p>
+                            <h2>IKIGAI <small>האיקיגאי שלי</small></h2>
+                            <h3>לגלות מה מחבר בין הלב שלי, היכולות שלי והתרומה שלי לעולם.</h3>
+                            <p>איקיגאי הוא מה שמעניק לחיים שלך משמעות, שמחה וסיבה לקום בבוקר. אין תשובה אחת נכונה ואין צורך למצוא מיד „ייעוד גדול” — לפעמים הוא מתחיל מדבר קטן שגורם לך להרגיש חיה, מועילה ומחוברת לעצמך.</p>
+                            <div className="ikigai-equation"><span>מה אני אוהבת</span><b>＋</b><span>במה אני טובה</span><b>＋</b><span>מה חשוב לי לתת</span><b>＋</b><span>איך אביא זאת לחיים</span></div>
+                            <button className="ikigai-primary" onClick={()=>{setIkigaiWizardOpen(true);setIkigaiStep(1);}}>🌸 לגלות את האיקיגאי שלי</button>
+                            <em>ארבעת התחומים הם כלי מודרני ופשוט להתבוננות עצמית, לא הגדרה יפנית מוחלטת.</em>
+                        </section>}
+
+                        {ikigaiWizardOpen && <section className="ikigai-wizard">
+                            <div className="ikigai-progress"><div><button onClick={()=>ikigaiStep===1?setIkigaiWizardOpen(false):setIkigaiStep(s=>s-1)}>←</button><span>שלב {ikigaiStep} מתוך 6</span><button onClick={()=>setIkigaiWizardOpen(false)}>×</button></div><i><b style={{width:`${ikigaiStep/6*100}%`}}/></i></div>
+                            {current && <div className="ikigai-question">
+                                <p>{current.eyebrow}</p><h3>{current.title}</h3><h4>{current.help}</h4>
+                                <div className="ikigai-prompts">{current.prompts.map(p=><span key={p}>{p}</span>)}</div>
+                                <textarea rows="7" autoFocus value={ikigaiData[current.key]} onChange={e=>setIkigaiData(p=>({...p,[current.key]:e.target.value}))} placeholder={current.placeholder}/>
+                            </div>}
+                            {ikigaiStep===5 && <div className="ikigai-question ikigai-connections">
+                                <p>החיבורים</p><h3>החיבורים שלך מתחילים להתבהר ✨</h3>
+                                <div className="ikigai-four-grid">{steps.map(s=><article key={s.key}><span>{s.eyebrow}</span><p>{ikigaiData[s.key]}</p></article>)}</div>
+                                <label>איזה חיבור חוזר שוב ושוב בתשובות שלך?</label>
+                                <textarea rows="3" value={ikigaiData.connection} onChange={e=>setIkigaiData(p=>({...p,connection:e.target.value}))} placeholder="אני מרגישה שהאיקיגאי שלי קשור ל..."/>
+                                <label>ניסוח האיקיגאי האישי שלך</label>
+                                <textarea className="ikigai-statement" rows="5" value={ikigaiData.statement} onChange={e=>setIkigaiData(p=>({...p,statement:e.target.value}))}/>
+                            </div>}
+                            {ikigaiStep===6 && <div className="ikigai-question">
+                                <p>ניסוי במציאות</p><h3>איך תוכלי לבדוק את הכיוון הזה?</h3><h4>בחרי פעולה קטנה שתאפשר לך לחוות את הכיוון, במקום רק לחשוב עליו.</h4>
+                                <div className="ikigai-experiments">{experimentTypes.map(t=><button key={t} className={ikigaiData.experimentType===t?'selected':''} onClick={()=>setIkigaiData(p=>({...p,experimentType:t}))}>{t}</button>)}</div>
+                                <label>מה תעשי בשבעת הימים הקרובים?</label>
+                                <textarea rows="3" value={ikigaiData.experiment} onChange={e=>setIkigaiData(p=>({...p,experiment:e.target.value}))} placeholder="לדוגמה: להכין קונספט לחדר אחד שמשלב עיצוב ואישיות."/>
+                            </div>}
+                            <div className="ikigai-actions"><button onClick={()=>ikigaiStep===1?setIkigaiWizardOpen(false):setIkigaiStep(s=>s-1)}>חזרה</button>{ikigaiStep<6?<button className="ikigai-primary" disabled={current && !ikigaiData[current.key].trim()} onClick={nextIkigai}>המשך</button>:<button className="ikigai-primary" disabled={!ikigaiData.experiment.trim()} onClick={()=>{setIkigaiData(p=>({...p,completed:true}));setIkigaiWizardOpen(false);}}>שמירת הניסוי שלי</button>}</div>
+                        </section>}
+
+                        {ikigaiData.completed && !ikigaiWizardOpen && <section className="ikigai-dashboard">
+                            <div className="ikigai-result"><span>האיקיגאי שלי</span><h2>{ikigaiData.statement}</h2></div>
+                            <div className="ikigai-four-grid">{steps.map(s=><article key={s.key}><span>{s.eyebrow}</span><p>{ikigaiData[s.key]}</p></article>)}</div>
+                            <div className="ikigai-current-experiment"><div><span>הניסוי הנוכחי שלי · {ikigaiData.experimentType}</span><h3>השבוע אני בודקת את הכיוון באמצעות: {ikigaiData.experiment}</h3></div></div>
+                            <div className="ikigai-dashboard-actions"><button onClick={()=>{setIkigaiWizardOpen(true);setIkigaiStep(1);}}>עדכון התשובות</button><button onClick={()=>{setIkigaiWizardOpen(true);setIkigaiStep(6);}}>יצירת ניסוי חדש</button><button onClick={addIkigaiToVision}>הוספה ללוח החזון</button></div>
+                        </section>}
+                    </div>;
+                })()}
+
+                {activeTab === 'inspiration' && <div className="growth-library inspiration-library max-w-5xl mx-auto animate-slide-in-up">
+                    <header className="growth-library-hero"><span>אומץ · התמדה · אפשרות</span><h2>מוטיבציה והשראה</h2><p>סיפורים ונאומים שמזכירים לנו מה אפשרי — ואז מחברים את ההשראה לצעד אמיתי.</p></header>
+                    <div className="growth-library-toolbar"><div><Icon name="search" size={15}/><input value={inspirationSearch} onChange={e=>setInspirationSearch(e.target.value)} placeholder="חיפוש לפי אדם, סיפור או תובנה..."/></div><b>{inspirationItems.length} מקורות השראה</b></div>
+                    <section className="growth-entry-form">
+                        <div className="growth-form-heading"><Icon name="plus" size={16}/><div><b>הוספת סיפור או נאום</b><small>מה עורר בך השראה, ומה תיקחי ממנו לחיים?</small></div></div>
+                        <div className="growth-form-grid"><input placeholder="כותרת" value={inspirationDraft.title} onChange={e=>setInspirationDraft(p=>({...p,title:e.target.value}))}/><input placeholder="שם האדם" value={inspirationDraft.person} onChange={e=>setInspirationDraft(p=>({...p,person:e.target.value}))}/><select value={inspirationDraft.type} onChange={e=>setInspirationDraft(p=>({...p,type:e.target.value}))}><option>סיפור הצלחה</option><option>נאום</option><option>ראיון</option><option>מסר אישי</option></select><input placeholder="קישור לסרטון או מקור" value={inspirationDraft.url} onChange={e=>setInspirationDraft(p=>({...p,url:e.target.value}))}/><textarea placeholder="מה למדתי?" value={inspirationDraft.lesson} onChange={e=>setInspirationDraft(p=>({...p,lesson:e.target.value}))}/><textarea placeholder="מה אעשה בעקבות זה?" value={inspirationDraft.action} onChange={e=>setInspirationDraft(p=>({...p,action:e.target.value}))}/></div>
+                        <button disabled={!inspirationDraft.title.trim()} onClick={()=>{setInspirationItems(p=>[{...inspirationDraft,id:`ins-${Date.now()}`},...p]);setInspirationDraft({title:'',person:'',type:'סיפור הצלחה',lesson:'',action:'',url:''});}}>שמירת מקור ההשראה</button>
+                    </section>
+                    <div className="growth-card-grid">{inspirationItems.filter(item=>`${item.title} ${item.person} ${item.lesson}`.toLowerCase().includes(inspirationSearch.toLowerCase())).map(item=><article className="growth-card" key={item.id}><div className="growth-card-top"><span>{item.type}</span><button onClick={()=>setInspirationItems(p=>p.filter(x=>x.id!==item.id))} aria-label="מחיקה">×</button></div><h3>{item.title}</h3><h4>{item.person}</h4>{item.lesson&&<div><b>מה אני לומדת מזה</b><p>{item.lesson}</p></div>}{item.action&&<div className="growth-action"><b>הפעולה שלי</b><p>{item.action}</p></div>}{item.url&&<a href={item.url} target="_blank" rel="noreferrer"><Icon name="play" size={13}/>צפייה במקור</a>}</article>)}</div>
+                </div>}
+
+                {activeTab === 'book-wisdom' && <div className="growth-library book-wisdom-library max-w-5xl mx-auto animate-slide-in-up">
+                    <header className="growth-library-hero"><span>קריאה · התבוננות · יישום</span><h2>סיכומי ספרים</h2><p>לא רק מה כתוב בספר — אלא מה הוא פתח בי, ומה אני בוחרת ליישם.</p></header>
+                    <div className="growth-library-toolbar"><div><Icon name="search" size={15}/><input value={bookWisdomSearch} onChange={e=>setBookWisdomSearch(e.target.value)} placeholder="חיפוש ספר, מחבר או תובנה..."/></div><b>{bookWisdomItems.length} ספרים בספרייה</b></div>
+                    <section className="growth-entry-form">
+                        <div className="growth-form-heading"><Icon name="book-open" size={16}/><div><b>הוספת ספר</b><small>תעדי את החוויה שלך והפכי קריאה לתנועה בחיים.</small></div></div>
+                        <div className="growth-form-grid"><input placeholder="שם הספר" value={bookWisdomDraft.title} onChange={e=>setBookWisdomDraft(p=>({...p,title:e.target.value}))}/><input placeholder="המחבר/ת" value={bookWisdomDraft.author} onChange={e=>setBookWisdomDraft(p=>({...p,author:e.target.value}))}/><select value={bookWisdomDraft.status} onChange={e=>setBookWisdomDraft(p=>({...p,status:e.target.value}))}><option>רוצה לקרוא</option><option>קוראת עכשיו</option><option>סיימתי</option></select><input placeholder="קישור לרכישה או להאזנה" value={bookWisdomDraft.url} onChange={e=>setBookWisdomDraft(p=>({...p,url:e.target.value}))}/><textarea placeholder="ההתרשמות האישית שלי" value={bookWisdomDraft.impression} onChange={e=>setBookWisdomDraft(p=>({...p,impression:e.target.value}))}/><textarea placeholder="הרעיון המרכזי שלקחתי" value={bookWisdomDraft.lesson} onChange={e=>setBookWisdomDraft(p=>({...p,lesson:e.target.value}))}/><textarea placeholder="איך איישם את זה בחיים?" value={bookWisdomDraft.action} onChange={e=>setBookWisdomDraft(p=>({...p,action:e.target.value}))}/></div>
+                        <button disabled={!bookWisdomDraft.title.trim()} onClick={()=>{setBookWisdomItems(p=>[{...bookWisdomDraft,id:`book-${Date.now()}`},...p]);setBookWisdomDraft({title:'',author:'',status:'רוצה לקרוא',impression:'',lesson:'',action:'',url:''});}}>הוספה לספרייה</button>
+                    </section>
+                    <div className="growth-card-grid">{bookWisdomItems.filter(item=>`${item.title} ${item.author} ${item.lesson}`.toLowerCase().includes(bookWisdomSearch.toLowerCase())).map(item=><article className="growth-card book-card" key={item.id}><div className="growth-card-top"><span>{item.status}</span><button onClick={()=>setBookWisdomItems(p=>p.filter(x=>x.id!==item.id))} aria-label="מחיקה">×</button></div><h3>{item.title}</h3><h4>{item.author}</h4>{item.impression&&<div><b>ההתרשמות שלי</b><p>{item.impression}</p></div>}{item.lesson&&<div><b>הרעיון שאני לוקחת</b><p>{item.lesson}</p></div>}{item.action&&<div className="growth-action"><b>מה איישם</b><p>{item.action}</p></div>}{item.url&&<a href={item.url} target="_blank" rel="noreferrer"><Icon name="external-link" size={13}/>פתיחת הקישור</a>}</article>)}</div>
+                </div>}
+
+                {activeTab === 'manifesting' && (() => {
+                    const categories = ['אהבה וזוגיות','קריירה ועסק','שפע כלכלי','בריאות ואנרגיה','בית וסביבת חיים','משפחה','התפתחות אישית','חוויה או נסיעה','משהו אחר'];
+                    const feelingOptions = ['בטוחה','אהובה','חופשייה','רגועה','שמחה','גאה','בריאה','מלאת אנרגיה','מסופקת','בשפע'];
+                    const todayKey = new Date().toISOString().slice(0, 10);
+                    const canContinue = {
+                        1: manifestDraft.category && manifestDraft.desire.trim(),
+                        2: manifestDraft.vision.trim(),
+                        3: manifestDraft.feelings.length > 0 && manifestDraft.why.trim(),
+                        4: manifestDraft.statement.trim(),
+                        5: manifestDraft.action.trim()
+                    }[manifestStep];
+                    const createStatement = () =>
+                        `אני מודה על כך שאני יוצרת בחיי ${manifestDraft.desire.trim()}.\nאני חיה במציאות שבה ${manifestDraft.vision.trim()}.\nאני מרגישה ${manifestDraft.feelings.join(', ')}.\nאני פתוחה להזדמנויות, פועלת באמונה ומאפשרת לדברים להתפתח בדרך המדויקת עבורי.`;
+                    const nextManifestStep = () => {
+                        if (manifestStep === 3 && !manifestDraft.statement.trim()) {
+                            setManifestDraft(prev => ({...prev, statement: createStatement()}));
+                        }
+                        setManifestStep(prev => Math.min(5, prev + 1));
+                    };
+                    const saveManifestation = () => {
+                        const item = {
+                            ...manifestDraft,
+                            id: manifestEditingId || Date.now(),
+                            createdAt: manifestEditingId
+                                ? manifestations.find(m => m.id === manifestEditingId)?.createdAt || new Date().toISOString()
+                                : new Date().toISOString(),
+                            achieved: false
+                        };
+                        setManifestations(prev => manifestEditingId
+                            ? prev.map(existing => existing.id === manifestEditingId
+                                ? {...item, achieved: existing.achieved}
+                                : existing)
+                            : [item, ...prev]);
+                        setManifestDraft(emptyManifestDraft);
+                        setManifestStep(1);
+                        setManifestEditingId(null);
+                        setManifestWizardOpen(false);
+                    };
+                    const editManifestation = (item) => {
+                        setManifestDraft({
+                            category: item.category || '',
+                            desire: item.desire || '',
+                            vision: item.vision || '',
+                            feelings: item.feelings || [],
+                            why: item.why || '',
+                            statement: item.statement || '',
+                            action: item.action || '',
+                            timing: item.timing || 'היום',
+                            customDate: item.customDate || ''
+                        });
+                        setManifestEditingId(item.id);
+                        setManifestStep(1);
+                        setManifestWizardOpen(true);
+                        setTimeout(() => document.querySelector('.manifest-wizard')?.scrollIntoView({behavior:'smooth', block:'start'}), 0);
+                    };
+                    const deleteManifestation = (item) => {
+                        if (window.confirm(`למחוק את הזימון „${item.desire}”?`)) {
+                            setManifestations(prev => prev.filter(m => m.id !== item.id));
+                        }
+                    };
+                    const addManifestToVisionBoard = (item) => {
+                        setVisionBoardItems(prev => [...prev, {
+                            id: Date.now(),
+                            type: 'text',
+                            text: item.statement || item.desire,
+                            x: 50, y: 50, width: 280, height: 160,
+                            color: '#fff0f6'
+                        }]);
+                        setSaveNotification(true);
+                        setTimeout(() => setSaveNotification(false), 2500);
+                    };
+
+                    return (
+                        <div className="manifest-page max-w-5xl mx-auto animate-slide-in-up pb-20">
+                            <section className="manifest-hero">
+                                <div className="manifest-orbit" aria-hidden="true"><span>✦</span></div>
+                                <p className="manifest-kicker">כוונה · תחושה · פעולה</p>
+                                <h2>Manifesting <span>✨</span></h2>
+                                <p className="manifest-lead">להפוך רצון ברור לחזון, ואת החזון לפעולה.</p>
+                                <p className="manifest-copy">מניפסטינג הוא תהליך של יצירת מציאות מתוך כוונה ברורה, חיבור רגשי ופעולה. אין צורך לדעת בדיוק איך הכול יקרה — רק לבחור כיוון ולבצע את הצעד הבא.</p>
+                                <div className="manifest-formula">חזון ברור <i>→</i> חיבור רגשי <i>→</i> שינוי תפיסה <i>→</i> פעולה ממשית <i>→</i> התמדה</div>
+                                <button className="manifest-primary" onClick={() => { setManifestDraft(emptyManifestDraft); setManifestEditingId(null); setManifestWizardOpen(true); setManifestStep(1); }}>
+                                    <Icon name="sparkles" size={17}/> יצירת זימון חדש
+                                </button>
+                            </section>
+
+                            <details className="manifest-example">
+                                <summary><Icon name="lightbulb" size={15}/> דוגמה קטנה מתוך Inside Out</summary>
+                                <div className="manifest-example-content">
+                                    <p>אם את רוצה להקים את Inside Out, מניפסטינג אינו רק לדמיין עסק מצליח. הוא כולל:</p>
+                                    <ul>
+                                        <li>להגדיר בדיוק מה השירות הראשון שלך.</li>
+                                        <li>לדמיין איך את מרגישה כשאת כבר עובדת עם לקוחות.</li>
+                                        <li>לזהות מחשבות מעכבות, כמו „אני עדיין לא מוכנה”.</li>
+                                        <li>לבחור פעולה קטנה וקונקרטית: להכין חבילת שירות, לפרסם פוסט או לפנות ללקוחה ראשונה.</li>
+                                        <li>להמשיך לפעול גם לפני שיש ודאות מלאה.</li>
+                                    </ul>
+                                    <blockquote>
+                                        <span>משפט מניפסטינג שמתאים לך</span>
+                                        אני מחברת בין רוח לחומר, הופכת את הרעיונות שלי לעשייה ויוצרת מתוך אמונה, דיוק והתמדה.
+                                    </blockquote>
+                                </div>
+                            </details>
+
+                            {manifestWizardOpen && (
+                                <section className="manifest-wizard">
+                                    <div className="manifest-progress-head">
+                                        <button onClick={() => manifestStep === 1 ? (setManifestWizardOpen(false), setManifestEditingId(null)) : setManifestStep(s => s - 1)} aria-label="חזרה">←</button>
+                                        <span>{manifestEditingId ? 'עריכת זימון' : 'זימון חדש'} · שלב {manifestStep} מתוך 5</span>
+                                        <button onClick={() => { setManifestWizardOpen(false); setManifestEditingId(null); }} aria-label="סגירה">×</button>
+                                    </div>
+                                    <div className="manifest-progress"><span style={{width: `${manifestStep * 20}%`}} /></div>
+
+                                    {manifestStep === 1 && <div className="manifest-question">
+                                        <span className="manifest-step-mark">01</span>
+                                        <h3>מה את רוצה ליצור בחייך?</h3>
+                                        <div className="manifest-choice-grid">
+                                            {categories.map(category => <button key={category} className={manifestDraft.category === category ? 'selected' : ''} onClick={() => setManifestDraft(p => ({...p, category}))}>{category}</button>)}
+                                        </div>
+                                        <label>כתבי במשפט אחד מה היית רוצה לזמן</label>
+                                        <textarea rows="3" value={manifestDraft.desire} onChange={e => setManifestDraft(p => ({...p, desire:e.target.value}))} placeholder="לדוגמה: אני רוצה ליצור עסק מצליח שמאפשר לי להתפרנס מהכישרון שלי."/>
+                                    </div>}
+
+                                    {manifestStep === 2 && <div className="manifest-question">
+                                        <span className="manifest-step-mark">02</span>
+                                        <h3>דמייני שזה כבר קיים בחייך. איך זה נראה?</h3>
+                                        <p className="manifest-hints">מה קורה ביום־יום שלך? איפה את נמצאת? מי נמצא איתך? מה השתנה?</p>
+                                        <textarea rows="7" value={manifestDraft.vision} onChange={e => setManifestDraft(p => ({...p, vision:e.target.value}))} placeholder="תארי את המציאות הרצויה בצורה ברורה ומפורטת ככל שמתאים לך." autoFocus/>
+                                    </div>}
+
+                                    {manifestStep === 3 && <div className="manifest-question">
+                                        <span className="manifest-step-mark">03</span>
+                                        <h3>איך תרגישי כשהזימון יתממש?</h3>
+                                        <p className="manifest-hints">בחרי עד שלוש תחושות.</p>
+                                        <div className="manifest-feelings">
+                                            {feelingOptions.map(feeling => {
+                                                const selected = manifestDraft.feelings.includes(feeling);
+                                                return <button key={feeling} className={selected ? 'selected' : ''} onClick={() => setManifestDraft(p => ({...p, feelings: selected ? p.feelings.filter(f => f !== feeling) : p.feelings.length < 3 ? [...p.feelings, feeling] : p.feelings}))}>{feeling}</button>;
+                                            })}
+                                        </div>
+                                        <label>למה הזימון הזה חשוב לך?</label>
+                                        <textarea rows="3" value={manifestDraft.why} onChange={e => setManifestDraft(p => ({...p, why:e.target.value}))} placeholder="מה הוא יאפשר לך להיות, להרגיש או ליצור?"/>
+                                    </div>}
+
+                                    {manifestStep === 4 && <div className="manifest-question">
+                                        <span className="manifest-step-mark">04</span>
+                                        <h3>הזימון שלך מוכן ✨</h3>
+                                        <p className="manifest-hints">הניסוח כתוב בהווה ובצורה חיובית. אפשר לערוך אותו כך שירגיש בדיוק שלך.</p>
+                                        <textarea className="manifest-statement-editor" rows="9" value={manifestDraft.statement} onChange={e => setManifestDraft(p => ({...p, statement:e.target.value}))}/>
+                                    </div>}
+
+                                    {manifestStep === 5 && <div className="manifest-question">
+                                        <span className="manifest-step-mark">05</span>
+                                        <h3>איזו פעולה תחבר אותך לזימון כבר עכשיו?</h3>
+                                        <p className="manifest-hints">בחרי צעד קטן שתוכלי לבצע ב־24 השעות הקרובות.</p>
+                                        <textarea rows="3" value={manifestDraft.action} onChange={e => setManifestDraft(p => ({...p, action:e.target.value}))} placeholder="למשל: לקבוע שיחה, לפתוח מסמך או לצאת להליכה."/>
+                                        <label>מתי תבצעי את הפעולה?</label>
+                                        <div className="manifest-timing">
+                                            {['היום','מחר','השבוע','בחירת תאריך'].map(t => <button key={t} className={manifestDraft.timing === t ? 'selected' : ''} onClick={() => setManifestDraft(p => ({...p, timing:t}))}>{t}</button>)}
+                                        </div>
+                                        {manifestDraft.timing === 'בחירת תאריך' && <input type="date" value={manifestDraft.customDate} onChange={e => setManifestDraft(p => ({...p, customDate:e.target.value}))}/>}
+                                    </div>}
+
+                                    <div className="manifest-wizard-actions">
+                                        <button className="manifest-secondary" onClick={() => manifestStep === 1 ? (setManifestWizardOpen(false), setManifestEditingId(null)) : setManifestStep(s => s - 1)}>חזרה</button>
+                                        {manifestStep < 5
+                                            ? <button disabled={!canContinue} className="manifest-primary" onClick={nextManifestStep}>המשך</button>
+                                            : <button disabled={!canContinue} className="manifest-primary" onClick={saveManifestation}>{manifestEditingId ? 'שמירת השינויים' : 'שמירת הזימון והצעד שלי'}</button>}
+                                    </div>
+                                </section>
+                            )}
+
+                            <section className="manifest-saved">
+                                <div className="manifest-section-title">
+                                    <div><p>הדרך שבחרתי</p><h3>הזימונים שלי</h3></div>
+                                    <span>{manifestations.length}</span>
+                                </div>
+                                {manifestations.length === 0 ? (
+                                    <div className="manifest-empty"><Icon name="sparkles" size={24}/><p>הזימון הראשון שלך עוד מחכה להיכתב.</p></div>
+                                ) : (
+                                    <div className="manifest-card-grid">
+                                        {manifestations.map(item => <article key={item.id} className={`manifest-card ${item.achieved ? 'achieved' : ''}`}>
+                                            <div className="manifest-card-top"><span>{item.category}</span><time>{new Date(item.createdAt).toLocaleDateString('he-IL')}</time></div>
+                                            <h4>{item.desire}</h4>
+                                            <div className="manifest-feeling-line">{item.feelings.join(' · ')}</div>
+                                            <p className="manifest-action-label">הפעולה הקרובה שלי</p>
+                                            <p className="manifest-action">{item.action}</p>
+                                            <details><summary>קריאת הזימון</summary><p>{item.statement}</p></details>
+                                            <div className="manifest-card-actions">
+                                                <button onClick={() => editManifestation(item)}><Icon name="edit-3" size={14}/> עריכה</button>
+                                                <button onClick={() => addManifestToVisionBoard(item)}><Icon name="image" size={14}/> ללוח החזון</button>
+                                                <button onClick={() => setManifestations(prev => prev.map(m => m.id === item.id ? {...m, achieved:!m.achieved} : m))}>{item.achieved ? 'התגשם ✓' : 'סימון כהתגשם'}</button>
+                                                <button className="manifest-delete" onClick={() => deleteManifestation(item)}><Icon name="trash-2" size={14}/> מחיקה</button>
+                                            </div>
+                                        </article>)}
+                                    </div>
+                                )}
+                            </section>
+
+                            {manifestations.length > 0 && <section className="manifest-daily">
+                                <div className="manifest-daily-icon"><Icon name="sparkles" size={22}/></div>
+                                <div><p>דקה של חיבור לזימון</p><h3>קראי לאט, דמייני רגע אחד ושאלי: מה הפעולה המדויקת שלי היום?</h3></div>
+                                <button className={manifestDailyDone[todayKey] ? 'done' : ''} onClick={() => setManifestDailyDone(prev => ({...prev, [todayKey]:!prev[todayKey]}))}>
+                                    {manifestDailyDone[todayKey] ? 'עשיתי היום ✓' : 'עשיתי את התרגול היום'}
+                                </button>
+                            </section>}
+                        </div>
+                    );
+                })()}
+
                 {activeTab === 'vision-board' && (
                     <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-5">
                         <div className="card p-5 border-t-4 border-pink-400">
@@ -3205,6 +4108,12 @@ import { supabase } from './lib/supabaseClient.js';
                     const visitedNames = ALL_COUNTRIES.filter(c => worldVisited.includes(c.id));
                     const upcomingNames = ALL_COUNTRIES.filter(c => worldUpcoming.includes(c.id));
                     const blockedNames = ALL_COUNTRIES.filter(c => worldBlocked.includes(c.id));
+                    const normalizedWorldSearch = worldSearch.trim().toLowerCase();
+                    const worldSearchResults = normalizedWorldSearch
+                        ? ALL_COUNTRIES.filter(c =>
+                            c.name.toLowerCase().includes(normalizedWorldSearch) ||
+                            (worldNotes[c.id] || '').toLowerCase().includes(normalizedWorldSearch))
+                        : [];
 
                     const toggleCountry = (id, toList) => {
                         if (toList === 'visited') {
@@ -3227,6 +4136,14 @@ import { supabase } from './lib/supabaseClient.js';
 
                     const updateCountryNote = (id, text) => {
                         setWorldNotes(prev => ({ ...prev, [id]: text }));
+                    };
+                    const renderCountryNote = (text) => {
+                        const parts = String(text || '').split(/(https?:\/\/[^\s]+)/g);
+                        return parts.map((part, index) =>
+                            /^https?:\/\//.test(part)
+                                ? <a key={index} href={part} target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:text-cyan-800 underline break-all">{part}</a>
+                                : <React.Fragment key={index}>{part}</React.Fragment>
+                        );
                     };
 
                     return (
@@ -3273,6 +4190,61 @@ import { supabase } from './lib/supabaseClient.js';
                                         <div className="text-xs text-slate-400 font-semibold">עדיין מחכות</div>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Country notebook and search */}
+                            <div className="card p-5 world-notes-search">
+                                <div className="flex flex-col md:flex-row gap-3">
+                                    <div className="relative flex-1">
+                                        <Icon name="search" size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input
+                                            value={worldSearch}
+                                            onChange={e => setWorldSearch(e.target.value)}
+                                            placeholder="חיפוש מדינה או תוכן מהערות — למשל ניו יורק..."
+                                            className="w-full pr-10 pl-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-cyan-400 text-sm"
+                                        />
+                                    </div>
+                                    <select
+                                        value={selectedWorldCountry}
+                                        onChange={e => setSelectedWorldCountry(e.target.value)}
+                                        className="md:w-56 px-3 py-3 bg-white border border-slate-200 rounded-xl outline-none text-sm">
+                                        <option value="">בחרי מדינה להוספת הערה</option>
+                                        {ALL_COUNTRIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
+                                </div>
+
+                                {selectedWorldCountry && (() => {
+                                    const country = ALL_COUNTRIES.find(c => c.id === selectedWorldCountry);
+                                    return <div className="mt-3 p-4 bg-cyan-50/60 rounded-xl border border-cyan-100">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div><b className="text-sm text-slate-700">{country?.name}</b><span className="text-[10px] text-slate-400 mr-2">{country?.continent}</span></div>
+                                            <button onClick={()=>setSelectedWorldCountry('')} className="text-slate-400 hover:text-slate-600 text-xs">סגור</button>
+                                        </div>
+                                        <textarea
+                                            autoFocus
+                                            value={worldNotes[selectedWorldCountry] || ''}
+                                            onChange={e => updateCountryNote(selectedWorldCountry, e.target.value)}
+                                            placeholder="כתבי ערים, מלונות, מסעדות, רעיונות, אנשים או כל דבר שתרצי לזכור..."
+                                            rows={4}
+                                            className="w-full p-3 text-sm bg-white border border-cyan-200 rounded-xl outline-none resize-y focus:border-cyan-400"
+                                        />
+                                        <p className="text-[10px] text-slate-400 mt-1">נשמר אוטומטית ויופיע בחיפוש</p>
+                                    </div>;
+                                })()}
+
+                                {normalizedWorldSearch && (
+                                    <div className="mt-4">
+                                        <p className="text-xs font-bold text-slate-500 mb-2">{worldSearchResults.length ? `${worldSearchResults.length} תוצאות` : 'לא נמצאו תוצאות'}</p>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {worldSearchResults.map(c => (
+                                                <button key={c.id} onClick={()=>setSelectedWorldCountry(c.id)} className="text-right p-3 bg-white border border-slate-100 rounded-xl hover:border-cyan-300 transition-all">
+                                                    <div className="flex justify-between gap-2"><b className="text-sm text-slate-700">{c.name}</b><span className="text-[10px] text-slate-400">{c.continent}</span></div>
+                                                    {worldNotes[c.id] && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{worldNotes[c.id]}</p>}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Legend */}
@@ -3376,6 +4348,14 @@ import { supabase } from './lib/supabaseClient.js';
                                                                 className={`w-5 h-5 rounded-full text-[10px] border transition-all flex items-center justify-center ${isBlocked ? 'bg-red-600 text-white border-red-600' : 'bg-white text-slate-300 border-slate-200 hover:border-red-400'}`}
                                                                 title="סמן כ'לא ניתן לבקר'"
                                                             >🚫</button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedWorldCountry(c.id);
+                                                                    setTimeout(() => document.querySelector('.world-notes-search')?.scrollIntoView({behavior:'smooth', block:'center'}), 0);
+                                                                }}
+                                                                className={`w-5 h-5 rounded-full text-[10px] border transition-all flex items-center justify-center ${worldNotes[c.id] ? 'bg-cyan-100 text-cyan-700 border-cyan-200' : 'bg-white text-slate-300 border-slate-200 hover:border-cyan-400'}`}
+                                                                title={worldNotes[c.id] ? 'עריכת ההערה השמורה' : 'הוספת הערה למדינה'}
+                                                            >✎</button>
                                                         </div>
                                                     );
                                                 })}
@@ -3383,6 +4363,30 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+
+                            {/* Saved notes grouped by country */}
+                            <div className="card p-5">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-extrabold text-slate-700 text-lg">הערות לפי מדינה</h3>
+                                    <span className="text-xs font-bold text-slate-400">{Object.values(worldNotes).filter(note => note?.trim()).length} הערות</span>
+                                </div>
+                                {Object.values(worldNotes).every(note => !note?.trim()) ? (
+                                    <p className="text-sm text-slate-400 text-center py-6">עדיין לא נשמרו הערות למדינות</p>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {ALL_COUNTRIES.filter(c => worldNotes[c.id]?.trim()).map(c => (
+                                            <div key={c.id} className="p-4 bg-cyan-50/50 border border-cyan-100 rounded-xl">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div><b className="text-sm text-slate-700">{c.name}</b><span className="text-[10px] text-slate-400 mr-2">{c.continent}</span></div>
+                                                    <button onClick={() => setSelectedWorldCountry(c.id)} className="text-xs font-bold text-cyan-600 hover:text-cyan-800">עריכה</button>
+                                                </div>
+                                                <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{renderCountryNote(worldNotes[c.id])}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="text-[10px] text-slate-400 mt-3">אפשר להדביק כתובות אינטרנט בתוך ההערה — הן יוצגו כאן כקישורים לחיצים.</p>
                             </div>
                         </div>
                     );
@@ -3777,9 +4781,9 @@ import { supabase } from './lib/supabaseClient.js';
                         </div>
                     </div>
                 )}
-                <footer className="max-w-5xl mx-auto mt-14 pt-6 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 pb-8">
-                    <div className="flex items-center gap-2.5"><div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-[9px] font-bold text-white">Me</div><span className="text-sm font-medium italic text-slate-400">"הכל מתחיל מבפנים החוצה." ✨</span></div>
-                    <div className="font-medium flex items-center gap-2 text-slate-400 bg-white/80 px-3.5 py-1.5 rounded-full border border-slate-100 text-[11px]"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-violet-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>2026</div>
+                <footer className="brand-page-footer max-w-5xl mx-auto mt-14 pb-8">
+                    <span className="footer-inside-out">INSIDE OUT</span>
+                    <strong className="footer-hen-signature">By Hen Zerah</strong>
                 </footer>
                 </main>
             </div>
