@@ -16,13 +16,6 @@ const polar = (cx, cy, radius, angle) => {
   const radians = (angle - 90) * Math.PI / 180;
   return { x: cx + radius * Math.cos(radians), y: cy + radius * Math.sin(radians) };
 };
-const ringSlice = (startAngle, endAngle, innerRadius, outerRadius) => {
-  const a = polar(160, 160, outerRadius, startAngle);
-  const b = polar(160, 160, outerRadius, endAngle);
-  const c = polar(160, 160, innerRadius, endAngle);
-  const d = polar(160, 160, innerRadius, startAngle);
-  return `M ${a.x} ${a.y} A ${outerRadius} ${outerRadius} 0 0 1 ${b.x} ${b.y} L ${c.x} ${c.y} A ${innerRadius} ${innerRadius} 0 0 0 ${d.x} ${d.y} Z`;
-};
 
 export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) {
   const [scores, setScores] = useState(() => read('insideout-life-scores', { body: 72, mind: 81, money: 58, relations: 76, purpose: 68, spirit: 84 }));
@@ -54,41 +47,40 @@ export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) 
 
   return (
     <section className="life-os life-os-bare" aria-label="חדר הבקרה של החיים">
-      <div className="life-os-greeting-top">
-        <span>INSIDE OUT · LIFE OS</span>
-        <h2>{greeting}, {userName}</h2>
-        <p>היום הוא היום ה־<b>{journeyDay}</b> במסע שלך.</p>
-      </div>
-      <div className="life-wheel-standalone">
+      <div className="life-os-row">
+        <div className="life-os-greeting-top">
+          <span>INSIDE OUT · LIFE OS</span>
+          <h2>{greeting}, {userName}</h2>
+          <p>היום הוא היום ה־<b>{journeyDay}</b> במסע שלך.</p>
+        </div>
+        <div className="life-wheel-standalone">
         <div className="life-wheel-wrap">
-          <svg className="life-wheel" viewBox="0 0 320 320" role="img" aria-label="גלגל החיים">
-            <defs>
-              <filter id="wheel-depth" x="-30%" y="-30%" width="160%" height="160%">
-                <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#4a3325" floodOpacity=".18" />
-              </filter>
-            </defs>
-            <g filter="url(#wheel-depth)">
-              {worlds.map((world, index) => {
-                const score = scores[world.id];
-                const delta = score - Number(baseline[world.id] ?? score);
-                const dir = trend(delta);
-                const start = index * 60 + 1.4;
-                const end = (index + 1) * 60 - 1.4;
-                const labelPoint = polar(160, 160, 108, index * 60 + 30);
-                return <g key={world.id} role="button" tabIndex="0" aria-label={`${world.label} ${score}% ${dir === 'up' ? 'במגמת עלייה' : dir === 'down' ? 'במגמת ירידה' : 'יציב'}`} className={selectedWorld === world.id ? 'active' : ''} onClick={() => { setSelectedWorld(world.id); onOpenWorld?.(world.id); }} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { setSelectedWorld(world.id); onOpenWorld?.(world.id); } }}>
-                  <path className="wheel-segment-value" d={ringSlice(start, end, 73, 145)} fill={world.color} />
-                  <text x={labelPoint.x} y={labelPoint.y - 12} className="wheel-icon" textAnchor="middle">{world.icon}</text>
-                  <text x={labelPoint.x} y={labelPoint.y + 3} className="wheel-label" textAnchor="middle">{world.label}</text>
-                  <text x={labelPoint.x} y={labelPoint.y + 15} textAnchor="middle">
-                    <tspan className="wheel-value">{score}%</tspan>
-                    {dir !== 'flat' && <tspan className={`wheel-trend wheel-trend-${dir}`}> {dir === 'up' ? '▲' : '▼'}</tspan>}
-                  </text>
-                </g>;
-              })}
-              <circle cx="160" cy="160" r="68" className="wheel-center" />
-              <text x="160" y="150" className="wheel-center-title" textAnchor="middle">מדד חיים נוכחי</text>
-              <text x="160" y="184" className="wheel-center-value" textAnchor="middle">{average}%</text>
+          <svg className="life-wheel life-wheel-enso" viewBox="0 0 320 320" role="img" aria-label="גלגל החיים בסגנון אנסו">
+            <g className="enso-brush">
+              <path className="enso-main-stroke" d="M264 220 C224 288 124 308 56 240 C-16 172 24 68 108 36" />
+              <path className="enso-upper-stroke" d="M100 40 C172 8 252 40 284 108" />
+              <path className="enso-dry-stroke enso-dry-one" d="M276 204 C228 272 136 288 72 232 C16 180 32 92 100 56 C172 20 244 52 272 116" />
+              <path className="enso-dry-stroke enso-dry-two" d="M252 248 C188 304 84 280 40 204 C4 136 44 60 120 32 C184 8 248 40 288 88" />
+              <path className="enso-dry-stroke enso-dry-three" d="M112 20 C176 0 244 24 292 80" />
+              <path className="enso-bristle" d="M272 192 L300 164 M268 208 L304 188 M280 116 L300 140" />
             </g>
+            <text x="160" y="150" className="wheel-center-title" textAnchor="middle">מדד חיים נוכחי</text>
+            <text x="160" y="184" className="wheel-center-value" textAnchor="middle">{average}%</text>
+            {worlds.map((world, index) => {
+              const score = scores[world.id];
+              const delta = score - Number(baseline[world.id] ?? score);
+              const dir = trend(delta);
+              const point = polar(160, 160, 136, index * 60);
+              return <g key={world.id} role="button" tabIndex="0" aria-label={`${world.label} ${score}% ${dir === 'up' ? 'במגמת עלייה' : dir === 'down' ? 'במגמת ירידה' : 'יציב'}`} className={`enso-world${selectedWorld === world.id ? ' active' : ''}`} onClick={() => { setSelectedWorld(world.id); onOpenWorld?.(world.id); }} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { setSelectedWorld(world.id); onOpenWorld?.(world.id); } }}>
+                <circle cx={point.x} cy={point.y} r="21" className="enso-world-dot" />
+                <text x={point.x} y={point.y - 3} className="wheel-icon" textAnchor="middle">{world.icon}</text>
+                <text x={point.x} y={point.y + 34} className="wheel-label" textAnchor="middle">{world.label}</text>
+                <text x={point.x} y={point.y + 46} textAnchor="middle">
+                  <tspan className="wheel-value">{score}%</tspan>
+                  {dir !== 'flat' && <tspan className={`wheel-trend wheel-trend-${dir}`}> {dir === 'up' ? '▲' : '▼'}</tspan>}
+                </text>
+              </g>;
+            })}
           </svg>
         </div>
         <div className="world-score-editor">
@@ -100,6 +92,7 @@ export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) 
               {scores[selectedWorld] > baseline[selectedWorld] ? '▲' : '▼'} מאז היום
             </em>
           )}
+        </div>
         </div>
       </div>
     </section>

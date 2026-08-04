@@ -3390,3 +3390,9 @@ html:not(.dark-mode) .inside-out-lockup .design-your-life-brush {
   text-transform:uppercase !important;
   color:#6b3a22 !important;
 }
+
+/* 2026 goals ribbon — text scaled back down to fit the compact card size instead of overpowering it */
+.goals-strip-title{font-size:16px!important}
+.goal-mini-card h3{font-size:11px!important;font-weight:700!important}
+.goal-mini-card p,.goal-mini-card label,.goal-mini-card input{font-size:9px!important}
+.goal-mini-card>span[class*="font-extrabold"]{font-size:10px!important}

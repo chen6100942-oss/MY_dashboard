@@ -349,3 +349,28 @@ html .dashboard-main .goal-mini-card button {
 .life-wheel-standalone .world-score-editor em{font-size:13px}
 .wheel-center-title{fill:#8d7468}
 .wheel-center-value{fill:#4a3325}
+
+/* Wheel of Life v4 — Japanese ensō: one hand-brushed ink circle instead of pie wedges */
+.life-wheel-enso .enso-brush{color:#6b3a22}
+.life-wheel-enso .enso-main-stroke{fill:none;stroke:currentColor;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;opacity:.94}
+.life-wheel-enso .enso-upper-stroke{fill:none;stroke:currentColor;stroke-width:7;stroke-linecap:round;opacity:.82}
+.life-wheel-enso .enso-dry-stroke{fill:none;stroke:currentColor;stroke-linecap:round}
+.life-wheel-enso .enso-dry-one{stroke-width:3.6;opacity:.55}
+.life-wheel-enso .enso-dry-two{stroke-width:2;opacity:.28}
+.life-wheel-enso .enso-dry-three{stroke-width:2.4;opacity:.24}
+.life-wheel-enso .enso-bristle{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;opacity:.45}
+.enso-world{cursor:pointer;outline:none}
+.enso-world-dot{fill:rgba(255,253,248,.88);stroke:transparent;stroke-width:2;transition:.2s ease}
+.enso-world:hover .enso-world-dot,.enso-world.active .enso-world-dot{fill:#fffdf9;stroke:#6b3a22}
+.life-wheel-enso .wheel-icon{font-size:19px}
+.life-wheel-enso .wheel-center-title{font-size:11px}
+.life-wheel-enso .wheel-center-value{font-size:30px}
+@media(prefers-reduced-motion:reduce){.enso-world-dot{transition:none}}
+
+/* Greeting on the right, wheel beside it on the left, instead of stacked */
+.life-os-row{display:flex;direction:ltr;flex-wrap:wrap;align-items:center;justify-content:center;gap:32px}
+.life-os-row > *{direction:rtl}
+.life-os-greeting-top{flex:1 1 240px;max-width:340px;margin:0;text-align:center}
+.life-wheel-standalone{flex:0 0 auto;width:min(360px,88vw);margin:0}
+@media(max-width:760px){.life-os-row{flex-direction:column}.life-os-greeting-top{max-width:none}}
+.life-wheel-standalone .world-score-editor{margin-top:32px}
