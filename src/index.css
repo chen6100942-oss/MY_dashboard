@@ -1662,9 +1662,9 @@ html.dark-mode .canvas-inspiration {
 .manifest-example-content li { margin: 3px 0; }
 .manifest-example-content blockquote {
   margin-top: 14px; padding: 12px 15px; border-right: 3px solid #d4a7b9;
-  border-radius: 10px; background: #fff8fb; color: #655966; font-family: Georgia, "Times New Roman", serif;
+  border-radius: 10px; background: #fff8fb; color: #655966; font-family: 'Bodoni MT','Didot','Baskerville',serif;
 }
-.manifest-example-content blockquote span { display: block; margin-bottom: 3px; color: #a17186; font-family: "Assistant", sans-serif; font-size: 9px; font-weight: 800; }
+.manifest-example-content blockquote span { display: block; margin-bottom: 3px; color: #a17186; font-family: 'Heebo','Nunito',sans-serif; font-size: 9px; font-weight: 800; }
 .manifest-wizard {
   max-width: 760px; margin: 28px auto 52px; padding: 26px 34px 32px;
   background: rgba(255,255,255,.91); border: 1px solid rgba(183,162,203,.26);
@@ -1675,7 +1675,7 @@ html.dark-mode .canvas-inspiration {
 .manifest-progress { height: 4px; margin: 13px 0 35px; overflow: hidden; border-radius: 4px; background: #f2eaf0; }
 .manifest-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--manifest-lilac), var(--manifest-rose)); transition: width .35s ease; }
 .manifest-question { max-width: 620px; margin: auto; animation: manifestReveal .35s ease both; }
-.manifest-step-mark { display: block; margin-bottom: 8px; color: rgba(157,95,120,.42); font: 300 28px/1 Georgia, serif; }
+.manifest-step-mark { display: block; margin-bottom: 8px; color: rgba(157,95,120,.42); font: 300 28px/1 'Bodoni MT','Didot','Baskerville',serif; }
 .manifest-question h3 { font-size: 24px; font-weight: 600; letter-spacing: -.02em; color: #514957; }
 .manifest-hints { margin: 8px 0 18px; font-size: 12px; color: var(--manifest-muted); }
 .manifest-question label { display: block; margin: 20px 0 8px; color: #6b606f; font-size: 12px; font-weight: 800; }
@@ -1692,7 +1692,7 @@ html.dark-mode .canvas-inspiration {
 .manifest-choice-grid button:hover, .manifest-feelings button:hover, .manifest-timing button:hover { border-color: #d8afbf; transform: translateY(-1px); }
 .manifest-choice-grid button.selected, .manifest-feelings button.selected, .manifest-timing button.selected { color: #89536b; border-color: #cf9fb3; background: #f9eaf1; box-shadow: inset 0 0 0 1px rgba(207,159,179,.2); }
 .manifest-feelings, .manifest-timing { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
-.manifest-statement-editor { font-family: Georgia, "Times New Roman", serif; font-size: 16px !important; }
+.manifest-statement-editor { font-family: 'Bodoni MT','Didot','Baskerville',serif; font-size: 16px !important; }
 .manifest-wizard-actions { display: flex; justify-content: space-between; margin-top: 30px; }
 .manifest-saved { margin-top: 48px; }
 .manifest-section-title { display: flex; align-items: end; justify-content: space-between; margin: 0 6px 20px; }
@@ -1710,7 +1710,7 @@ html.dark-mode .canvas-inspiration {
 .manifest-action { margin-top: 3px; font-size: 13px; color: #685f6b; }
 .manifest-card details { margin-top: 15px; padding-top: 13px; border-top: 1px solid #efe6eb; }
 .manifest-card summary { cursor: pointer; color: var(--manifest-rose-deep); font-size: 11px; font-weight: 800; }
-.manifest-card details p { white-space: pre-line; margin-top: 10px; color: #776d79; font: 14px/1.8 Georgia, serif; }
+.manifest-card details p { white-space: pre-line; margin-top: 10px; color: #776d79; font: 14px/1.8 'Bodoni MT','Didot','Baskerville',serif; }
 .manifest-card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .manifest-card-actions button { display: inline-flex; align-items: center; gap: 5px; padding: 7px 10px; border-radius: 10px; background: #f5eef3; color: #7c6675; font-size: 10px; font-weight: 800; }
 .manifest-daily { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 16px; margin-top: 22px; padding: 20px 22px; border: 1px solid rgba(183,162,203,.25); border-radius: 22px; background: linear-gradient(110deg,#f7f0fa,#fff9fb); }
@@ -1741,7 +1741,7 @@ html.dark-mode .manifest-daily { background: #29242e; border-color: #403642; }
 /* ── IKIGAI: a Japanese-inspired reflection path ───────────────── */
 .ikigai-page { --iki-ink:#514b50; --iki-red:#b96f78; --iki-pink:#e8b9bd; --iki-paper:#fffaf7; direction:rtl; color:var(--iki-ink); }
 .ikigai-hero { position:relative; overflow:hidden; padding:58px 38px 48px; text-align:center; border:1px solid rgba(185,111,120,.16); border-radius:32px; background:radial-gradient(circle at 15% 18%,rgba(239,190,194,.28),transparent 25%),linear-gradient(145deg,#fffdfb,#fbf4f2); box-shadow:0 22px 56px rgba(91,66,68,.08); }
-.ikigai-sun { position:absolute; left:7%; top:34px; display:grid; place-items:center; width:72px;height:72px;border-radius:50%;background:rgba(213,122,127,.15);color:#a96068;font-family:serif;font-size:24px; }
+.ikigai-sun { position:absolute; left:7%; top:34px; display:grid; place-items:center; width:72px;height:72px;border-radius:50%;background:rgba(213,122,127,.15);color:#a96068;font-family:'Bodoni MT','Didot','Baskerville',serif;font-size:24px; }
 .ikigai-kicker{font-size:10px;font-weight:900;letter-spacing:.18em;color:var(--iki-red);}
 .ikigai-hero h2{margin-top:10px;font:500 clamp(42px,6vw,68px)/1 'Trebuchet MS',sans-serif;letter-spacing:.08em;color:#5d555a;}
 .ikigai-hero h2 small{display:block;margin-top:8px;font:500 17px/1.4 Heebo,sans-serif;letter-spacing:0;}
@@ -1756,7 +1756,7 @@ html.dark-mode .manifest-daily { background: #29242e; border-color: #403642; }
 .ikigai-question textarea{width:100%;padding:15px 17px;border:1px solid #eadedf;border-radius:15px;background:var(--iki-paper);outline:none;resize:vertical;font-size:14px;line-height:1.8}.ikigai-question textarea:focus{border-color:#d39aa0;box-shadow:0 0 0 4px rgba(185,111,120,.09)}
 .ikigai-question label{display:block;margin:18px 0 7px;font-size:11px;font-weight:900;color:#75696e}.ikigai-actions{display:flex;justify-content:space-between;margin-top:28px}.ikigai-actions>button:first-child{padding:0 18px;border-radius:12px;background:#f3eded;color:#766b70;font-size:12px;font-weight:800}
 .ikigai-four-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}.ikigai-four-grid article{min-height:112px;padding:16px;border:1px solid #eadedf;border-radius:18px;background:linear-gradient(145deg,#fff,#fff8f6)}.ikigai-four-grid article:nth-child(2){background:#f8f4fb}.ikigai-four-grid article:nth-child(3){background:#f6faf4}.ikigai-four-grid span{color:var(--iki-red);font-size:10px;font-weight:900}.ikigai-four-grid p{margin-top:7px;color:#6f6569;font-size:12px;line-height:1.65;white-space:pre-wrap}
-.ikigai-statement{font-family:Georgia,serif!important;font-size:15px!important}.ikigai-experiments{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.ikigai-experiments button{padding:8px 11px;border:1px solid #eadedf;border-radius:12px;background:white;color:#7c7175;font-size:11px;font-weight:700}.ikigai-experiments button.selected{border-color:#ce9299;background:#fae9ea;color:#99575f}
+.ikigai-statement{font-family:'Bodoni MT','Didot','Baskerville',serif!important;font-size:15px!important}.ikigai-experiments{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.ikigai-experiments button{padding:8px 11px;border:1px solid #eadedf;border-radius:12px;background:white;color:#7c7175;font-size:11px;font-weight:700}.ikigai-experiments button.selected{border-color:#ce9299;background:#fae9ea;color:#99575f}
 .ikigai-dashboard{max-width:850px;margin:auto}.ikigai-result{text-align:center;padding:42px 36px;border-radius:28px;background:linear-gradient(145deg,#fff9f7,#f8eeee);box-shadow:0 18px 45px rgba(91,66,68,.08)}.ikigai-result span{color:var(--iki-red);font-size:11px;font-weight:900}.ikigai-result h2{max-width:680px;margin:12px auto 0;white-space:pre-line;font:500 20px/1.9 Georgia,serif;color:#5e5358}
 .ikigai-current-experiment{margin-top:15px;padding:19px 22px;border-radius:18px;background:#f5eef2}.ikigai-current-experiment span{font-size:10px;font-weight:900;color:#9f6570}.ikigai-current-experiment h3{margin-top:5px;font-size:13px;font-weight:700;color:#675d62}.ikigai-dashboard-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:18px}.ikigai-dashboard-actions button{padding:9px 13px;border-radius:11px;background:white;border:1px solid #e6d9dc;color:#7b686e;font-size:11px;font-weight:800}
 html.dark-mode .ikigai-hero,html.dark-mode .ikigai-wizard,html.dark-mode .ikigai-result,html.dark-mode .ikigai-four-grid article{background:#272328;border-color:#443a3e;color:#eee6e8}.dark-mode .ikigai-question textarea{background:#312b30;border-color:#4a3d42;color:#eee}
@@ -2544,7 +2544,7 @@ html:not(.dark-mode) .inside-out-lockup .inside-out-flowing {
 html:not(.dark-mode) .home-canvas h2,
 html:not(.dark-mode) .home-canvas h3 {
   color:#51443d !important;
-  font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif !important;
+  font-family:'Bodoni MT','Didot','Baskerville',serif !important;
   font-weight:500;
 }
 html:not(.dark-mode) .home-canvas :is(.text-slate-400,.text-slate-500) {
@@ -2562,7 +2562,7 @@ html:not(.dark-mode) .home-editorial-calendar > h3 {
   justify-content:center;
   margin-bottom:14px;
   color:#6b392b !important;
-  font-family:'Segoe Script','Brush Script MT','Palatino Linotype',serif !important;
+  font-family:'Bodoni MT','Didot','Baskerville',serif !important;
   font-size:22px !important;
   font-weight:400 !important;
   transform:rotate(-1deg);
@@ -2571,7 +2571,7 @@ html:not(.dark-mode) .home-editorial-calendar > h3 > span,
 html:not(.dark-mode) .home-editorial-calendar > h3 > svg { opacity:.48; }
 html:not(.dark-mode) .home-editorial-calendar .grid-cols-7 > div {
   color:#665850;
-  font-family:'Palatino Linotype',Palatino,serif;
+  font-family:'Bodoni MT','Didot','Baskerville',serif;
 }
 html:not(.dark-mode) .home-editorial-calendar .grid-cols-7 span.rounded-full {
   color:#51453f !important;
@@ -2591,7 +2591,7 @@ html:not(.dark-mode) .calendar-page > .card:first-child {
 }
 html:not(.dark-mode) .calendar-page > .card:first-child h2 {
   color:#654235 !important;
-  font-family:'Palatino Linotype','Book Antiqua',Palatino,serif !important;
+  font-family:'Bodoni MT','Didot','Baskerville',serif !important;
   font-size:28px;
   font-weight:400;
 }
@@ -2613,7 +2613,7 @@ html:not(.dark-mode) .calendar-month-nav {
 }
 html:not(.dark-mode) .calendar-month-nav h3 {
   color:#6a392b !important;
-  font-family:'Segoe Script','Brush Script MT','Palatino Linotype',serif !important;
+  font-family:'Bodoni MT','Didot','Baskerville',serif !important;
   font-size:36px !important;
   font-weight:400 !important;
   transform:rotate(-1deg);
@@ -2636,7 +2636,7 @@ html:not(.dark-mode) .calendar-month-grid {
 }
 html:not(.dark-mode) .calendar-month-grid > .grid:first-child > div {
   color:#4e443e !important;
-  font-family:'Palatino Linotype',Palatino,serif;
+  font-family:'Bodoni MT','Didot','Baskerville',serif;
   font-size:12px;
   letter-spacing:.08em;
 }
@@ -2669,7 +2669,7 @@ html:not(.dark-mode) .calendar-month-grid .calendar-day > div > div:first-child 
   margin:0 auto !important;
   border-radius:50%;
   color:#51453f !important;
-  font-family:'Palatino Linotype',Palatino,serif;
+  font-family:'Bodoni MT','Didot','Baskerville',serif;
   font-size:16px;
   font-weight:400 !important;
 }
@@ -3123,7 +3123,7 @@ html:not(.dark-mode) .brand-page-footer::after { background:linear-gradient(90de
 .daily-enso-dry.thin { stroke-width:1;opacity:.34; }
 .daily-enso-bristle { fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;opacity:.42; }
 .daily-soul-date { color:var(--other-gold);font-size:10px;font-weight:800;letter-spacing:.13em; }
-.daily-soul-sheet h1 { margin-top:10px;color:#3f3a36;font-family:'Palatino Linotype','Book Antiqua',Palatino,serif;font-size:clamp(38px,5vw,62px);font-weight:400;line-height:1.12;letter-spacing:-.045em; }
+.daily-soul-sheet h1 { margin-top:10px;color:#3f3a36;font-family:'Bodoni MT','Didot','Baskerville',serif;font-size:clamp(38px,5vw,62px);font-weight:400;line-height:1.12;letter-spacing:-.045em; }
 .daily-soul-intro { margin:13px auto 25px;color:#837c75;font-size:13px; }
 .daily-soul-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:11px;text-align:right; }
 .daily-soul-grid button {
@@ -3232,7 +3232,7 @@ html:not(.dark-mode) .manifest-hero h2,
 html:not(.dark-mode) .ikigai-hero h2,
 html:not(.dark-mode) .ikigai-result h2,
 html:not(.dark-mode) .manifest-section-title h3 {
-  font-family:'Palatino Linotype','Book Antiqua',Palatino,serif !important;
+  font-family:'Bodoni MT','Didot','Baskerville',serif !important;
   font-weight:400 !important;
 }
 html:not(.dark-mode) .dashboard-main .card,
@@ -3358,7 +3358,7 @@ html:not(.dark-mode) .dashboard-main .goals-strip-title,html:not(.dark-mode) .da
 .goals-strip-title{font-size:20px!important;font-weight:900!important;line-height:1.1!important}.goal-mini-card{min-height:42px!important;padding:4px 7px 7px!important;gap:4px!important}.goal-mini-card h3{font-size:9px!important;font-weight:800!important}.goal-mini-card p,.goal-mini-card label,.goal-mini-card input{font-size:8px!important}.goal-mini-card>span,.goal-mini-card .animate-float{font-size:12px!important}.goal-mini-card>span[class*="font-extrabold"]{font-size:10px!important}.goal-mini-card>.h-1,.goal-mini-card>.h-1\.5{right:7px;bottom:3px;left:7px;height:2px!important}
 .morning-journey .morning-step-title h3{font-size:30px!important;line-height:1.05!important}.morning-journey .morning-step-title p{margin-top:5px!important;font-size:16px!important;line-height:1.35!important}.morning-journey .morning-step-title{grid-template-columns:24px minmax(390px,520px) 72px 24px;width:min(680px,100%)!important}.morning-journey .morning-step{min-height:88px!important}@media(max-width:700px){.morning-journey .morning-step-title{grid-template-columns:20px minmax(0,1fr) 42px 22px;width:100%!important}.morning-journey .morning-step-title h3{font-size:23px!important}.morning-journey .morning-step-title p{font-size:13px!important}}
 .morning-journey .morning-header-copy h2{padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-.morning-journey .morning-journey-header h2{font-family:'Segoe Script','Brush Script MT','Bradley Hand',cursive!important;font-size:43px!important;font-weight:400!important}.morning-journey .morning-header-copy>span{font-weight:900!important;color:#62483a!important;font-size:11px!important}.morning-journey .morning-step-title h3{font-weight:700!important}
+.morning-journey .morning-journey-header h2{font-family:'Bodoni MT','Didot','Baskerville',serif!important;font-size:43px!important;font-weight:400!important}.morning-journey .morning-header-copy>span{font-weight:900!important;color:#62483a!important;font-size:11px!important}.morning-journey .morning-step-title h3{font-weight:700!important}
 .morning-journey>.morning-step:nth-last-child(5){display:none!important}
 .morning-journey .morning-journey-header{background-image:linear-gradient(90deg,rgba(250,247,242,.74),rgba(255,252,247,.48),rgba(250,247,242,.7)),url('/morning-sunrise-coffee.png')!important;background-size:cover!important;background-position:center 55%!important}.morning-journey .morning-journey-header::before{display:none!important}.header-date>p,.header-date .header-year{color:#765947!important}
 html:not(.dark-mode) .tab-help-video:not(.is-open){border:1px solid rgba(112,84,67,.09)!important;background:rgba(232,220,208,.88)!important;box-shadow:0 5px 16px rgba(91,62,45,.08)!important;backdrop-filter:blur(12px)!important}html:not(.dark-mode) .tab-help-video:not(.is-open) .tab-help-copy b{color:#6f5548!important;font-weight:650!important}html:not(.dark-mode) .tab-help-video:not(.is-open) .tab-help-click-hint{color:#947b6e!important;font-weight:550!important}html:not(.dark-mode) .tab-help-video:not(.is-open) .tab-help-play{color:#7d6255!important;background:rgba(255,255,255,.72)!important}

@@ -319,3 +319,19 @@ html .dashboard-main .goal-mini-card button {
 .wheel-trend-down{fill:#a15b4c;color:#a15b4c}
 .world-score-editor{position:relative;flex-wrap:wrap}
 .world-score-editor em{margin-inline-start:2px;font-style:normal;font-size:8px;font-weight:800}
+
+/* Wheel of Life v3 — minimalist, monochrome, larger, standing directly on the page (no card behind it) */
+.life-os.life-os-bare{padding:0;border:0;background:none;box-shadow:none;overflow:visible}
+.life-os.life-os-bare::after{display:none}
+.life-wheel-standalone{display:flex;flex-direction:column;align-items:center;width:min(460px,92vw);margin:18px auto}
+.life-wheel-standalone .life-wheel-side-label{margin-bottom:6px;color:#8d7468;font-size:10px;font-weight:800;letter-spacing:.14em}
+.life-wheel-standalone .life-wheel-wrap{width:100%;margin:0}
+.life-wheel-standalone .life-wheel{width:100%}
+.life-wheel-standalone .world-score-editor{width:min(360px,90%);margin-top:16px}
+.wheel-segment-value{opacity:1}
+.life-wheel g:hover .wheel-segment-value,.life-wheel g.active .wheel-segment-value{filter:brightness(1.04)}
+.wheel-icon{font-size:15px}
+.wheel-center{fill:#f5efe6}
+.wheel-label,.wheel-value{fill:#4a3325;text-shadow:none}
+.wheel-center-title{fill:#8d7468}
+.wheel-center-value{fill:#4a3325}
