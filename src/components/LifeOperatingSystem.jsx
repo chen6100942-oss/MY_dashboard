@@ -1,13 +1,14 @@
 import React, { useMemo, useState, useEffect } from 'react';
 
-// One monochrome hue, stepped from light to deep, instead of six different colors
+// One uniform pastel color for every segment — score is conveyed by the number/trend, not by shade
+const WHEEL_COLOR = '#C9D8C1';
 const worlds = [
-  { id: 'body', label: 'גוף', icon: '🧘', color: '#E7D8C4', prompt: 'מה הגוף שלך צריך כדי להרגיש חיוני יותר?' },
-  { id: 'mind', label: 'תודעה', icon: '🧠', color: '#DAC4A6', prompt: 'איזו מחשבה תשרת את הגרסה החדשה שלך היום?' },
-  { id: 'money', label: 'כסף', icon: '💰', color: '#CBAF8B', prompt: 'איזו פעולה קטנה תיצור יותר ביטחון כלכלי?' },
-  { id: 'relations', label: 'מערכות יחסים', icon: '🤝', color: '#BB9970', prompt: 'למי נכון להעניק היום נוכחות אמיתית?' },
-  { id: 'purpose', label: 'ייעוד', icon: '🧭', color: '#A8825A', prompt: 'איזו עשייה מקרבת אותך לעבודה המשמעותית שלך?' },
-  { id: 'spirit', label: 'רוח', icon: '🕊', color: '#8F6845', prompt: 'מה יחזיר אותך היום למרכז שלך?' }
+  { id: 'body', label: 'גוף', icon: '🧘', color: WHEEL_COLOR, prompt: 'מה הגוף שלך צריך כדי להרגיש חיוני יותר?' },
+  { id: 'mind', label: 'תודעה', icon: '🧠', color: WHEEL_COLOR, prompt: 'איזו מחשבה תשרת את הגרסה החדשה שלך היום?' },
+  { id: 'money', label: 'כסף', icon: '💰', color: WHEEL_COLOR, prompt: 'איזו פעולה קטנה תיצור יותר ביטחון כלכלי?' },
+  { id: 'relations', label: 'מערכות יחסים', icon: '🤝', color: WHEEL_COLOR, prompt: 'למי נכון להעניק היום נוכחות אמיתית?' },
+  { id: 'purpose', label: 'ייעוד', icon: '🧭', color: WHEEL_COLOR, prompt: 'איזו עשייה מקרבת אותך לעבודה המשמעותית שלך?' },
+  { id: 'spirit', label: 'רוח', icon: '🕊', color: WHEEL_COLOR, prompt: 'מה יחזיר אותך היום למרכז שלך?' }
 ];
 
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -23,9 +24,17 @@ const ringSlice = (startAngle, endAngle, innerRadius, outerRadius) => {
   return `M ${a.x} ${a.y} A ${outerRadius} ${outerRadius} 0 0 1 ${b.x} ${b.y} L ${c.x} ${c.y} A ${innerRadius} ${innerRadius} 0 0 0 ${d.x} ${d.y} Z`;
 };
 
-export default function LifeOperatingSystem({ onOpenWorld }) {
+export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) {
   const [scores, setScores] = useState(() => read('insideout-life-scores', { body: 72, mind: 81, money: 58, relations: 76, purpose: 68, spirit: 84 }));
   const [selectedWorld, setSelectedWorld] = useState('mind');
+  const startDate = useMemo(() => {
+    const saved = localStorage.getItem('insideout-journey-start');
+    if (saved) return new Date(saved);
+    const d = new Date(); d.setDate(d.getDate() - 183); localStorage.setItem('insideout-journey-start', d.toISOString()); return d;
+  }, []);
+  const journeyDay = Math.max(1, Math.floor((new Date() - startDate) / 86400000) + 1);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב';
   const selected = worlds.find(world => world.id === selectedWorld);
   const average = Math.round(Object.values(scores).reduce((sum, score) => sum + Number(score || 0), 0) / worlds.length);
 
@@ -39,15 +48,18 @@ export default function LifeOperatingSystem({ onOpenWorld }) {
     return fresh.scores;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const baselineAverage = Math.round(Object.values(baseline).reduce((sum, score) => sum + Number(score || 0), 0) / worlds.length);
   const trend = delta => delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
 
   useEffect(() => localStorage.setItem('insideout-life-scores', JSON.stringify(scores)), [scores]);
 
   return (
     <section className="life-os life-os-bare" aria-label="חדר הבקרה של החיים">
+      <div className="life-os-greeting-top">
+        <span>INSIDE OUT · LIFE OS</span>
+        <h2>{greeting}, {userName}</h2>
+        <p>היום הוא היום ה־<b>{journeyDay}</b> במסע שלך.</p>
+      </div>
       <div className="life-wheel-standalone">
-        <span className="life-wheel-side-label">גלגל החיים</span>
         <div className="life-wheel-wrap">
           <svg className="life-wheel" viewBox="0 0 320 320" role="img" aria-label="גלגל החיים">
             <defs>
@@ -62,11 +74,9 @@ export default function LifeOperatingSystem({ onOpenWorld }) {
                 const dir = trend(delta);
                 const start = index * 60 + 1.4;
                 const end = (index + 1) * 60 - 1.4;
-                const scoreRadius = 73 + (score / 100) * 72;
                 const labelPoint = polar(160, 160, 108, index * 60 + 30);
                 return <g key={world.id} role="button" tabIndex="0" aria-label={`${world.label} ${score}% ${dir === 'up' ? 'במגמת עלייה' : dir === 'down' ? 'במגמת ירידה' : 'יציב'}`} className={selectedWorld === world.id ? 'active' : ''} onClick={() => { setSelectedWorld(world.id); onOpenWorld?.(world.id); }} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { setSelectedWorld(world.id); onOpenWorld?.(world.id); } }}>
-                  <path className="wheel-segment-base" d={ringSlice(start, end, 73, 145)} />
-                  <path className="wheel-segment-value" d={ringSlice(start, end, 73, scoreRadius)} fill={world.color} />
+                  <path className="wheel-segment-value" d={ringSlice(start, end, 73, 145)} fill={world.color} />
                   <text x={labelPoint.x} y={labelPoint.y - 12} className="wheel-icon" textAnchor="middle">{world.icon}</text>
                   <text x={labelPoint.x} y={labelPoint.y + 3} className="wheel-label" textAnchor="middle">{world.label}</text>
                   <text x={labelPoint.x} y={labelPoint.y + 15} textAnchor="middle">
@@ -76,13 +86,8 @@ export default function LifeOperatingSystem({ onOpenWorld }) {
                 </g>;
               })}
               <circle cx="160" cy="160" r="68" className="wheel-center" />
-              <text x="160" y="142" className="wheel-center-title" textAnchor="middle">מדד חיים נוכחי</text>
-              <text x="160" y="176" className="wheel-center-value" textAnchor="middle">{average}%</text>
-              {average !== baselineAverage && (
-                <text x="160" y="194" textAnchor="middle" className={`wheel-trend wheel-trend-${trend(average - baselineAverage)}`}>
-                  {average > baselineAverage ? '▲' : '▼'} {Math.abs(average - baselineAverage)} מהיום
-                </text>
-              )}
+              <text x="160" y="150" className="wheel-center-title" textAnchor="middle">מדד חיים נוכחי</text>
+              <text x="160" y="184" className="wheel-center-value" textAnchor="middle">{average}%</text>
             </g>
           </svg>
         </div>

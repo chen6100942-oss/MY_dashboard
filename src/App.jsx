@@ -116,6 +116,7 @@ import { supabase } from './lib/supabaseClient.js';
         };
         const [ambientSound, setAmbientSound] = useState('off');
         const youtubeAmbientTracks = [
+            { id:'OW7TH2U4hps', label:'צלילים קסומים', note:'פעמוני טיבט קסומים לרוגע עמוק' },
             { id:'qDP10U39rDA', label:'מים זורמים', note:'נחל עדין וצלילי טבע' },
             { id:'pwVXI96HSs8', label:'ZEN', note:'נוכחות, נשימה ואיזון' },
             { id:'5BLZNhGVbEk', label:'OM', note:'חיבור פנימי ומדיטציה' },

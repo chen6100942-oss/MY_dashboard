@@ -332,6 +332,20 @@ html .dashboard-main .goal-mini-card button {
 .life-wheel g:hover .wheel-segment-value,.life-wheel g.active .wheel-segment-value{filter:brightness(1.04)}
 .wheel-icon{font-size:15px}
 .wheel-center{fill:#f5efe6}
-.wheel-label,.wheel-value{fill:#4a3325;text-shadow:none}
+.wheel-label,.wheel-value{fill:#3f4f3b;text-shadow:none}
+
+/* Simple centered greeting above the wheel, no card behind it */
+.life-os-greeting-top{margin:0 auto 6px;text-align:center}
+.life-os-greeting-top span{color:#8d7468;font-size:9px;font-weight:800;letter-spacing:.13em}
+.life-os-greeting-top h2{margin:6px 0 2px;font-family:'Bodoni MT','Didot','Baskerville',serif;font-size:30px;font-weight:400}
+.life-os-greeting-top p{color:#8d7f78;font-size:11px}
+.life-os-greeting-top p b{color:#72574b;font-size:14px}
+
+/* Score gauge under the wheel, enlarged so it's actually legible */
+.life-wheel-standalone .world-score-editor{width:min(400px,94%);gap:14px}
+.life-wheel-standalone .world-score-editor span{width:auto;font-size:15px;font-weight:800}
+.life-wheel-standalone .world-score-editor input{height:8px;border-radius:99px}
+.life-wheel-standalone .world-score-editor b{width:auto;font-size:15px;font-weight:700;color:#4a3325}
+.life-wheel-standalone .world-score-editor em{font-size:13px}
 .wheel-center-title{fill:#8d7468}
 .wheel-center-value{fill:#4a3325}
