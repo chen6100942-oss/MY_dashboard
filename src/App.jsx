@@ -26,6 +26,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'tasks', name: 'משימות ופרויקטים', icon: 'list-todo', color: 'blue', emoji: '✅' },
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
+            { id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' },
             { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
             { id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' },
             { id: 'inspiration', name: 'מוטיבציה והשראה', icon: 'flame', color: 'amber', emoji: '✦' },
@@ -694,6 +695,9 @@ import { supabase } from './lib/supabaseClient.js';
             }
             if (!deleted.has('ikigai') && !result.some(t => t.id === 'ikigai')) {
                 result.push({ id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' });
+            }
+            if (!deleted.has('morning-ritual') && !result.some(t => t.id === 'morning-ritual')) {
+                result.push({ id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' });
             }
             if (!deleted.has('inspiration') && !result.some(t => t.id === 'inspiration')) {
                 result.push({ id:'inspiration', name:'מוטיבציה והשראה', icon:'flame', color:'amber', emoji:'✦' });
@@ -1962,7 +1966,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 return 'col-span-6';
                             };
                             const visibleBlocks = homeBlockOrder
-                                .filter(id=>!hiddenHomeBlocks.includes(id) && id!=='countdown' && id!=='affirmations' && id!=='gamechangers')
+                                .filter(id=>!hiddenHomeBlocks.includes(id) && id!=='countdown' && id!=='affirmations' && id!=='gamechangers' && id!=='morning')
                                 .sort((a,b) => {
                                     const priority = {goals:0, 'today-tasks':1};
                                     return (priority[a] ?? 2) - (priority[b] ?? 2);
@@ -3248,6 +3252,20 @@ import { supabase } from './lib/supabaseClient.js';
                 )}
 
                 {/* CALENDAR */}
+                {activeTab === 'morning-ritual' && (
+                    <div className="max-w-5xl mx-auto animate-slide-in-up pb-16">
+                        <MorningRitualJourney
+                            tracks={youtubeAmbientTracks.filter(track=>!track.scope)}
+                            activeTrackId={youtubeAmbientId}
+                            onSelectTrack={trackId=>{setAmbientSound('off');setYoutubeAmbientId(trackId);}}
+                            affirmations={affirmations}
+                            affirmationUrl={affirmationUrl}
+                            gameChangers={gameChangers}
+                            setGameChangers={setGameChangers}
+                        />
+                    </div>
+                )}
+
                 {activeTab === 'gantt' && (
                     <div className="calendar-page max-w-7xl mx-auto space-y-6 animate-slide-in-up pb-16">
                         <WeeklyLifePlanner onScheduleChange={weeklyEvents => setTasks(previous => {
