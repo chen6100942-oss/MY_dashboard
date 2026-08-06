@@ -705,6 +705,8 @@ import { supabase } from './lib/supabaseClient.js';
             if (!deleted.has('book-wisdom') && !result.some(t => t.id === 'book-wisdom')) {
                 result.push({ id:'book-wisdom', name:'סיכומי ספרים', icon:'book-open', color:'indigo', emoji:'◈' });
             }
+            // Home always leads the list, no matter what order was saved or dragged
+            result.sort((a, b) => (a.id === 'home' ? -1 : b.id === 'home' ? 1 : 0));
             return result;
         };
 
