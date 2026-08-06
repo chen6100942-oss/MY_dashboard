@@ -112,7 +112,8 @@ import { supabase } from './lib/supabaseClient.js';
         };
         const [ambientSound, setAmbientSound] = useState('off');
         const youtubeAmbientTracks = [
-            { id:'OW7TH2U4hps', label:'צלילים קסומים', note:'פעמוני טיבט קסומים לרוגע עמוק' },
+            { id:'rUndZMU9M4A', label:'צלילים קסומים', note:'גונג טיבטי לריפוי וריגוע עמוק' },
+            { id:'yeb-IGR4G5M', label:'DEEP WORK', note:'מוזיקת פוקוס לריכוז עמוק ותפוקה' },
             { id:'qDP10U39rDA', label:'מים זורמים', note:'נחל עדין וצלילי טבע' },
             { id:'pwVXI96HSs8', label:'ZEN', note:'נוכחות, נשימה ואיזון' },
             { id:'5BLZNhGVbEk', label:'OM', note:'חיבור פנימי ומדיטציה' },

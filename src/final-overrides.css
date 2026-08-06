@@ -385,3 +385,8 @@ html .dashboard-main .goal-mini-card button {
 .life-metric-bar i{display:block;height:100%;border-radius:inherit;background:#8a6a4d;transition:width .3s ease}
 .life-metric-card input[type="range"]{width:100%;height:4px;accent-color:#8a6a4d}
 @media(max-width:520px){.life-metrics-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Vacation ambient screen needs its own way back — it covers the whole page, including the toggle button underneath it */
+.vacation-ambient{pointer-events:auto}
+.vacation-ambient-return{display:inline-block;margin-top:16px;padding:10px 20px;border:1px solid rgba(101,74,60,.25);border-radius:999px;color:#654a3c;background:rgba(255,255,255,.7);font-size:10px;font-weight:800;transition:.2s ease}
+.vacation-ambient-return:hover{background:#fffaf3;transform:translateY(-1px)}
