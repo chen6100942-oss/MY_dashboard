@@ -350,15 +350,10 @@ html .dashboard-main .goal-mini-card button {
 .wheel-center-title{fill:#8d7468}
 .wheel-center-value{fill:#4a3325}
 
-/* Wheel of Life v4 — Japanese ensō: one hand-brushed ink circle instead of pie wedges */
-.life-wheel-enso .enso-brush{color:#6b3a22}
-.life-wheel-enso .enso-main-stroke{fill:none;stroke:currentColor;stroke-width:15;stroke-linecap:round;stroke-linejoin:round;opacity:.94}
-.life-wheel-enso .enso-upper-stroke{fill:none;stroke:currentColor;stroke-width:7;stroke-linecap:round;opacity:.82}
-.life-wheel-enso .enso-dry-stroke{fill:none;stroke:currentColor;stroke-linecap:round}
-.life-wheel-enso .enso-dry-one{stroke-width:3.6;opacity:.55}
-.life-wheel-enso .enso-dry-two{stroke-width:2;opacity:.28}
-.life-wheel-enso .enso-dry-three{stroke-width:2.4;opacity:.24}
-.life-wheel-enso .enso-bristle{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;opacity:.45}
+/* Wheel of Life v5 — bold single-brushstroke ensō (thick, textured edge, frayed tail) matching the reference photo */
+.life-wheel-enso .enso-brush{color:#3a2418}
+.life-wheel-enso .enso-main-stroke{fill:none;stroke:currentColor;stroke-width:34;stroke-linecap:round;stroke-linejoin:round}
+.life-wheel-enso .enso-bristle{fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;opacity:.7}
 .enso-world{cursor:pointer;outline:none}
 .enso-world-dot{fill:rgba(255,253,248,.88);stroke:transparent;stroke-width:2;transition:.2s ease}
 .enso-world:hover .enso-world-dot,.enso-world.active .enso-world-dot{fill:#fffdf9;stroke:#6b3a22}
@@ -367,11 +362,26 @@ html .dashboard-main .goal-mini-card button {
 .life-wheel-enso .wheel-center-value{font-size:30px}
 @media(prefers-reduced-motion:reduce){.enso-world-dot{transition:none}}
 
-/* Greeting on the right, wheel beside it on the left, instead of stacked */
-.life-os-row{display:flex;direction:ltr;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:32px}
+/* Wheel on the right (first in natural RTL flow), greeting beside it on the left */
+.life-os-row{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:32px}
 .life-os-greeting-top{padding-top:26px}
-.life-os-row > *{direction:rtl}
 .life-os-greeting-top{flex:1 1 240px;max-width:340px;margin:0;text-align:center}
 .life-wheel-standalone{flex:0 0 auto;width:min(360px,88vw);margin:0}
 @media(max-width:760px){.life-os-row{flex-direction:column}.life-os-greeting-top{max-width:none}}
 .life-wheel-standalone .world-score-editor{margin-top:32px}
+
+/* Wheel of Life retired — the six domains are now a plain metrics grid */
+.life-os-greeting-top{padding-top:0;max-width:none;flex:none}
+.life-os-greeting-top p b{font-family:'Bodoni MT','Didot','Baskerville',serif}
+.life-metrics-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;width:min(980px,96vw);margin:24px auto 0}
+.life-metric-card{padding:16px 16px 14px;border:1px solid rgba(83,66,58,.1);border-radius:18px;background:rgba(255,255,255,.42);cursor:pointer;transition:.2s ease}
+.life-metric-card:hover{background:rgba(255,255,255,.68);transform:translateY(-1px)}
+.life-metric-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.life-metric-icon{font-size:17px}
+.life-metric-label{color:#6b5b52;font-size:12px;font-weight:700}
+.life-metric-value{display:flex;align-items:baseline;gap:5px;font-family:'Bodoni MT','Didot','Baskerville',serif;font-size:26px;color:#4a3325}
+.life-metric-value em{font-style:normal;font-size:12px}
+.life-metric-bar{overflow:hidden;height:5px;margin:8px 0 6px;border-radius:99px;background:rgba(83,66,58,.1)}
+.life-metric-bar i{display:block;height:100%;border-radius:inherit;background:#8a6a4d;transition:width .3s ease}
+.life-metric-card input[type="range"]{width:100%;height:4px;accent-color:#8a6a4d}
+@media(max-width:520px){.life-metrics-grid{grid-template-columns:repeat(2,1fr)}}

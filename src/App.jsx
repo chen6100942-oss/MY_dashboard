@@ -24,17 +24,13 @@ import { supabase } from './lib/supabaseClient.js';
         const [tabs, setTabs] = useState([
             { id: 'home', name: 'דף הבית', icon: 'home', color: 'violet', emoji: '🏠' },
             { id: 'tasks', name: 'משימות ופרויקטים', icon: 'list-todo', color: 'blue', emoji: '✅' },
-            { id: 'schedule', name: 'לוח זמנים יומי', icon: 'calendar-clock', color: 'amber', emoji: '📅' },
-            { id: 'metrics', name: 'מדדי הצלחה', icon: 'trending-up', color: 'emerald', emoji: '📊' },
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
-            { id: 'future-self', name: 'אני העתידית', icon: 'sparkles', color: 'rose', emoji: '✨' },
             { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
             { id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' },
             { id: 'inspiration', name: 'מוטיבציה והשראה', icon: 'flame', color: 'amber', emoji: '✦' },
             { id: 'book-wisdom', name: 'סיכומי ספרים', icon: 'book-open', color: 'indigo', emoji: '◈' },
             { id: 'mindset', name: 'Mindset', icon: 'brain', color: 'purple', emoji: '🧠' },
-            { id: 'ideas', name: 'רעיונות', icon: 'lightbulb', color: 'yellow', emoji: '💡' },
             { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
             { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' },
@@ -666,7 +662,7 @@ import { supabase } from './lib/supabaseClient.js';
         const ensureBuiltinTabs = (tabsArr) => {
             let deletedIds = [];
             try { deletedIds = JSON.parse(localStorage.getItem('deleted_tab_ids') || '[]'); } catch(e) {}
-            const deleted = new Set(deletedIds);
+            const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule']);
             const result = [...tabsArr]
                 .filter(tab => !deleted.has(tab.id))
                 .map(tab => tab.id === 'manifesting' ? {...tab, name: 'Manifesting'} : tab)
