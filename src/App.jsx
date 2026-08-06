@@ -128,10 +128,17 @@ import { supabase } from './lib/supabaseClient.js';
             { id:'D2KRO0qRDhU', label:'העלאת הרטט', note:'חוק המשיכה ואנרגיה גבוהה', scope:'manifesting' }
         ];
         const manifestingAmbientTracks = youtubeAmbientTracks.filter(track => track.scope === 'manifesting');
-        const [youtubeAmbientId, setYoutubeAmbientId] = useState(() => localStorage.getItem('youtubeAmbientId') || '');
+        const [youtubeAmbientId, setYoutubeAmbientId] = useState(() => {
+            if (!localStorage.getItem('entranceSoundMigratedV2')) {
+                localStorage.setItem('entranceSoundMigratedV2', '1');
+                localStorage.setItem('youtubeAmbientId', 'rUndZMU9M4A');
+                return 'rUndZMU9M4A';
+            }
+            return localStorage.getItem('youtubeAmbientId') || '';
+        });
         const activeYoutubeTrack = youtubeAmbientTracks.find(track => track.id === youtubeAmbientId);
         const recommendedTrackByTab = {
-            home:'pwVXI96HSs8', tasks:'pSAy7e4NN4Q', schedule:'qDP10U39rDA', metrics:'pSAy7e4NN4Q',
+            home:'rUndZMU9M4A', tasks:'pSAy7e4NN4Q', schedule:'qDP10U39rDA', metrics:'pSAy7e4NN4Q',
             goals:'TyiA4aEkPuk', gantt:'pSAy7e4NN4Q', 'future-self':'TyiA4aEkPuk', manifesting:'NVPrxcR_RZI',
             ikigai:'pSAy7e4NN4Q', mindset:'cXS3fBmnMNo', ideas:'pwVXI96HSs8', resources:'pwVXI96HSs8',
             archive:'-4rtl36Cz48', 'my-world':'qDP10U39rDA', 'vision-board':'TyiA4aEkPuk',
@@ -143,6 +150,11 @@ import { supabase } from './lib/supabaseClient.js';
             setYoutubeAmbientId(current => current === trackId ? '' : trackId);
         };
         useEffect(() => localStorage.setItem('youtubeAmbientId', youtubeAmbientId), [youtubeAmbientId]);
+        useEffect(() => {
+            const playGong = () => { setAmbientSound('off'); setYoutubeAmbientId('rUndZMU9M4A'); };
+            window.addEventListener('play-daily-gong', playGong);
+            return () => window.removeEventListener('play-daily-gong', playGong);
+        }, []);
         const audioContextRef = useRef(null);
         const ambientAudioRef = useRef({ nodes: [], interval: null });
         const openingPlayedRef = useRef(false);
@@ -1628,6 +1640,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 const year = new Date().getFullYear();
                                 return (<div className="header-date"><p className="text-xs">{d}</p><p className="header-year">{year}</p></div>);
                             })()}
+                            <DailyPearl />
                         </div>
 
                         {/* כותרת ואפרמציה - מרכז */}
@@ -1805,7 +1818,6 @@ import { supabase } from './lib/supabaseClient.js';
                     <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
                         <LifeOperatingSystem userName={user?.user_metadata?.full_name?.split(' ')[0] || 'חן'} />
-                        <DailyPearl />
 
                         {/* COMPACT TOOLBAR */}
                         {(() => {

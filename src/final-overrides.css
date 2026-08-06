@@ -386,6 +386,27 @@ html .dashboard-main .goal-mini-card button {
 .life-metric-card input[type="range"]{width:100%;height:4px;accent-color:#8a6a4d}
 @media(max-width:520px){.life-metrics-grid{grid-template-columns:repeat(2,1fr)}}
 
+/* Daily message — compact card under the date, expands into an overlay instead of a large inline section */
+.daily-message-card{display:flex;flex-direction:column;align-items:flex-end;gap:4px;width:190px;margin:8px 0 0 auto;padding:14px 18px;border:1px solid rgba(83,66,58,.12);border-radius:18px;text-align:right;background:rgba(255,255,255,.4);transition:.2s ease}
+.daily-message-card:hover{background:rgba(255,255,255,.68);transform:translateY(-1px)}
+.daily-message-card.is-done{opacity:.7}
+.daily-message-kicker{color:#8d7468;font-size:9px;font-weight:800;letter-spacing:.14em}
+.daily-message-card b{font-family:'Bodoni MT','Didot','Baskerville',serif;font-size:19px;font-weight:400;color:#4a3325}
+.daily-message-card small{color:#8d7f78;font-size:12px}
+@media(max-width:900px){.daily-message-card{width:auto;align-items:center;margin:8px auto 0}}
+
+.pearl-overlay{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:20px;background:rgba(47,37,31,.5);backdrop-filter:blur(14px)}
+.pearl-dialog{position:relative;width:min(660px,94vw);max-height:90vh;overflow-y:auto;border:1px solid rgba(76,59,50,.14);border-radius:24px;background:linear-gradient(135deg,#f7f1ea,#eee6de);box-shadow:0 30px 80px rgba(64,47,39,.22)}
+.pearl-close{position:absolute;z-index:2;top:14px;left:14px;width:30px;height:30px;border-radius:50%;color:#725c51;background:rgba(255,255,255,.6);font-size:18px}
+.pearl-dialog > header{padding:26px 24px 16px;text-align:center;color:var(--pearl)}
+.pearl-dialog > header span{font-size:9px;font-weight:800;letter-spacing:.12em}
+.pearl-dialog > header h3{margin-top:6px;font:400 26px 'Bodoni MT','Didot',serif;color:#4a3325}
+.pearl-dialog .pearl-after{padding:0 24px}
+.pearl-dialog > footer{display:flex;justify-content:center;gap:10px;padding:18px 24px 24px}
+.pearl-dialog > footer button{padding:9px 18px;border:1px solid rgba(75,58,50,.14);border-radius:999px;color:#725c51;background:rgba(255,255,255,.6);font-size:10px;font-weight:800}
+.pearl-dialog > footer button.done{color:#fff;background:var(--pearl)}
+@media(max-width:700px){.pearl-layers{grid-template-columns:1fr!important}}
+
 /* Vacation ambient screen needs its own way back — it covers the whole page, including the toggle button underneath it */
 .vacation-ambient{pointer-events:auto}
 .vacation-ambient-return{display:inline-block;margin-top:16px;padding:10px 20px;border:1px solid rgba(101,74,60,.25);border-radius:999px;color:#654a3c;background:rgba(255,255,255,.7);font-size:10px;font-weight:800;transition:.2s ease}

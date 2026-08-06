@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const pearls = [
   { world:'הגוף', color:'#7f947d', science:'שינוי קטן שחוזר על עצמו קל יותר לשימור משינוי חד וקיצוני.', meaning:'את לא צריכה להשלים את כל הדרך כדי להתחיל להרגיש אחרת.', spirit:'עקביות עדינה הופכת בחירה חדשה לחלק ממי שאת.', action:'בחרי היום החלטה אחת שתכבד את הגוף שלך.', habit:'שתיתי כוס מים נוספת.', thought:'התקדמות עדיפה על שלמות.' },
@@ -11,28 +12,35 @@ const todayKey = () => new Date().toISOString().slice(0,10);
 
 export default function DailyPearl(){
   const pearl = useMemo(() => pearls[Math.floor(Date.now()/86400000)%pearls.length], []);
-  const [revealed,setRevealed] = useState(() => localStorage.getItem('insideout-pearl-revealed')===todayKey());
+  const [open, setOpen] = useState(false);
   const [saved,setSaved] = useState(false);
   const [done,setDone] = useState(false);
-  const reveal = () => { setRevealed(true); localStorage.setItem('insideout-pearl-revealed',todayKey()); };
   const save = () => {
     const current = JSON.parse(localStorage.getItem('insideout-pearl-collection')||'[]');
     if(!current.some(item=>item.date===todayKey())) localStorage.setItem('insideout-pearl-collection',JSON.stringify([...current,{...pearl,date:todayKey()}]));
     setSaved(true);
   };
+  const finish = () => { setDone(true); setOpen(false); };
   const count = (()=>{try{return JSON.parse(localStorage.getItem('insideout-pearl-collection')||'[]').length;}catch{return 0;}})();
-  return <section className="daily-version-update">
-    <header><div><span>DAILY VERSION UPDATE</span><h2>עדכון הגרסה היומי</h2></div><p>תובנה אחת · פעולה אחת · הרגל אחד · מחשבה אחת</p></header>
-    <div className={`pearl-scene ${revealed?'is-revealed':''}`}>
-      <div className="pearl-card">
-        <button className="pearl-back" onClick={reveal} aria-label="פתיחת פנינת היום"><i aria-hidden="true"/><span>INSIDE OUT</span><h3>Today's Pearl</h3><small>לחצי כדי לגלות את הפנינה שלך</small></button>
-        <article className="pearl-front" style={{'--pearl':pearl.color}}>
-          <header><span>{pearl.world}</span><h3>פנינת היום</h3></header>
+  const openPearl = () => { window.dispatchEvent(new CustomEvent('play-daily-gong')); setOpen(true); };
+
+  return <>
+    <button className={`daily-message-card${done?' is-done':''}`} onClick={openPearl}>
+      <span className="daily-message-kicker">INSIDE OUT</span>
+      <b>🔔 המסר היומי שלך</b>
+      <small>{done?'קראת את המסר של היום ✓':'לחצי לפתיחה'}</small>
+    </button>
+    {open && createPortal(
+      <div className="pearl-overlay" role="dialog" aria-modal="true" aria-labelledby="pearl-title">
+        <section className="pearl-dialog" style={{'--pearl':pearl.color}}>
+          <button className="pearl-close" onClick={()=>setOpen(false)} aria-label="סגירה">×</button>
+          <header><span>{pearl.world}</span><h3 id="pearl-title">🌸 המסר היומי שלך</h3></header>
           <div className="pearl-layers"><section><b>הידע</b><p>{pearl.science}</p></section><section><b>המשמעות עבורך</b><p>{pearl.meaning}</p></section><section><b>הרוח</b><p>{pearl.spirit}</p></section><section className="pearl-action"><b>הפעולה להיום</b><p>{pearl.action}</p></section></div>
-          <footer><button onClick={save}>{saved?'נשמרה באוסף':'שמרי פנינה'}</button><button className={done?'done':''} onClick={()=>setDone(true)}>{done?'ביצעתי · עדכון הושלם':'ביצעתי'}</button></footer>
-        </article>
-      </div>
-    </div>
-    <div className="pearl-after"><span>הרגל אחד</span><b>{pearl.habit}</b><span>מחשבה לקחת איתך</span><b>{pearl.thought}</b><small>אספת עד היום {count} פנינים</small></div>
-  </section>;
+          <div className="pearl-after"><span>הרגל אחד</span><b>{pearl.habit}</b><span>מחשבה לקחת איתך</span><b>{pearl.thought}</b><small>אספת עד היום {count} פנינים</small></div>
+          <footer><button onClick={save}>{saved?'נשמרה באוסף':'שמרי פנינה'}</button><button className="done" onClick={finish}>ביצעתי · סיימתי</button></footer>
+        </section>
+      </div>,
+      document.body
+    )}
+  </>;
 }
