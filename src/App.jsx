@@ -19,6 +19,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [user, setUser] = useState(() => ({ displayName: 'חן', uid: 'local', email: 'local', photoURL: null }));
         const [loading, setLoading] = useState(false);
         const [activeTab, setActiveTab] = useState('home');
+        const [focusedDomainGoalId, setFocusedDomainGoalId] = useState(null);
         const [showConfetti, setShowConfetti] = useState(false);
         const [saveNotification, setSaveNotification] = useState(false);
         const [tabs, setTabs] = useState([
@@ -130,8 +131,8 @@ import { supabase } from './lib/supabaseClient.js';
         ];
         const manifestingAmbientTracks = youtubeAmbientTracks.filter(track => track.scope === 'manifesting');
         const [youtubeAmbientId, setYoutubeAmbientId] = useState(() => {
-            if (!localStorage.getItem('entranceSoundMigratedV2')) {
-                localStorage.setItem('entranceSoundMigratedV2', '1');
+            if (!localStorage.getItem('entranceSoundMigratedV3')) {
+                localStorage.setItem('entranceSoundMigratedV3', '1');
                 localStorage.setItem('youtubeAmbientId', 'rUndZMU9M4A');
                 return 'rUndZMU9M4A';
             }
@@ -158,7 +159,7 @@ import { supabase } from './lib/supabaseClient.js';
         }, []);
         const audioContextRef = useRef(null);
         const ambientAudioRef = useRef({ nodes: [], interval: null });
-        const openingPlayedRef = useRef(false);
+        const entranceSoundTimerRef = useRef(null);
         const getAudioContext = () => {
             if (!audioContextRef.current) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -174,35 +175,19 @@ import { supabase } from './lib/supabaseClient.js';
             });
             ambientAudioRef.current = { nodes: [], interval: null };
         };
-        const playJapaneseOpening = () => {
-            if (openingPlayedRef.current) return;
-            const ctx = getAudioContext();
-            if (!ctx) return;
-            ctx.resume().then(() => {
-                openingPlayedRef.current = true;
-                const notes = [523.25, 659.25, 783.99, 880, 783.99, 659.25];
-                notes.forEach((frequency, index) => {
-                    const start = ctx.currentTime + index * .31;
-                    const oscillator = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    oscillator.type = index % 2 ? 'sine' : 'triangle';
-                    oscillator.frequency.setValueAtTime(frequency, start);
-                    gain.gain.setValueAtTime(.0001, start);
-                    gain.gain.exponentialRampToValueAtTime(.055, start + .025);
-                    gain.gain.exponentialRampToValueAtTime(.0001, start + 1.15);
-                    oscillator.connect(gain).connect(ctx.destination);
-                    oscillator.start(start);
-                    oscillator.stop(start + 1.2);
-                });
-            }).catch(() => {});
-        };
         useEffect(() => {
-            if (!showDailySoulOpening || openingPlayedRef.current) return;
-            playJapaneseOpening();
-            const beginAfterFirstTouch = () => playJapaneseOpening();
-            window.addEventListener('pointerdown', beginAfterFirstTouch, { once: true });
-            return () => window.removeEventListener('pointerdown', beginAfterFirstTouch);
+            if (!showDailySoulOpening) return;
+            if (entranceSoundTimerRef.current) window.clearTimeout(entranceSoundTimerRef.current);
+            setAmbientSound('off');
+            setYoutubeAmbientId('rUndZMU9M4A');
+            entranceSoundTimerRef.current = window.setTimeout(() => {
+                setYoutubeAmbientId(current => current === 'rUndZMU9M4A' ? '' : current);
+                entranceSoundTimerRef.current = null;
+            }, 12000);
         }, [showDailySoulOpening]);
+        useEffect(() => () => {
+            if (entranceSoundTimerRef.current) window.clearTimeout(entranceSoundTimerRef.current);
+        }, []);
         useEffect(() => {
             localStorage.setItem('dashboardAmbientSound', ambientSound);
             stopAmbientAudio();
@@ -536,6 +521,7 @@ import { supabase } from './lib/supabaseClient.js';
             'Q1-achieved':'', 'Q2-achieved':'', 'Q3-achieved':'', 'Q4-achieved':''
         }); // [{id,type,title,data:{}}]
         const [showAddHomeBlock, setShowAddHomeBlock] = useState(false);
+        const [showSoundLibrary, setShowSoundLibrary] = useState(false);
         const [newHomeBlockType, setNewHomeBlockType] = useState('writing');
         const [newHomeBlockTitle, setNewHomeBlockTitle] = useState('');
         const [worldVisited, setWorldVisited] = useState(['IL','FR','IT','ES','GR','CY','TR','US','GB','PT']);
@@ -1197,6 +1183,23 @@ import { supabase } from './lib/supabaseClient.js';
         const removeGoalPoint = (gid, pid) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:g.points.filter(pt => pt.id!==pid)}:g));
         const removeGoal = (gid) => { saveSnapshot(); setDomainGoals(p => p.filter(g => g.id !== gid)); };
         const addNewGoal = () => { if (!newGoalTitle.trim()) return; saveSnapshot(); setDomainGoals(prev => [...prev, { id: `dg${Date.now()}`, title: newGoalTitle, emoji: newGoalEmoji, color: newGoalColor, points: [{id:'p1',label:'יעד קרוב',text:''},{id:'p2',label:'יעד בינוני',text:''},{id:'p3',label:'יעד רחוק',text:''}] }]); setNewGoalTitle(''); setNewGoalEmoji('🎯'); setNewGoalColor('from-violet-500 to-purple-500'); };
+        const openDetailedGoal = (sourceGoal) => {
+            const compact = value => String(value || '').replace(/[^\u0590-\u05ffa-z0-9]/gi, '').toLowerCase();
+            const sourceTitle = compact(sourceGoal?.title);
+            const fixedGoalLinks = { p1: 'dg2', p2: 'dg1', p3: 'dg4' };
+            const match = domainGoals.find(goal => goal.id === fixedGoalLinks[sourceGoal?.id])
+                || domainGoals.find(goal => goal.emoji && goal.emoji === sourceGoal?.emoji)
+                || domainGoals.find(goal => {
+                    const targetTitle = compact(goal.title);
+                    return targetTitle && sourceTitle && (targetTitle.includes(sourceTitle) || sourceTitle.includes(targetTitle));
+                });
+            setFocusedDomainGoalId(match?.id || null);
+            setActiveTab('goals');
+            window.setTimeout(() => {
+                const target = match ? document.getElementById(`domain-goal-${match.id}`) : document.getElementById('domain-goals-heading');
+                target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 120);
+        };
         const addNewIdea = () => { if (!newIdeaText.trim()) return; saveSnapshot(); setIdeas(prev => [...prev, { id: `idea${Date.now()}`, text: newIdeaText, emoji: newIdeaEmoji, color: newIdeaColor, date: new Date().toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' }) }]); setNewIdeaText(''); setNewIdeaEmoji('💡'); setNewIdeaColor('yellow'); };
         const removeIdea = (id) => { saveSnapshot(); const idea = ideas.find(i => i.id === id); if (idea) addToArchive(idea.text, 'idea'); setIdeas(prev => prev.filter(i => i.id !== id)); };
         const updateIdeaText = (id, text) => setIdeas(prev => prev.map(i => i.id === id ? {...i, text} : i));
@@ -1511,7 +1514,8 @@ import { supabase } from './lib/supabaseClient.js';
                             <h1 id="daily-soul-title">מה הנשמה שלך<br/>מבקשת היום?</h1>
                             <p className="daily-soul-intro">אין צורך להספיק הכול. בחרי דבר אחד שנכון לך עכשיו.</p>
                             <div className="daily-soul-grid">
-                                {soulChoices.map(choice=><button key={choice.label} onClick={()=>{setActiveTab(choice.tab);closeDailySoulOpening();}}>
+                                {soulChoices.map((choice,index)=><button key={choice.label} className={index===5?'is-recommended':''} onClick={()=>{setActiveTab(choice.tab);closeDailySoulOpening();}}>
+                                    {index===5 && <em className="daily-soul-recommended">מומלץ להיום</em>}
                                     <span className="daily-soul-choice-icon"><Icon name={choice.icon} size={18}/></span>
                                     <span><b>{choice.label}</b><small>{choice.note}</small></span>
                                     <i>←</i>
@@ -1527,6 +1531,9 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* SIDEBAR */}
                 <aside style={{width:'240px',flexShrink:0,...(darkMode?{backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}:{boxShadow:'0 0 10px rgba(0,0,0,0.08)'})}} className="primary-sidebar bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
+                    <div className="sidebar-greeting">
+                        <LifeOperatingSystem mode="greeting" userName={user?.user_metadata?.full_name?.split(' ')[0] || 'חן'} />
+                    </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
                         {tabs.filter(tab => tab.id !== 'archive').map(tab => (
@@ -1560,6 +1567,17 @@ import { supabase } from './lib/supabaseClient.js';
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab==='tab-settings' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
                             <span className="nav-line-icon" aria-hidden="true" style={{color:'#747b86'}}><Icon name="settings" size={17} /></span>
                             <span className="text-xs">הגדרות</span>
+                        </button>
+                        <button onClick={() => { setActiveTab('tab-settings'); setSettingsSection('help'); }}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${activeTab==='tab-settings' && settingsSection==='help' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                            <span className="nav-line-icon help-nav-icon" aria-hidden="true">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="9" />
+                                    <path d="M9.7 9a2.45 2.45 0 1 1 3.75 2.08c-.9.57-1.45 1.05-1.45 2.17" />
+                                    <path d="M12 17h.01" />
+                                </svg>
+                            </span>
+                            <span className="text-xs">הוראות שימוש</span>
                         </button>
                     </div>
                     <div className="language-switcher" aria-label="בחירת שפה">
@@ -1640,13 +1658,13 @@ import { supabase } from './lib/supabaseClient.js';
 
 
                         {/* תאריך - עמודה ימנית */}
-                        <div className="text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
+                        <div className="header-date-column text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
+                            <div className="header-vacation-slot"><VacationMode /></div>
                             {(() => {
                                 const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
                                 const year = new Date().getFullYear();
                                 return (<div className="header-date"><p className="text-xs">{d}</p><p className="header-year">{year}</p></div>);
                             })()}
-                            <DailyPearl />
                         </div>
 
                         {/* כותרת ואפרמציה - מרכז */}
@@ -1654,16 +1672,7 @@ import { supabase } from './lib/supabaseClient.js';
                             {/* Brand lockup */}
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
-                                    <h1 className="inside-out-flowing">INSIDE <span className="enso-o" aria-label="O">
-                                        <svg viewBox="0 0 80 80" aria-hidden="true">
-                                            <path className="enso-main-stroke" d="M66 55 C56 72 31 77 14 60 C-4 43 6 17 27 9"/>
-                                            <path className="enso-upper-stroke" d="M25 10 C43 2 63 10 71 27"/>
-                                            <path className="enso-dry-stroke enso-dry-one" d="M69 51 C57 68 34 72 18 58 C4 45 8 23 25 14 C43 5 61 13 68 29"/>
-                                            <path className="enso-dry-stroke enso-dry-two" d="M63 62 C47 76 21 70 10 51 C1 34 11 15 30 8 C46 2 62 10 72 22"/>
-                                            <path className="enso-dry-stroke enso-dry-three" d="M28 5 C44 0 61 6 73 20"/>
-                                            <path className="enso-bristle" d="M68 48 L75 41 M67 52 L76 47 M70 29 L75 35"/>
-                                        </svg>
-                                    </span>UT</h1>
+                                    <h1 className="inside-out-flowing">INSIDE OUT</h1>
                                 </div>
                                 <strong className="design-your-life-brush" style={{'--marker-color': brandMarkerColor}}>
                                     Design your life
@@ -1713,18 +1722,18 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        {/* עמודה שמאלית - ריקה (כפתורים עברו לפאנל הצד) */}
-                        <div style={{gridColumn:"3"}}></div>
+                        <div style={{gridColumn:"3"}} />
 
                     </div>
                 </div>
+                <div className="mobile-vacation-slot"><VacationMode /></div>
 
                 {/* TABS */}
 
                 {/* quotes now appear inside the title section above */}
 
                 {/* Contextual help video — available inside every tab */}
-                {activeTab !== 'tab-settings' && (() => {
+                {false && activeTab !== 'tab-settings' && (() => {
                     const currentTab = tabs.find(t => t.id === activeTab);
                     const savedUrl = tabHelpVideos[activeTab] || '';
                     const localFile = tabHelpFiles[activeTab];
@@ -1734,7 +1743,7 @@ import { supabase } from './lib/supabaseClient.js';
                     const embedUrl = youtubeMatch ? `https://www.youtube.com/embed/${youtubeMatch[1]}` : savedUrl;
                     const hasVideo = !!(savedUrl || localFile);
                     return (
-                        <section className={`tab-help-video max-w-5xl mx-auto mb-5 ${isOpen ? 'is-open' : ''}`}>
+                        <section className={`tab-help-video max-w-5xl mx-auto mb-5 ${activeTab==='home'?'home-help-position':''} ${isOpen ? 'is-open' : ''}`}>
                             <button className="tab-help-trigger" onClick={() => setTabHelpOpen(prev => ({...prev,[activeTab]:!prev[activeTab]}))}>
                                 <span className="tab-help-play"><Icon name="play" size={14}/></span>
                                 <span className="tab-help-copy">
@@ -1744,7 +1753,6 @@ import { supabase } from './lib/supabaseClient.js';
                                 </span>
                                 <span className="tab-help-chevron">{isOpen ? '⌃' : '⌄'}</span>
                             </button>
-                            <VacationMode />
                             {isOpen && <div className="tab-help-body">
                                 {hasVideo && !isEditing && <div className="tab-help-player">
                                     {localFile ? (
@@ -1823,8 +1831,7 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'home' && (
                     <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
-                        <LifeOperatingSystem userName={user?.user_metadata?.full_name?.split(' ')[0] || 'חן'} />
-
+                        <div className="home-command-row">
                         {/* COMPACT TOOLBAR */}
                         {(() => {
                             const now = new Date(), e2026 = new Date(2026,11,31,23,59,59);
@@ -1867,13 +1874,28 @@ import { supabase } from './lib/supabaseClient.js';
                             );
                         })()}
 
+                        <div className="home-sound-column">
+                        {!showMotivationFilm && !showDailySoulOpening && <div className="daily-message-slot"><DailyPearl /></div>}
                         <section className="home-soundscape" aria-label="בחירת מוזיקת רקע">
-                            <div className="home-soundscape-title"><Icon name="volume-2" size={15}/><i className={`sound-monitor ${youtubeAmbientId?'is-playing':''}`} aria-hidden="true"><b/><b/><b/><b/><b/></i><span>צלילי מרחב</span><small>בחרי את האנרגיה שנכונה לך עכשיו</small></div>
-                            <div className="home-soundscape-options">
-                                {youtubeAmbientTracks.filter(track=>!track.scope).map(track => <button key={track.id} title={track.note} className={youtubeAmbientId===track.id?'active':''} onClick={()=>toggleYoutubeAmbient(track.id)}>{track.label}</button>)}
-                                <button className={!youtubeAmbientId?'active':''} onClick={()=>setYoutubeAmbientId('')}>שקט</button>
-                            </div>
+                            <button className="home-soundscape-trigger" onClick={()=>setShowSoundLibrary(true)} aria-haspopup="dialog">
+                                <Icon name="volume-2" size={15}/><i className={`sound-monitor ${youtubeAmbientId?'is-playing':''}`} aria-hidden="true"><b/><b/><b/><b/><b/></i>
+                                <span><b>צלילי מרחב</b><small>{activeYoutubeTrack?.label || 'שקט'}</small></span><Icon name="chevron-down" size={13}/>
+                            </button>
+                            {showSoundLibrary && <div className="sound-library-overlay" role="dialog" aria-modal="true" aria-labelledby="sound-library-title" onClick={()=>setShowSoundLibrary(false)}>
+                                <div className="sound-library-dialog" onClick={event=>event.stopPropagation()}>
+                                    <button className="sound-library-close" onClick={()=>setShowSoundLibrary(false)} aria-label="סגירה">×</button>
+                                    <span>INSIDE OUT · SOUNDSCAPE</span>
+                                    <h3 id="sound-library-title">איזו אנרגיה נכונה לך עכשיו?</h3>
+                                    <p>בחרי צליל למרחב. אפשר להחליף או לחזור לשקט בכל רגע.</p>
+                                    <div className="sound-library-options">
+                                        {youtubeAmbientTracks.filter(track=>!track.scope).map(track => <button key={track.id} title={track.note} className={youtubeAmbientId===track.id?'active':''} onClick={()=>{toggleYoutubeAmbient(track.id);setShowSoundLibrary(false);}}><Icon name="music-2" size={15}/><span><b>{track.label}</b><small>{track.note}</small></span></button>)}
+                                        <button className={!youtubeAmbientId?'active':''} onClick={()=>{setYoutubeAmbientId('');setShowSoundLibrary(false);}}><Icon name="volume-x" size={15}/><span><b>שקט</b><small>ללא מוזיקת רקע</small></span></button>
+                                    </div>
+                                </div>
+                            </div>}
                         </section>
+                        </div>
+                        </div>
 
                         {/* Quick actions moved from the left rail onto the canvas */}
                         <div className="canvas-actions">
@@ -2032,7 +2054,7 @@ import { supabase } from './lib/supabaseClient.js';
                                             </div>
                                             <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
                                                 {projects.filter(p=>p.showOnHome).map(project => { const progress = calculateProgress(project.id); return (
-                                                <div key={project.id} className="goal-mini-card card text-center group relative overflow-visible flex-shrink-0">
+                                                <div key={project.id} role="button" tabIndex="0" aria-label={`פתיחת פירוט היעד ${project.title}`} onClick={event=>{if(!event.target.closest('button,input,textarea,select'))openDetailedGoal(project);}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailedGoal(project);}}} className="goal-mini-card home-goal-link card text-center group relative overflow-visible flex-shrink-0">
                                                     <div className="flex justify-end gap-0.5 mb-1 h-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center text-blue-600" style={{fontSize:'9px'}}>✏️</button>
                                                         <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-4 h-4 bg-rose-100 rounded flex items-center justify-center text-rose-500" style={{fontSize:'9px'}}>🗑️</button>
@@ -2047,7 +2069,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                     </>)}
                                                 </div>);})}
                                                 {showWeightCard && (
-                                                    <div className="goal-mini-card card text-center relative group flex-shrink-0">
+                                                    <div role="button" tabIndex="0" aria-label="פתיחת יעדים לפי תחומים" onClick={event=>{if(!event.target.closest('button,input,textarea,select'))openDetailedGoal({title:'ירידה במשקל',emoji:'⚖️'});}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailedGoal({title:'ירידה במשקל',emoji:'⚖️'});}}} className="goal-mini-card home-goal-link card text-center relative group flex-shrink-0">
                                                         {editingWeightCard ? (<div className="space-y-3"><p className="text-xs font-bold text-slate-600 mb-2">עריכת יעד משקל</p><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">משקל התחלתי:</span><input type="number" value={weightStart} onChange={e=>setWeightStart(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">משקל נוכחי:</span><input type="number" value={currentWeight} onChange={e=>setCurrentWeight(e.target.value)} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><div className="flex items-center gap-2 justify-between"><span className="text-xs text-slate-500">יעד הורדה:</span><input type="number" value={weightGoal} onChange={e=>setWeightGoal(Number(e.target.value))} className="w-16 text-center text-sm font-bold border border-slate-200 rounded-lg px-2 py-1 outline-none"/><span className="text-xs text-slate-400">קג</span></div><button onClick={()=>setEditingWeightCard(false)} className="w-full py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-bold">שמור</button></div>):(<React.Fragment>
                                                             <span className="text-3xl mb-2 block animate-float">⚖️</span>
                                                             <h3 className={`font-bold text-slate-700 mb-2 ${sz}`}>יעד ירידה · {weightGoal} קג</h3>
@@ -2337,6 +2359,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 {id:'domains', icon:'🏷️', label:'תחומים'},
                                 {id:'content', icon:'✏️', label:'תוכן'},
                                 {id:'backup',  icon:'💾', label:'גיבוי'},
+                                {id:'help',    icon:'📖', label:'הוראות שימוש'},
                             ].map(s => (
                                 <button key={s.id} onClick={() => setSettingsSection(s.id)}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all border-2 ${settingsSection===s.id ? 'bg-violet-600 text-white border-transparent shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'}`}>
@@ -2344,6 +2367,23 @@ import { supabase } from './lib/supabaseClient.js';
                                 </button>
                             ))}
                         </div>
+
+                        {settingsSection === 'help' && (
+                            <section className="app-help-page">
+                                <header><span>INSIDE OUT · GUIDE</span><h2>איך משתמשים באפליקציה?</h2><p>כל מה שצריך כדי להתחיל, להתארגן ולבנות שגרה שמתאימה לך.</p></header>
+                                <div className="app-help-grid">
+                                    {[
+                                        {icon:'home',title:'דף הבית',text:'כאן רואים את תמונת היום: הברכה, מדדי החיים, משימות, יעדים ולוח השנה.',tab:'home'},
+                                        {icon:'check-square',title:'משימות ופרויקטים',text:'צרי משימה או פרויקט, הגדירי תאריך וקדימות, ועדכני התקדמות לאורך הדרך.',tab:'tasks'},
+                                        {icon:'target',title:'יעדים ותחומי חיים',text:'חלקי את החזון ליעדים מדידים ועקבי אחר גוף, תודעה, כסף, יחסים, ייעוד ורוח.',tab:'goals'},
+                                        {icon:'sunrise',title:'טקסים ושגרה',text:'השתמשי בטקס הבוקר, בכתיבה ובמסר היומי כדי להתחיל את היום בכוונה.',tab:'morning'},
+                                        {icon:'sparkles',title:'כלים להתפתחות',text:'עברִי בין Manifesting, IKIGAI, Mindset, השראה וסיכומי ספרים לפי הצורך שלך.',tab:'manifesting'},
+                                        {icon:'settings',title:'התאמה אישית',text:'בהגדרות אפשר לשנות פרופיל, עיצוב, כרטיסיות, תחומים, תוכן וגיבוי.',tab:'tab-settings'}
+                                    ].map(item=><button key={item.title} onClick={()=>setActiveTab(item.tab)}><i><Icon name={item.icon} size={19}/></i><span><b>{item.title}</b><small>{item.text}</small></span><em>←</em></button>)}
+                                </div>
+                                <footer><b>טיפ להתחלה</b><p>בחרי בכל יום משימה חשובה אחת ועדכני מדד חיים אחד. עקביות קטנה עדיפה על עומס.</p></footer>
+                            </section>
+                        )}
 
                         {/* ── PROFILE ── */}
                         {settingsSection === 'profile' && (
@@ -3246,8 +3286,8 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* GOALS */}
                 {activeTab === 'goals' && (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up pb-16">
-                        <div className="card p-5 flex items-center gap-3 justify-center text-center"><h2 className="text-xl font-bold text-slate-800">🎯 יעדים אסטרטגיים לפי תחומים</h2></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{domainGoals.map(goal => (<div key={goal.id} className="card overflow-hidden flex flex-col group/goal"><div className={`h-1 bg-gradient-to-r ${goal.color}`}></div><div className="p-4 pb-2 flex items-center gap-2.5"><EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" /><input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" /><button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><div className="px-4 pb-4 space-y-3 flex-1">{goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}<div className="space-y-2.5">{goal.points.map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}<button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button></div></div></div>))}</div>
+                        <div className="card p-5 flex items-center gap-3 justify-center text-center"><h2 id="domain-goals-heading" className="text-xl font-bold text-slate-800">🎯 יעדים אסטרטגיים לפי תחומים</h2></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{domainGoals.map(goal => (<div id={`domain-goal-${goal.id}`} key={goal.id} className={`card domain-goal-card overflow-hidden flex flex-col group/goal ${focusedDomainGoalId===goal.id?'is-focused':''}`}>{focusedDomainGoalId===goal.id&&<span className="selected-goal-label">✓ היעד שבחרת</span>}<div className={`h-1 bg-gradient-to-r ${goal.color}`}></div><div className="p-4 pb-2 flex items-center gap-2.5"><EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" /><input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" /><button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><div className="px-4 pb-4 space-y-3 flex-1">{goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}<div className="space-y-2.5">{goal.points.map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}<button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button></div></div></div>))}</div>
                         <div className="card p-5 border-t-[3px] border-pink-400"><div className="space-y-2.5"><input type="text" value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} placeholder="שם היעד..." className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><div className="flex items-center gap-2"><EmojiPicker value={newGoalEmoji} onChange={setNewGoalEmoji} /><span className="text-xs text-slate-400">בחרי אימוג'י ליעד</span></div><select value={newGoalColor} onChange={e => setNewGoalColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select><button onClick={addNewGoal} className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-pink-600 transition-all">הוסף יעד</button></div></div>
                         {renderBuiltinExtra('goals')}
                     </div>

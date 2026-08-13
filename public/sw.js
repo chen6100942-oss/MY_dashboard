@@ -1,4 +1,4 @@
-const CACHE = 'dashboard-v2';
+const CACHE = 'dashboard-v3-20260813';
 const PRECACHE = [self.location.href || '/'];
 self.addEventListener('install', e => {
     e.waitUntil(caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));

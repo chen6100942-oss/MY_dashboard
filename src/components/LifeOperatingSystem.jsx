@@ -29,7 +29,7 @@ const isDark = hex => {
   return (0.299 * r + 0.587 * g + 0.114 * b) < 150;
 };
 
-export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) {
+export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld, mode = 'all' }) {
   const [scores, setScores] = useState(() => read('insideout-life-scores', { body: 72, mind: 81, money: 58, relations: 76, purpose: 68, spirit: 84 }));
   const [selectedWorld, setSelectedWorld] = useState('mind');
   const startDate = useMemo(() => {
@@ -58,15 +58,32 @@ export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) 
   useEffect(() => localStorage.setItem('insideout-life-scores', JSON.stringify(scores)), [scores]);
 
   return (
-    <section className="life-os life-os-bare" aria-label="חדר הבקרה של החיים">
+    <section className={`life-os life-os-bare life-os-${mode}`} aria-label="חדר הבקרה של החיים">
       <div className="life-os-row">
+      {mode !== 'wheel' && <>
       <div className="life-os-greeting-top">
-        <span>INSIDE OUT · LIFE OS</span>
         <h2>{greeting}, {userName}</h2>
         <p>היום הוא היום ה־<b>{journeyDay}</b> במסע שלך</p>
       </div>
+      </>}
+      {mode !== 'greeting' && <>
       <div className="life-wheel-standalone">
         <div className="life-wheel-wrap">
+          <div className="life-domains-diagram" role="group" aria-label="תחומי החיים שלך">
+            <div className="life-domains-summary">
+              <span>תמונת החיים שלך</span>
+              <strong>{average}%</strong>
+            </div>
+            <div className="life-domains-grid">
+              {worlds.map(world => {
+                const score = scores[world.id];
+                return <button key={world.id} type="button" className={`life-domain-row ${selectedWorld === world.id ? 'active' : ''}`} onClick={() => { setSelectedWorld(world.id); onOpenWorld?.(world.id); }} aria-label={`${world.label} ${score}%`}>
+                  <span className="life-domain-heading"><i>{world.icon}</i><b>{world.label}</b><em>{score}%</em></span>
+                  <span className="life-domain-track"><span style={{ width: `${score}%`, background: world.color }} /></span>
+                </button>;
+              })}
+            </div>
+          </div>
           <svg className="life-wheel" viewBox="0 0 320 320" role="img" aria-label="גלגל החיים">
             <defs>
               <filter id="wheel-depth" x="-30%" y="-30%" width="160%" height="160%">
@@ -109,6 +126,7 @@ export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld }) 
           )}
         </div>
       </div>
+      </>}
       </div>
     </section>
   );

@@ -46,9 +46,12 @@ export default function VacationMode() {
     </button>
     {active && !open && createPortal(
       <div className="vacation-ambient">
+        <button className="vacation-exit-fixed" onClick={finish} aria-label="סיום מצב החופשה">
+          <span aria-hidden="true">←</span> סיום מצב חופשה
+        </button>
         <div>
           <span>VACATION MODE</span><b>הגיע הזמן לנשום</b><small>{messages[selection]}</small>
-          <button className="vacation-ambient-return" onClick={() => setOpen(true)}>לחזרה מהחופשה ←</button>
+          <button className="vacation-ambient-return" onClick={finish}>לחזרה מהחופשה ←</button>
         </div>
       </div>,
       document.body

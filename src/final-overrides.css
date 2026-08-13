@@ -12,11 +12,59 @@ html .dashboard-main .goal-mini-card button {
   letter-spacing: 0 !important;
 }
 
+/* Compact home composition and life-domains diagram */
+.home-canvas>.life-os-wheel{order:999!important;width:100%;margin-top:12px!important;padding-top:10px!important;border-top:1px solid rgba(83,66,58,.12)}
+.life-wheel-wrap>.life-wheel{display:none}
+.life-wheel-standalone{width:auto!important;max-width:100%;margin:0 auto!important}
+.life-wheel-standalone::before{display:none!important}
+.life-domains-diagram{width:min(1000px,82vw);padding:12px 14px;border:1px solid rgba(83,66,58,.13);border-radius:20px;background:rgba(255,252,247,.58);box-shadow:0 12px 32px rgba(75,49,36,.06)}
+.life-domains-summary{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:11px;padding:0 2px 8px;border-bottom:1px solid rgba(83,66,58,.1);color:#5d483d}
+.life-domains-summary span{font-size:13px;font-weight:700}
+.life-domains-summary strong{font:400 25px/1 'Bodoni MT','Didot','Baskerville',serif;color:#7b4934}
+.life-domains-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.life-domain-row{display:block;width:100%;padding:7px 8px;border:1px solid transparent;border-radius:12px;background:transparent;text-align:right;transition:.18s ease}
+.life-domain-row:hover,.life-domain-row.active{border-color:rgba(123,73,52,.18);background:rgba(255,255,255,.68);transform:translateY(-1px)}
+.life-domain-heading{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:5px;margin-bottom:6px;color:#59483f}
+.life-domain-heading i{font-style:normal;font-size:14px}.life-domain-heading b{font-size:11px}.life-domain-heading em{font-style:normal;font-size:11px;font-weight:800;color:#71594d}
+.life-domain-track{display:block;height:6px;overflow:hidden;border-radius:99px;background:rgba(83,66,58,.1)}
+.life-domain-track>span{display:block;height:100%;border-radius:inherit;transition:width .35s ease}
+.life-wheel-standalone .world-score-editor{width:min(420px,90%);margin-top:9px!important}
+@media(min-width:761px){.dashboard-main{padding-inline:18px!important}.home-canvas{gap:8px!important;height:auto!important;min-height:0!important;overflow:visible!important;zoom:1;max-width:none!important;width:100%;margin-inline:auto!important}.home-command-row{gap:7px;width:100%}.canvas-actions{width:100%;margin:0!important}.home-canvas :is(.card,.home-editorial-calendar,.today-tasks-card){margin-block:4px!important}.home-canvas>.life-os-wheel,.life-os-wheel .life-os-row,.life-os-wheel .life-wheel-wrap{width:100%;max-width:none}.life-domains-diagram{width:100%;max-width:none}}
+@media(min-width:761px){.home-canvas{align-items:center}.home-canvas>*{width:100%;margin-inline:auto!important}.home-command-row,.canvas-actions{justify-content:center}.life-os-wheel .life-wheel-standalone{display:flex;width:100%!important;align-items:center}.life-domains-summary{direction:rtl}.life-domains-grid{width:100%}}
+.home-command-row{margin-top:68px!important}
+@media(min-width:1280px){.dashboard-main{width:auto!important;max-width:none!important;margin-right:240px!important;margin-left:0!important;padding-right:18px!important;padding-left:18px!important}}
+@media(min-width:1280px){.dashboard-main>.home-canvas{box-sizing:border-box;width:calc(100% - 28px)!important;max-width:1380px!important;margin-right:auto!important;margin-left:auto!important;padding-right:4px!important;padding-left:4px!important}.dashboard-main>.home-canvas>*{max-width:none!important}.daily-message-slot .daily-message-card{right:248px}}
+@media(min-width:1280px){.home-sound-column .daily-message-slot .daily-message-card{right:242px!important;top:54%!important;bottom:auto!important;width:108px!important;max-width:108px!important;padding-inline:3px!important;z-index:70}.home-sound-column .daily-message-slot .daily-message-copy{width:100%}.home-sound-column .daily-message-slot .daily-message-copy b{white-space:normal!important;text-align:center;line-height:1.35}}
+@media(min-width:768px) and (max-width:1279px){.home-sound-column .daily-message-slot .daily-message-card{right:12px!important;top:54%!important;bottom:auto!important;width:104px!important;max-width:104px!important;padding-inline:2px!important}.home-sound-column .daily-message-slot .daily-message-copy b{white-space:normal!important;text-align:center;line-height:1.35}}
+
+/* Floating daily message — hands and a quiet invitation, without a card */
+.home-sound-column .daily-message-slot{width:0!important;height:0!important;margin:0!important;padding:0!important}
+.daily-message-slot .daily-message-card{position:fixed!important;z-index:68;right:248px;top:58%;bottom:auto;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px;width:auto!important;min-height:0!important;margin:0!important;padding:7px 9px!important;border:0!important;border-radius:0!important;color:#6c4d3e;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;text-align:center!important;transform:translateY(-50%)}
+.daily-message-slot .daily-message-card:hover{transform:translateY(calc(-50% - 2px));background:transparent!important}
+.daily-message-slot .daily-message-copy{align-items:center!important}
+.daily-message-slot .daily-message-copy b{font-family:inherit!important;font-size:11px!important;font-weight:800!important;color:#6c4d3e!important;white-space:nowrap}
+.daily-message-slot .daily-message-hands{position:relative!important;inset:auto!important;order:-1;display:block!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.daily-message-slot .daily-message-hands i{display:flex;align-items:center;justify-content:center;gap:0;font-size:27px!important;font-style:normal;filter:drop-shadow(0 5px 7px rgba(117,75,51,.18));animation:none!important}
+.daily-message-slot .daily-message-hands i b{display:block;font-weight:400;animation:dailyHandsLeft 2.2s ease-in-out infinite}
+.daily-message-slot .daily-message-hands i b:last-child{animation-name:dailyHandsRight}
+.daily-message-slot .daily-message-hands em{top:-3px!important;right:-4px!important}
+@media(max-width:760px){.daily-message-slot .daily-message-card{right:10px;top:auto;bottom:78px;transform:none}.daily-message-slot .daily-message-card:hover{transform:translateY(-2px)}}
+@keyframes dailyHandsLeft{0%,100%{transform:translateX(1px) rotate(5deg)}50%{transform:translateX(-8px) rotate(-8deg)}}
+@keyframes dailyHandsRight{0%,100%{transform:translateX(-1px) rotate(-5deg)}50%{transform:translateX(8px) rotate(8deg)}}
+@media(max-width:1000px){.life-domains-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.life-domains-diagram{width:min(94vw,430px);padding:12px}.life-domains-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}}
+
 .primary-sidebar > .language-switcher {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
 }
+#google_translate_element,.goog-te-gadget,.goog-te-banner-frame,.skiptranslate iframe{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;opacity:0!important;pointer-events:none!important}
+body{top:0!important}
+.primary-sidebar>.language-switcher{display:flex!important;align-items:center;justify-content:center;gap:5px;padding:8px 10px!important;border-top:1px solid rgba(83,66,58,.08)!important;background:transparent!important;box-shadow:none!important}
+.primary-sidebar>.language-switcher button{min-width:30px;height:25px;padding:0 6px;border:0;border-radius:8px;color:#84756d;background:transparent;font-size:9px;font-weight:800;transition:.18s ease}
+.primary-sidebar>.language-switcher button:hover,.primary-sidebar>.language-switcher button.active{color:#654b3e;background:rgba(116,82,64,.09)}
+.primary-sidebar .help-nav-icon{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:9px;color:#936f56;background:rgba(174,137,105,.13)}
 
 .weekly-life-planner .plan-next-week {
   padding-inline: 12px !important;
@@ -395,6 +443,184 @@ html .dashboard-main .goal-mini-card button {
 .daily-message-card small{color:#8d7f78;font-size:12px}
 @media(max-width:900px){.daily-message-card{width:auto;align-items:center;margin:8px auto 0}}
 
+/* Home hierarchy v4 — greeting, three daily moves, then life metrics */
+.dashboard-hero{margin-bottom:0!important;padding-top:4px!important}
+.inside-out-lockup{transform:scale(.96);transform-origin:center top;margin-bottom:-5px}
+.inside-out-lockup .design-your-life-brush{font-size:25px!important;line-height:1.15}
+.home-canvas{display:flex;flex-direction:column;gap:18px}
+.home-canvas.space-y-6>:not([hidden])~:not([hidden]){margin-top:0}
+.life-os-row{display:flex;flex-direction:column;align-items:stretch;gap:22px}
+.life-os-greeting-top{order:1;padding:8px 0 0}
+.life-os-greeting-top span{color:#765e52;font-size:10px}
+.life-os-greeting-top h2{margin:7px 0 4px;color:#3f2e26;font-size:clamp(29px,3.4vw,40px);line-height:1.08}
+.life-os-greeting-top p{color:#6f625b;font-size:12px}
+.life-wheel-standalone{order:2;width:min(330px,82vw);margin:2px auto 0}
+.life-wheel-standalone::before{content:'מדדי החיים שלך';display:block;margin-bottom:8px;color:#59463c;font:400 19px 'Bodoni MT','Didot','Baskerville',serif;text-align:center}
+
+/* Clearer daily message and a consistent quiet-control language */
+.daily-message-card{width:220px;padding:16px 18px;border:1px solid rgba(103,63,43,.22);background:rgba(255,252,247,.78);box-shadow:0 10px 28px rgba(75,49,36,.08)}
+.daily-message-kicker{color:#755240}
+.daily-message-card b{font-size:20px;font-weight:500}
+.daily-message-card small{color:#675b54;font-size:11px;font-weight:600}
+.home-toolbar button,.canvas-actions button,.home-soundscape-options button{border-radius:12px!important}
+.home-toolbar button:focus-visible,.canvas-actions button:focus-visible,.home-soundscape-options button:focus-visible{outline:3px solid rgba(132,87,63,.25);outline-offset:2px}
+html:not(.dark-mode) .home-canvas :is(.text-slate-400,.text-slate-500){color:#71645d!important}
+
+/* Daily choice dialog — one recommendation, five quieter alternatives */
+.daily-soul-sheet{width:min(780px,100%);padding:34px 42px 28px}
+.daily-soul-symbol{width:52px;height:52px}
+.daily-soul-sheet h1{font-size:clamp(34px,4.3vw,50px)}
+.daily-soul-intro{margin:10px auto 19px;color:#675f59}
+.daily-soul-grid{grid-template-columns:repeat(2,1fr);gap:9px}
+.daily-soul-grid button{position:relative;min-height:82px;padding:13px 15px;background:rgba(255,253,248,.72)}
+.daily-soul-grid button.is-recommended{grid-column:1/-1;order:-1;min-height:94px;color:#fffaf5;border-color:#71412d;background:#71412d;box-shadow:0 14px 32px rgba(83,46,30,.17)}
+.daily-soul-grid button.is-recommended b,.daily-soul-grid button.is-recommended small,.daily-soul-grid button.is-recommended i{color:inherit}
+.daily-soul-grid button.is-recommended .daily-soul-choice-icon{color:#71412d;background:#fffaf5}
+.daily-soul-recommended{position:absolute;top:9px;left:12px;color:rgba(255,250,245,.72);font-size:8px;font-style:normal;font-weight:900;letter-spacing:.08em}
+
+@media(max-width:760px){
+  .dashboard-main{padding-top:8px!important}
+  .dashboard-hero{padding-top:0!important}
+  .inside-out-lockup{transform:scale(.76);margin-bottom:-18px}
+  .inside-out-lockup .design-your-life-brush{font-size:18px!important}
+  .home-canvas{gap:14px}
+  .life-os-greeting-top{padding-top:2px}
+  .life-os-greeting-top h2{font-size:30px}
+  .life-wheel-standalone{width:min(300px,88vw)}
+  .home-toolbar{gap:7px}
+  .home-toolbar>div:first-child{flex-basis:100%}
+  .home-soundscape{overflow:hidden}
+  .home-soundscape-options{display:flex;flex-wrap:nowrap;max-width:100%;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x proximity}
+  .home-soundscape-options button{flex:0 0 auto;scroll-snap-align:start}
+  .daily-soul-sheet{padding:30px 15px 22px}
+  .daily-soul-grid{grid-template-columns:1fr}
+  .daily-soul-grid button.is-recommended{grid-column:auto}
+  .daily-soul-grid button{min-height:70px}
+  .daily-soul-grid small{display:block}
+}
+
+/* One central guide replaces per-tab help prompts */
+.app-help-page{overflow:hidden;border:1px solid rgba(84,61,49,.12);border-radius:26px;color:#59463c;background:rgba(255,251,246,.62);box-shadow:0 18px 50px rgba(70,48,37,.07)}
+.app-help-page>header{padding:34px 30px 25px;text-align:center;border-bottom:1px solid rgba(84,61,49,.1)}
+.app-help-page>header span{color:#96745f;font-size:8px;font-weight:900;letter-spacing:.18em}
+.app-help-page>header h2{margin:8px 0 5px;font:400 clamp(29px,4vw,42px)/1.1 'Bodoni MT','Didot','Baskerville',serif;color:#49352b}
+.app-help-page>header p{color:#786961;font-size:11px}
+.app-help-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:24px}
+.app-help-grid button{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;min-height:92px;padding:15px;border:1px solid rgba(84,61,49,.1);border-radius:18px;color:#5d493f;background:rgba(255,255,255,.48);text-align:right;transition:.2s ease}
+.app-help-grid button:hover{transform:translateY(-2px);background:#fff;box-shadow:0 12px 25px rgba(70,48,37,.07)}
+.app-help-grid button>i{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;color:#865f4b;background:#f0e3d7;font-style:normal}
+.app-help-grid b,.app-help-grid small{display:block}.app-help-grid b{font-size:12px}.app-help-grid small{margin-top:5px;color:#7d6e66;font-size:9px;line-height:1.55}.app-help-grid em{color:#a18472;font-size:15px;font-style:normal}
+.app-help-page>footer{margin:0 24px 24px;padding:17px 20px;border-radius:17px;color:#6d5143;background:#ead9c9;text-align:center}.app-help-page>footer b{font-size:10px}.app-help-page>footer p{margin-top:4px;font-size:10px}
+@media(max-width:680px){.app-help-grid{grid-template-columns:1fr;padding:15px}.app-help-page>header{padding:28px 18px 21px}.app-help-page>footer{margin:0 15px 15px}}
+@media(max-width:420px){
+  .inside-out-lockup{transform:scale(.66);margin-bottom:-27px}
+  .daily-soul-symbol{width:44px;height:44px}
+  .daily-soul-sheet h1{font-size:33px}
+}
+
+/* Compact header controls and the daily message's new spiritual gesture */
+@media(min-width:768px){.header-date-column{display:flex!important;flex-direction:column;align-items:center;transform:translateX(58px)}}
+.header-date-column .header-date{width:184px;text-align:center}
+.header-vacation-slot{display:flex;justify-content:center;width:184px;margin:0 auto 9px;transform:none}
+.header-vacation-slot .vacation-side-button{width:184px;height:64px;margin:0;padding:10px 15px;border:1px solid rgba(103,63,43,.18);border-radius:16px;justify-content:center;background:rgba(255,252,247,.74);box-shadow:0 8px 24px rgba(75,49,36,.06)}
+.header-vacation-slot .vacation-side-button,.header-vacation-slot .vacation-side-button:hover,.header-vacation-slot .vacation-side-button.is-active,.mobile-vacation-slot .vacation-side-button,.mobile-vacation-slot .vacation-side-button:hover,.mobile-vacation-slot .vacation-side-button.is-active{border-color:transparent!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
+.header-vacation-slot .vacation-side-button b{font-size:10px;color:#60483c}
+.mobile-vacation-slot{display:none}
+.daily-message-slot{display:flex;justify-content:center;width:min(100%,1024px);margin:-8px auto 15px;padding:0 12px}
+.header-daily-slot{align-self:start;justify-self:start;justify-content:flex-start;width:184px;margin:5px 0 0;padding:0;transform:translateX(-46px)}
+.daily-message-slot .daily-message-card{position:relative;display:flex;align-items:center;justify-content:center;width:184px;min-height:64px;margin:0;padding:11px 16px;border-radius:16px;text-align:center}
+.daily-message-copy{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.daily-message-copy .daily-message-kicker{font-size:7px;letter-spacing:.12em}
+.daily-message-copy b{font-family:inherit;font-size:11px;font-weight:850;white-space:nowrap}
+.daily-message-copy small{font-size:8px}
+.daily-message-hands{position:absolute;z-index:2;top:-14px;right:-13px;display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(103,63,43,.14);border-radius:50%;color:#8c604a;background:rgba(255,251,245,.94);box-shadow:0 7px 18px rgba(75,49,36,.1)}
+.daily-message-hands i{position:relative;z-index:1;font-size:23px;font-style:normal;transform-origin:center bottom;animation:pearlHandsOpen 2.2s cubic-bezier(.45,0,.2,1) infinite}
+.daily-message-hands em{position:absolute;top:3px;right:3px;z-index:2;color:#b58b52;font-size:9px;font-style:normal;animation:pearlSpark 2.8s ease-in-out infinite}
+.daily-message-card:hover .daily-message-hands i{transform:translateY(-2px) scale(1.08)}
+@keyframes pearlHandsOpen{0%,100%{transform:translateY(2px) rotate(-3deg) scale(.9);opacity:.76}45%,55%{transform:translateY(-4px) rotate(3deg) scale(1.14);opacity:1;filter:drop-shadow(0 4px 8px rgba(181,139,82,.32))}}
+@keyframes pearlSpark{0%,100%{transform:scale(.72) rotate(0);opacity:.48}50%{transform:scale(1.2) rotate(22deg);opacity:1;text-shadow:0 0 12px rgba(181,139,82,.65)}}
+@media(max-width:760px){
+  .header-vacation-slot{display:none}
+  .mobile-vacation-slot{display:flex;justify-content:center;margin:0 auto 10px}
+  .mobile-vacation-slot .vacation-side-button{width:184px;height:58px;margin:0;border-radius:16px}
+  .header-daily-slot{position:absolute;top:12px;left:12px;z-index:4;width:160px;margin:0;transform:none}
+  .daily-message-slot .daily-message-card{width:184px}
+  .header-daily-slot .daily-message-card{width:160px}
+}
+@media(prefers-reduced-motion:reduce){.daily-message-hands i,.daily-message-hands em{animation:none}}
+
+/* Reference-layout pass: header controls, command row and life overview */
+.dashboard-main{position:relative}
+.home-help-position{position:absolute!important;z-index:12;top:18px;left:18px;width:250px!important;margin:0!important}
+.home-help-position:not(.is-open){min-height:52px}
+.header-daily-slot{margin-top:72px}
+.home-canvas>*{order:4}
+.home-command-row{order:1;display:flex;align-items:stretch;gap:10px;width:100%}
+.home-command-row .home-toolbar{flex:1;margin:0}
+.home-command-row .home-toolbar{justify-content:center;padding:4px}
+.home-command-row .home-toolbar>*{min-height:32px!important}
+.home-command-row .home-toolbar>button{padding-top:4px!important;padding-bottom:4px!important}
+.home-command-row .home-toolbar .theme-toggle{width:32px;height:32px;flex-basis:32px}
+.home-command-row .home-toolbar>div:first-child{flex:0 1 330px!important;min-width:220px!important;max-width:330px}
+.home-command-row .home-toolbar>div:first-child input{padding-top:4px!important;padding-bottom:4px!important;font-size:12px}
+.home-command-row .home-sound-column{display:flex;flex:0 0 184px;flex-direction:column;gap:7px}
+.home-command-row .home-soundscape{width:100%;margin:0;padding:0;border:0}
+.home-sound-column .daily-message-slot{width:100%;margin:0;padding:0}
+.home-sound-column .daily-message-card{width:100%;min-height:54px}
+.canvas-actions{order:2}
+.home-canvas>.life-os-greeting{order:0;margin:0;padding:0;border:0}
+.home-canvas>.life-os-wheel{order:99;margin-top:30px;padding-top:24px;border-top:1px solid rgba(83,66,58,.12)}
+.life-os-greeting .life-os-row{display:block}
+.life-os-greeting .life-os-greeting-top{padding-top:0}
+.header-greeting-slot{width:230px;margin:0 auto 8px;text-align:center}
+.header-greeting-slot .life-os{margin:0;padding:0}
+.header-greeting-slot .life-os-row{display:block}
+.header-greeting-slot .life-os-greeting-top>span{display:none}
+.header-greeting-slot .life-os-greeting-top h2{margin:0 0 4px;font-size:23px;line-height:1.05}
+.header-greeting-slot .life-os-greeting-top p{font-size:10px}
+.header-greeting-slot .life-os-greeting-top p b{font-size:12px}
+@media(max-width:760px){.header-greeting-slot{grid-column:1/-1!important;justify-self:center;width:100%;margin-top:8px}.header-greeting-slot .life-os-greeting-top h2{font-size:20px}}
+.sidebar-greeting{flex:0 0 auto;padding:18px 14px 12px;border-bottom:1px solid rgba(83,66,58,.11);text-align:right}
+.sidebar-greeting .life-os{margin:0;padding:0;width:100%}
+.sidebar-greeting .life-os-row{display:block}
+.sidebar-greeting .life-os-greeting-top{min-width:0;padding:0;text-align:right}
+.sidebar-greeting .life-os-greeting-top>span{display:none}
+.sidebar-greeting .life-os-greeting-top h2{margin:0 0 5px;font-size:18px;line-height:1.15;white-space:nowrap}
+.sidebar-greeting .life-os-greeting-top p{margin:0;font-size:9px;line-height:1.35}
+.sidebar-greeting .life-os-greeting-top p b{font-size:11px}
+.life-os-row{flex-direction:row;align-items:flex-start;justify-content:center;gap:42px}
+.life-os-greeting-top{align-self:flex-start;min-width:250px;padding-top:16px;text-align:center}
+.life-wheel-standalone{width:min(330px,42vw);margin:0}
+.home-soundscape-trigger{display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:7px;width:100%;height:100%;min-height:32px;padding:4px 10px;border:1px solid rgba(83,66,58,.13);border-radius:14px;color:#654b3e;background:rgba(255,252,247,.72);box-shadow:0 7px 20px rgba(75,49,36,.05);text-align:right;transition:.2s ease}
+.home-soundscape-trigger:hover{transform:translateY(-1px);background:#fffdf9}
+.home-soundscape-trigger>span{display:flex;flex-direction:column;min-width:0}
+.home-soundscape-trigger b{font-size:10px;font-weight:850}
+.home-soundscape-trigger small{overflow:hidden;color:#867269;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+.sound-library-overlay{position:fixed;z-index:10030;inset:0;display:grid;place-items:center;padding:18px;background:rgba(48,40,35,.46);backdrop-filter:blur(14px)}
+.sound-library-dialog{position:relative;width:min(560px,94vw);max-height:min(720px,90vh);overflow-y:auto;padding:30px;border:1px solid rgba(255,255,255,.6);border-radius:26px;color:#59453b;background:linear-gradient(145deg,#fbf7f1,#eee2d6);box-shadow:0 30px 90px rgba(52,38,31,.25);text-align:center}
+.sound-library-close{position:absolute;top:14px;left:15px;width:32px;height:32px;border-radius:50%;color:#755f54;background:rgba(255,255,255,.55);font-size:20px}
+.sound-library-dialog>span{color:#92735f;font-size:8px;font-weight:900;letter-spacing:.18em}
+.sound-library-dialog h3{margin:8px 0 5px;font:400 27px/1.2 'Bodoni MT','Didot','Baskerville',serif;color:#49352b}
+.sound-library-dialog>p{color:#806f66;font-size:10px}
+.sound-library-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px;text-align:right}
+.sound-library-options button{display:grid;grid-template-columns:32px 1fr;align-items:center;gap:9px;min-height:68px;padding:11px 13px;border:1px solid rgba(87,63,51,.11);border-radius:16px;color:#665046;background:rgba(255,255,255,.48);transition:.2s ease}
+.sound-library-options button:hover{transform:translateY(-1px);background:#fff}
+.sound-library-options button.active{color:#fffaf5;border-color:#71412d;background:#71412d;box-shadow:0 10px 25px rgba(83,46,30,.15)}
+.sound-library-options button>svg{margin:auto}
+.sound-library-options b,.sound-library-options small{display:block}
+.sound-library-options b{font-size:10px}.sound-library-options small{margin-top:3px;color:#8a766c;font-size:8px;line-height:1.35}.sound-library-options button.active small{color:rgba(255,250,245,.7)}
+@media(max-width:760px){
+  .home-help-position{position:relative!important;top:auto;left:auto;width:calc(100% - 24px)!important;margin:0 auto 10px!important}
+  .header-daily-slot{margin-top:0}
+  .home-command-row{flex-direction:column}
+  .home-command-row .home-sound-column{flex-basis:auto;width:184px;align-self:center}
+  .life-os-row{flex-direction:column;align-items:center;gap:20px}
+  .life-os-greeting-top{order:1;align-self:stretch;padding-top:0}
+  .life-wheel-standalone{order:2;width:min(300px,88vw)}
+  .sound-library-dialog{padding:27px 16px 20px}
+  .sound-library-options{grid-template-columns:1fr}
+}
+
 .pearl-overlay{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:20px;background:rgba(47,37,31,.5);backdrop-filter:blur(14px)}
 .pearl-dialog{position:relative;width:min(660px,94vw);max-height:90vh;overflow-y:auto;border:1px solid rgba(76,59,50,.14);border-radius:24px;background:linear-gradient(135deg,#f7f1ea,#eee6de);box-shadow:0 30px 80px rgba(64,47,39,.22)}
 .pearl-close{position:absolute;z-index:2;top:14px;left:14px;width:30px;height:30px;border-radius:50%;color:#725c51;background:rgba(255,255,255,.6);font-size:18px}
@@ -411,3 +637,190 @@ html .dashboard-main .goal-mini-card button {
 .vacation-ambient{pointer-events:auto}
 .vacation-ambient-return{display:inline-block;margin-top:16px;padding:10px 20px;border:1px solid rgba(101,74,60,.25);border-radius:999px;color:#654a3c;background:rgba(255,255,255,.7);font-size:10px;font-weight:800;transition:.2s ease}
 .vacation-ambient-return:hover{background:#fffaf3;transform:translateY(-1px)}
+.vacation-exit-fixed{position:fixed;z-index:10025;top:18px;left:18px;display:flex;align-items:center;gap:8px;padding:11px 17px;border:1px solid rgba(101,74,60,.24);border-radius:999px;color:#5d4337;background:rgba(255,250,244,.9);box-shadow:0 10px 30px rgba(72,52,39,.14);backdrop-filter:blur(12px);font-size:11px;font-weight:850;pointer-events:auto;transition:.2s ease}
+.vacation-exit-fixed:hover{transform:translateY(-1px);background:#fff}
+.vacation-exit-fixed:focus-visible,.vacation-ambient-return:focus-visible{outline:3px solid rgba(101,74,60,.3);outline-offset:3px}
+@media(max-width:600px){.vacation-exit-fixed{top:12px;left:12px;padding:10px 14px}.vacation-ambient>div{width:calc(100% - 28px);padding:22px 18px}.vacation-ambient-return{min-height:44px;padding:12px 20px}}
+
+/* Home — desert boho studio */
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas){
+  --boho-clay:#a45f43;--boho-rust:#7d4937;--boho-sand:#e8d5ba;--boho-stone:#f4ede3;--boho-olive:#7c8061;--boho-ink:#55433a;
+  background:#f3eadf!important;
+}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after{content:'⌒  ·  ◡  ·  ⌒';display:block;margin:4px auto -3px;color:rgba(145,85,61,.55);font:500 10px/1 Georgia,serif;letter-spacing:.48em;text-align:center}
+html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
+  border:1px solid rgba(120,79,57,.14)!important;
+  border-radius:24px 18px 27px 19px!important;
+  background:linear-gradient(145deg,rgba(255,252,246,.88),rgba(238,224,207,.72))!important;
+  box-shadow:0 13px 32px rgba(83,55,39,.075),inset 0 1px rgba(255,255,255,.7)!important;
+}
+html:not(.dark-mode) .home-canvas .home-command-row{border-color:rgba(120,79,57,.15)!important;border-radius:19px 14px 20px 15px!important;background:rgba(235,219,199,.82)!important;box-shadow:0 8px 24px rgba(83,55,39,.07)!important}
+html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),html:not(.dark-mode) .home-canvas .home-soundscape-trigger{border-color:rgba(132,82,57,.14)!important;color:var(--boho-ink)!important;background:rgba(255,250,242,.68)!important}
+html:not(.dark-mode) .home-canvas .canvas-actions{gap:9px!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button{border:1px solid rgba(122,82,59,.12)!important;border-radius:18px 13px 18px 13px!important;color:#655044!important;background:rgba(246,236,224,.82)!important;box-shadow:0 7px 18px rgba(82,55,41,.055)!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(3n+1){box-shadow:inset 0 -2px var(--boho-clay),0 7px 18px rgba(82,55,41,.05)!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(3n+2){box-shadow:inset 0 -2px var(--boho-olive),0 7px 18px rgba(82,55,41,.05)!important}
+html:not(.dark-mode) .home-canvas .goals-strip-title,html:not(.dark-mode) .home-canvas .home-editorial-calendar>h3{color:var(--boho-rust)!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card{border-color:rgba(126,79,55,.12)!important;background:rgba(251,244,234,.72)!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(odd){border-radius:17px 12px 19px 11px!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(even){border-radius:12px 19px 12px 18px!important}
+html:not(.dark-mode) .home-canvas .today-gamechangers{border-top-color:rgba(124,128,97,.24)!important}
+html:not(.dark-mode) .home-canvas :is(input,textarea):focus{border-color:rgba(164,95,67,.48)!important;box-shadow:0 0 0 3px rgba(164,95,67,.09)!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{color:var(--boho-rust)}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::before,html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::after{background:linear-gradient(90deg,transparent,rgba(164,95,67,.48),rgba(124,128,97,.24))!important}
+@media(prefers-reduced-motion:no-preference){html:not(.dark-mode) .home-canvas :is(.card,.canvas-actions button){transition:transform .2s ease,box-shadow .2s ease}html:not(.dark-mode) .home-canvas .canvas-actions button:hover{transform:translateY(-2px) rotate(-.25deg)}}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#9a674f!important;text-shadow:0 8px 28px rgba(154,103,79,.09)!important}
+
+/* Stronger boho signature: woven edges, desert sun and hand-drawn arches. */
+html:not(.dark-mode) .home-canvas .home-command-row{border-style:solid!important;outline:1px dashed rgba(143,91,63,.17);outline-offset:4px}
+html:not(.dark-mode) .home-canvas .goals-strip{position:relative;overflow:hidden;border-top:3px solid rgba(164,95,67,.48)!important}
+html:not(.dark-mode) .home-canvas .goals-strip::after{content:'☼';position:absolute;right:18px;top:5px;color:rgba(164,95,67,.48);font:400 22px/1 Georgia,serif;transform:rotate(8deg)}
+html:not(.dark-mode) .home-canvas .home-editorial-calendar,html:not(.dark-mode) .home-canvas .today-tasks-card{position:relative;overflow:hidden}
+html:not(.dark-mode) .home-canvas .home-editorial-calendar::before{content:'';position:absolute;left:-28px;bottom:-48px;width:118px;height:118px;border:2px solid rgba(164,95,67,.16);border-radius:50% 50% 0 0;box-shadow:0 0 0 10px rgba(164,95,67,.055),0 0 0 20px rgba(124,128,97,.045);pointer-events:none}
+html:not(.dark-mode) .home-canvas .today-tasks-card::before{content:'◠  ◠  ◠';position:absolute;left:18px;top:14px;color:rgba(124,128,97,.34);font:700 12px/1 Georgia,serif;letter-spacing:.2em;pointer-events:none}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+1){border-bottom:3px solid rgba(164,95,67,.58)!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+2){border-bottom:3px solid rgba(124,128,97,.58)!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+3){border-bottom:3px solid rgba(190,145,91,.55)!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n){border-bottom:3px solid rgba(125,73,55,.5)!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button::before{content:'';width:5px;height:5px;flex:0 0 5px;border-radius:50%;background:var(--boho-clay);opacity:.55}
+html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(even)::before{background:var(--boho-olive)}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{font-family:'Palatino Linotype','Book Antiqua',Palatino,serif!important}
+@media(max-width:760px){html:not(.dark-mode) .home-canvas .home-command-row{outline-offset:2px}html:not(.dark-mode) .home-canvas .goals-strip::after{display:none}}
+
+/* Airier home rhythm — space sections without inflating their internal controls. */
+@media(min-width:761px){
+  .dashboard-main>.home-canvas{gap:18px!important}
+  .home-canvas .home-command-row{margin-bottom:2px!important}
+  .home-canvas .canvas-actions{margin-top:2px!important;margin-bottom:4px!important}
+  .home-canvas .home-block{margin-top:2px!important;margin-bottom:2px!important}
+  .home-canvas .grid.md\:grid-cols-2{column-gap:20px!important}
+  .home-canvas :is(.goals-strip,.home-editorial-calendar,.today-tasks-card){padding-top:14px!important;padding-bottom:14px!important}
+}
+@media(max-width:760px){.dashboard-main>.home-canvas{gap:13px!important}.home-canvas .home-block{margin-block:2px!important}}
+
+/* Calm home pass — one warm palette, no decorative stripes or visual noise. */
+html:not(.dark-mode) .primary-sidebar{border:0!important;border-left:0!important;box-shadow:none!important;background:#eee5da!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#f3eadf!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after{display:none!important;content:none!important}
+html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){border:0!important;border-radius:20px!important;background:#f8f3ec!important;box-shadow:0 8px 24px rgba(79,57,45,.055)!important}
+html:not(.dark-mode) .home-canvas .home-command-row{border:0!important;outline:0!important;border-radius:18px!important;background:#eee5da!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),html:not(.dark-mode) .home-canvas .home-soundscape-trigger{border:0!important;border-radius:11px!important;background:#f8f3ec!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button{border:0!important;border-radius:14px!important;color:#65574f!important;background:#f7f1e9!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button::before{display:none!important;content:none!important}
+html:not(.dark-mode) .home-canvas .goals-strip{border:0!important}
+html:not(.dark-mode) .home-canvas .goals-strip::after,html:not(.dark-mode) .home-canvas .home-editorial-calendar::before,html:not(.dark-mode) .home-canvas .today-tasks-card::before{display:none!important;content:none!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card,html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){border:0!important;border-radius:14px!important;background:#f3ece3!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas :is(.bg-violet-50,.bg-purple-50,.bg-pink-50,.bg-emerald-50,.bg-blue-50,.bg-amber-50){background:#f3ece3!important}
+html:not(.dark-mode) .home-canvas :is(.border-violet-100,.border-purple-100,.border-pink-100,.border-emerald-100,.border-blue-100,.border-amber-100){border-color:transparent!important}
+html:not(.dark-mode) .home-canvas .today-gamechangers{border-top:0!important}
+
+/* Final viewport anchoring: the home entrance transform otherwise traps fixed children inside the canvas. */
+.dashboard-main>.home-canvas{transform:none!important}
+@media(min-width:1280px){
+  .dashboard-main .home-sound-column .daily-message-slot .daily-message-card{
+    position:fixed!important;right:242px!important;top:54%!important;bottom:auto!important;
+    width:108px!important;max-width:108px!important;transform:translateY(-50%)!important;
+  }
+  .dashboard-main .home-sound-column .daily-message-slot .daily-message-card:hover{transform:translateY(calc(-50% - 2px))!important}
+}
+@media(min-width:768px) and (max-width:1279px){
+  .dashboard-main .home-sound-column .daily-message-slot .daily-message-card{
+    position:fixed!important;right:12px!important;top:54%!important;bottom:auto!important;
+    width:104px!important;max-width:104px!important;transform:translateY(-50%)!important;
+  }
+}
+
+/* The daily message lives directly under body, fully independent of dashboard widths and transforms. */
+.daily-message-floating-root{position:fixed;z-index:10010;right:242px;top:24px;width:108px;transform:none;pointer-events:none}
+.daily-message-floating-root .daily-message-card{position:static!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:5px;width:108px!important;min-height:0!important;margin:0!important;padding:6px 2px!important;border:0!important;background:transparent!important;box-shadow:none!important;text-align:center!important;transform:none!important;pointer-events:auto}
+.daily-message-floating-root .daily-message-card:hover{transform:translateY(-2px)!important}
+.daily-message-floating-root .daily-message-copy{align-items:center!important;width:100%}
+.daily-message-floating-root .daily-message-copy b{white-space:normal!important;text-align:center!important;line-height:1.35!important}
+.daily-message-floating-root .daily-message-hands{position:relative!important;inset:auto!important;display:block!important;width:auto!important;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.daily-message-floating-root .daily-message-hands i{display:flex;align-items:center;justify-content:center;font-size:30px!important;font-style:normal;animation:pearlHandsOpen 2.2s ease-in-out infinite!important;filter:drop-shadow(0 5px 7px rgba(117,75,51,.18))}
+.daily-message-floating-root .daily-message-hands i b{display:block;font-weight:400;animation:dailyHandsLeft 2.2s ease-in-out infinite}.daily-message-floating-root .daily-message-hands i b:last-child{animation-name:dailyHandsRight}
+.daily-message-floating-root .daily-message-meditation i{font-size:34px!important;animation:dailyMeditationFloat 2.8s ease-in-out infinite!important}
+@keyframes dailyMeditationFloat{0%,100%{transform:translateY(1px);filter:drop-shadow(0 4px 6px rgba(117,75,51,.14))}50%{transform:translateY(-5px);filter:drop-shadow(0 9px 9px rgba(117,75,51,.2))}}
+@media(max-width:1279px){.daily-message-floating-root{right:12px}}
+@media(max-width:760px){.daily-message-floating-root{top:12px;right:10px;bottom:auto;transform:none}}
+
+/* Bring the life overview closer to the calendar without clipping either section. */
+.home-canvas>.life-os-wheel{margin-top:-20px!important;padding-top:2px!important}
+
+/* Search and soundscape share one compact toolbar surface. */
+.home-command-row{box-sizing:border-box;display:flex!important;align-items:center!important;gap:6px!important;min-height:42px;padding:4px 6px!important;border:1px solid rgba(112,84,67,.09);border-radius:17px;background:rgba(247,243,235,.76)!important;box-shadow:0 5px 16px rgba(91,62,45,.06);backdrop-filter:blur(14px)}
+.home-command-row .home-toolbar{flex:1!important;min-height:32px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
+.home-command-row .home-sound-column{display:flex!important;flex:0 0 174px!important;width:174px!important;align-self:stretch;justify-content:center;gap:0!important;margin:0!important;padding:0!important}
+.home-command-row .home-soundscape{display:flex;align-items:center;height:100%;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.home-command-row .home-soundscape-trigger{min-height:30px!important;height:30px!important;padding:3px 8px!important;border-color:rgba(112,84,67,.1)!important;border-radius:11px!important;background:rgba(255,255,255,.34)!important;box-shadow:none!important}
+.home-command-row .home-toolbar :is(button,input){min-height:30px!important;height:30px!important}
+.home-command-row .home-toolbar>div{padding-top:0!important;padding-bottom:0!important}
+@media(max-width:760px){.home-command-row{align-items:stretch!important}.home-command-row .home-sound-column{width:100%!important;flex-basis:auto!important}.home-command-row .home-soundscape-trigger{width:100%}}
+
+/* On home, bring the original lined signature directly beneath the life overview. */
+.dashboard-main:has(>.home-canvas)>.brand-page-footer{margin-top:64px!important;padding-top:0!important;padding-bottom:8px!important}
+.home-command-row>.home-sound-column{order:-1!important}
+
+/* Definitive quiet-home override — intentionally last. */
+html:not(.dark-mode) .primary-sidebar{border:none!important;box-shadow:none!important;background:#eee5da!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#f3eadf!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after,
+html:not(.dark-mode) .home-canvas .goals-strip::after,
+html:not(.dark-mode) .home-canvas .home-editorial-calendar::before,
+html:not(.dark-mode) .home-canvas .today-tasks-card::before,
+html:not(.dark-mode) .home-canvas .canvas-actions button::before{display:none!important;content:none!important}
+html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){border:none!important;background:#f8f3ec!important;box-shadow:0 7px 20px rgba(79,57,45,.045)!important}
+html:not(.dark-mode) .home-canvas .home-command-row{border:none!important;outline:none!important;background:#eee5da!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){border:none!important;background:#f3ece3!important;box-shadow:none!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button{border:none!important;background:#f7f1e9!important;box-shadow:none!important}
+
+/* Screenshot-specific cleanup: remove the remaining color bars and the sidebar seam. */
+html:not(.dark-mode) body:has(.home-canvas),html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell{background:#f3eadf!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{margin:0!important;height:100vh!important;border-radius:0!important;border:none!important;background:#f3eadf!important;box-shadow:none!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .home-editorial-calendar,
+html:not(.dark-mode) .dashboard-main .home-canvas .today-tasks-card,
+html:not(.dark-mode) .dashboard-main .home-canvas .goals-strip{border:none!important;background:#f8f3ec!important;box-shadow:0 7px 20px rgba(79,57,45,.04)!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){border:none!important;background:#f7f1e9!important;box-shadow:none!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){border:none!important;background:#f3ece3!important;box-shadow:none!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-1,
+html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-1\.5{background:#ded5ca!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-full{background:#afa396!important;box-shadow:none!important}
+html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .gradient-text{color:#70645d!important;background:none!important;-webkit-text-fill-color:currentColor!important}
+
+/* Quiet divider between the right navigation and the workspace. */
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{border-left:0!important;box-shadow:-7px 0 22px rgba(91,66,53,.045)!important}
+.home-goal-link{cursor:pointer;transition:transform .18s ease,background .18s ease!important}
+.home-goal-link:hover,.home-goal-link:focus-visible{transform:translateY(-2px);background:#faf6f0!important;outline:2px solid rgba(120,88,70,.18);outline-offset:2px}
+.domain-goal-card{scroll-margin-top:28px;transition:box-shadow .25s ease,transform .25s ease}
+.domain-goal-card.is-focused{box-shadow:0 0 0 3px rgba(139,108,87,.2),0 14px 34px rgba(83,60,47,.1)!important;transform:translateY(-2px)}
+.domain-goal-card{position:relative}
+.selected-goal-label{position:absolute;z-index:3;top:10px;left:11px;padding:5px 9px;border-radius:999px;color:#fff;background:#8b6c5d;font-size:9px;font-weight:850;box-shadow:0 5px 14px rgba(83,60,47,.14)}
+html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!important}
+
+/* Daily message readability */
+.pearl-dialog{width:min(740px,94vw)!important}
+.pearl-dialog>header span{font-size:11px!important;color:#756b96!important}
+.pearl-dialog>header h3{font-size:31px!important;line-height:1.2!important;color:#513b30!important}
+.pearl-dialog .pearl-layers b{font-size:12px!important;color:#654b3f!important}
+.pearl-dialog .pearl-layers p{margin-top:8px!important;font-size:13px!important;line-height:1.65!important;color:#5f5149!important}
+.pearl-dialog .pearl-layers section{min-height:126px!important;padding:21px 23px!important}
+.pearl-dialog .pearl-after{gap:12px!important;margin-top:18px!important}
+.pearl-dialog .pearl-after span{font-size:10px!important;color:#806f66!important}
+.pearl-dialog .pearl-after b{font-size:11px!important;color:#594940!important}
+.pearl-dialog .pearl-after small{font-size:10px!important;color:#745f54!important}
+.pearl-dialog>footer button{min-height:40px;padding:10px 22px!important;font-size:12px!important}
+@media(max-width:700px){.pearl-dialog>header h3{font-size:27px!important}.pearl-dialog .pearl-layers p{font-size:12px!important}.pearl-dialog .pearl-layers section{min-height:auto!important}}
+
+/* Exact supplied ink enso replaces the generated O in the home wordmark. */
+.inside-out-lockup .enso-o-image{display:inline-block!important;width:.86em!important;height:.86em!important;margin:0 .015em!important;vertical-align:-.095em!important;background:none!important}
+.inside-out-lockup .enso-o-image img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;transform:scale(1.13);filter:contrast(1.12)!important}
+.inside-out-lockup .inside-out-flowing{font-family:'Gveret Levin','Arial Narrow',sans-serif!important;font-weight:400!important;letter-spacing:.015em!important;line-height:.9!important}
+.inside-out-lockup .inside-out-exact{display:flex!important;align-items:center!important;justify-content:center!important;width:min(650px,56vw)!important;height:auto!important;margin:0 auto!important;line-height:0!important}
+.inside-out-lockup .inside-out-exact img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
+@media (max-width:700px){.inside-out-lockup .inside-out-exact{width:min(560px,90vw)!important}}
+
+/* Sidebar copy follows the warm date color throughout. */
+html:not(.dark-mode) .primary-sidebar nav button,
+html:not(.dark-mode) .primary-sidebar nav button:hover,
+html:not(.dark-mode) .primary-sidebar nav button[class*="text-violet"],
+html:not(.dark-mode) .primary-sidebar>div button{color:#765947!important}

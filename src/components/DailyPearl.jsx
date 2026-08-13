@@ -13,6 +13,7 @@ const todayKey = () => new Date().toISOString().slice(0,10);
 export default function DailyPearl(){
   const pearl = useMemo(() => pearls[Math.floor(Date.now()/86400000)%pearls.length], []);
   const [open, setOpen] = useState(false);
+  const [seen, setSeen] = useState(false);
   const [saved,setSaved] = useState(false);
   const [done,setDone] = useState(false);
   const save = () => {
@@ -22,14 +23,18 @@ export default function DailyPearl(){
   };
   const finish = () => { setDone(true); setOpen(false); };
   const count = (()=>{try{return JSON.parse(localStorage.getItem('insideout-pearl-collection')||'[]').length;}catch{return 0;}})();
-  const openPearl = () => { window.dispatchEvent(new CustomEvent('play-daily-gong')); setOpen(true); };
+  const openPearl = () => { setSeen(true); window.dispatchEvent(new CustomEvent('play-daily-gong')); setOpen(true); };
 
   return <>
-    <button className={`daily-message-card${done?' is-done':''}`} onClick={openPearl}>
-      <span className="daily-message-kicker">INSIDE OUT</span>
-      <b>🔔 המסר היומי שלך</b>
-      <small>{done?'קראת את המסר של היום ✓':'לחצי לפתיחה'}</small>
-    </button>
+    {createPortal(
+      <div className="daily-message-floating-root">
+        <button className={`daily-message-card${done?' is-done':''}`} onClick={openPearl}>
+          {!seen && <span className="daily-message-hands daily-message-meditation" aria-hidden="true"><i>🧘‍♀️</i><em>✦</em></span>}
+          <span className="daily-message-copy"><b>{done?'המסר היומי נקרא ✓':'למסר היומי לחצי כאן'}</b></span>
+        </button>
+      </div>,
+      document.body
+    )}
     {open && createPortal(
       <div className="pearl-overlay" role="dialog" aria-modal="true" aria-labelledby="pearl-title">
         <section className="pearl-dialog" style={{'--pearl':pearl.color}}>
