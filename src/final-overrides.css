@@ -887,3 +887,12 @@ html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas :is(.ca
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .home-command-row{background:#bba890!important;border:1px solid rgba(63,45,34,.08)!important}
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){background:#d8c8b3!important;color:#49362a!important;border:0!important;box-shadow:none!important}
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;color:#49362a!important;border:0!important;box-shadow:none!important}
+
+/* Exact supplied final wordmark — preserve the lettering and painted O as one image. */
+.inside-out-lockup .inside-out-final-image{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:min(660px,58vw)!important;height:auto!important;margin:0 auto!important;
+  padding:0!important;line-height:0!important;letter-spacing:0!important;color:transparent!important
+}
+.inside-out-lockup .inside-out-final-image img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
+@media(max-width:760px){.inside-out-lockup .inside-out-final-image{width:min(660px,92vw)!important}}

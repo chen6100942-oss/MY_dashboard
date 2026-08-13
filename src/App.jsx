@@ -10,6 +10,7 @@ import DailyPearl from './components/DailyPearl.jsx';
 import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
 import { supabase } from './lib/supabaseClient.js';
+import insideOutFinalLockup from './assets/inside-out-final-lockup.png';
 
     const App = () => {
         // ============================================================
@@ -1672,7 +1673,9 @@ import { supabase } from './lib/supabaseClient.js';
                             {/* Brand lockup */}
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
-                                    <h1 className="inside-out-flowing">INSIDE OUT</h1>
+                                    <h1 className="inside-out-flowing inside-out-final-image" aria-label="INSIDE OUT">
+                                        <img src={insideOutFinalLockup} alt="INSIDE OUT" />
+                                    </h1>
                                 </div>
                                 <strong className="design-your-life-brush" style={{'--marker-color': brandMarkerColor}}>
                                     Design your life
