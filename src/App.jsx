@@ -10,7 +10,7 @@ import DailyPearl from './components/DailyPearl.jsx';
 import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
 import { supabase } from './lib/supabaseClient.js';
-import insideOutFinalLockup from './assets/inside-out-final-lockup.png';
+import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.png';
 
     const App = () => {
         // ============================================================
