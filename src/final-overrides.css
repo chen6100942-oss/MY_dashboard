@@ -669,7 +669,7 @@ html:not(.dark-mode) .home-canvas :is(input,textarea):focus{border-color:rgba(16
 html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{color:var(--boho-rust)}
 html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::before,html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::after{background:linear-gradient(90deg,transparent,rgba(164,95,67,.48),rgba(124,128,97,.24))!important}
 @media(prefers-reduced-motion:no-preference){html:not(.dark-mode) .home-canvas :is(.card,.canvas-actions button){transition:transform .2s ease,box-shadow .2s ease}html:not(.dark-mode) .home-canvas .canvas-actions button:hover{transform:translateY(-2px) rotate(-.25deg)}}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#9a674f!important;text-shadow:0 8px 28px rgba(154,103,79,.09)!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#6f402d!important;text-shadow:0 8px 28px rgba(111,64,45,.08)!important}
 
 /* Stronger boho signature: woven edges, desert sun and hand-drawn arches. */
 html:not(.dark-mode) .home-canvas .home-command-row{border-style:solid!important;outline:1px dashed rgba(143,91,63,.17);outline-offset:4px}
@@ -814,9 +814,9 @@ html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!impo
 /* Exact supplied ink enso replaces the generated O in the home wordmark. */
 .inside-out-lockup .enso-o-image{display:inline-block!important;width:.86em!important;height:.86em!important;margin:0 .015em!important;vertical-align:-.095em!important;background:none!important}
 .inside-out-lockup .enso-o-image img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;transform:scale(1.13);filter:contrast(1.12)!important}
-.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:-.055em!important;line-height:.88!important}
+.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:.035em!important;line-height:.88!important}
 html:not(.dark-mode) .dashboard-main .inside-out-lockup .inside-out-flowing,
-html.dark-mode .dashboard-main .inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:-.055em!important}
+html.dark-mode .dashboard-main .inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:.035em!important}
 .inside-out-lockup .inside-out-exact{display:flex!important;align-items:center!important;justify-content:center!important;width:min(650px,56vw)!important;height:auto!important;margin:0 auto!important;line-height:0!important}
 .inside-out-lockup .inside-out-exact img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
 @media (max-width:700px){.inside-out-lockup .inside-out-exact{width:min(560px,90vw)!important}}
