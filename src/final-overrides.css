@@ -896,3 +896,29 @@ html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .goal-m
 }
 .inside-out-lockup .inside-out-final-image img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
 @media(max-width:760px){.inside-out-lockup .inside-out-final-image{width:min(660px,92vw)!important}}
+
+/* Full home backdrop sampled from the supplied wordmark paper. */
+html:not(.dark-mode) body:has(.home-canvas),
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-main:has(>.home-canvas){
+  background-color:#e7d2be!important;
+  background-image:url('./assets/japandi-paper-background.png')!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{
+  background-color:rgba(224,207,188,.86)!important;
+  background-image:url('./assets/japandi-paper-background.png')!important;
+  background-size:cover!important;
+  background-position:right center!important;
+  background-repeat:no-repeat!important;
+  background-blend-mode:soft-light!important;
+  backdrop-filter:blur(12px)!important;
+}
+@media(max-width:760px){
+  html:not(.dark-mode) body:has(.home-canvas),
+  html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
+  html:not(.dark-mode) body:has(.home-canvas) .dashboard-main:has(>.home-canvas){background-attachment:scroll!important;background-position:center top!important}
+}
