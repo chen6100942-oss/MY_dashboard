@@ -879,3 +879,11 @@ html:not(.dark-mode) body:has(.home-canvas) .daily-message-floating-root .daily-
   html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{background:#bba890!important}
   html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){box-shadow:0 7px 18px rgba(63,45,34,.065)!important}
 }
+
+/* Win over legacy component-specific colors so the home reads as one material system. */
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
+  background:#e8ddcd!important;border:1px solid rgba(63,45,34,.075)!important;box-shadow:0 12px 30px rgba(63,45,34,.075)!important
+}
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .home-command-row{background:#bba890!important;border:1px solid rgba(63,45,34,.08)!important}
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){background:#d8c8b3!important;color:#49362a!important;border:0!important;box-shadow:none!important}
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;color:#49362a!important;border:0!important;box-shadow:none!important}
