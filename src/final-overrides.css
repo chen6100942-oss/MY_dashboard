@@ -814,9 +814,9 @@ html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!impo
 /* Exact supplied ink enso replaces the generated O in the home wordmark. */
 .inside-out-lockup .enso-o-image{display:inline-block!important;width:.86em!important;height:.86em!important;margin:0 .015em!important;vertical-align:-.095em!important;background:none!important}
 .inside-out-lockup .enso-o-image img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;transform:scale(1.13);filter:contrast(1.12)!important}
-.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:.035em!important;line-height:.88!important}
+.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;letter-spacing:.035em!important;line-height:.88!important}
 html:not(.dark-mode) .dashboard-main .inside-out-lockup .inside-out-flowing,
-html.dark-mode .dashboard-main .inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;letter-spacing:.035em!important}
+html.dark-mode .dashboard-main .inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;letter-spacing:.035em!important}
 .inside-out-lockup .inside-out-exact{display:flex!important;align-items:center!important;justify-content:center!important;width:min(650px,56vw)!important;height:auto!important;margin:0 auto!important;line-height:0!important}
 .inside-out-lockup .inside-out-exact img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
 @media (max-width:700px){.inside-out-lockup .inside-out-exact{width:min(560px,90vw)!important}}
