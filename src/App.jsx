@@ -9,6 +9,7 @@ import LifeOperatingSystem from './components/LifeOperatingSystem.jsx';
 import DailyPearl from './components/DailyPearl.jsx';
 import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
+import ZenHomePreview from './components/ZenHomePreview.jsx';
 import { supabase } from './lib/supabaseClient.js';
 import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.png';
 
@@ -1830,8 +1831,13 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
 
 
 
+                {/* ZEN HOME PREVIEW — enabled only through ?zenPreview=1 */}
+                {activeTab === 'home' && new URLSearchParams(window.location.search).get('zenPreview') === '1' && (
+                    <ZenHomePreview tasks={tasks} goals={domainGoals} onNavigate={setActiveTab} />
+                )}
+
                 {/* HOME */}
-                {activeTab === 'home' && (
+                {activeTab === 'home' && new URLSearchParams(window.location.search).get('zenPreview') !== '1' && (
                     <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
                         <div className="home-command-row">

@@ -888,6 +888,30 @@ html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .home-c
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){background:#d8c8b3!important;color:#49362a!important;border:0!important;box-shadow:none!important}
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;color:#49362a!important;border:0!important;box-shadow:none!important}
 
+/* Zen Focus — reversible preview mode, active only when the preview component exists. */
+html:not(.dark-mode) body:has(.zen-preview-home),
+html:not(.dark-mode) body:has(.zen-preview-home) .dashboard-shell,
+html:not(.dark-mode) body:has(.zen-preview-home) .dashboard-main{background:#f4f1e9!important;background-image:none!important;color:#352820!important}
+html:not(.dark-mode) body:has(.zen-preview-home) .primary-sidebar{background:#f8f5ee!important;background-image:none!important;border-left:1px solid rgba(53,40,32,.08)!important;box-shadow:none!important}
+.zen-preview-home{position:relative;width:min(1010px,100%);margin:10px auto 60px;display:grid;gap:18px;direction:rtl;color:#352820}
+.zen-preview-home :is(button,article){font-family:Heebo,Arial,sans-serif}
+.zen-preview-home article{background:rgba(255,254,250,.92);border:1px solid rgba(53,40,32,.08);border-radius:22px;box-shadow:0 12px 36px rgba(71,58,45,.065)}
+.zen-today-card{padding:25px 48px 18px;text-align:center}
+.zen-eyebrow{display:flex;align-items:center;justify-content:center;gap:8px;color:#778363;font-size:13px;font-weight:700}
+.zen-today-card h2{margin:8px 0 1px;font:500 34px/1.15 'Bodoni Moda',Georgia,serif;color:#30251f}
+.zen-today-card>p{margin:0 0 14px;color:#70645b;font-size:15px}
+.zen-task-list{border-top:1px solid rgba(53,40,32,.09)}
+.zen-task-list button{display:grid;grid-template-columns:36px 1fr 30px;align-items:center;width:100%;min-height:52px;padding:7px 5px;border:0;border-bottom:1px solid rgba(53,40,32,.08);background:transparent;color:#493d35;cursor:pointer}
+.zen-task-list button:hover{background:#f3f2ea}.zen-task-list button i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#e3e5d8;color:#4b553d;font-style:normal}.zen-task-list button span{text-align:center;font-size:14px}.zen-task-list button svg{color:#778363}
+.zen-lower-grid{display:grid;grid-template-columns:1fr 1.08fr;gap:18px}
+.zen-lower-grid article{padding:20px 28px}.zen-lower-grid header{display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:17px}.zen-lower-grid header svg{color:#778363}.zen-lower-grid h3{margin:0;font:500 23px/1.2 'Bodoni Moda',Georgia,serif}
+.zen-week-days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;direction:rtl}.zen-week-days button{display:grid;place-items:center;gap:7px;padding:4px;border:0;background:transparent;color:#51463e;cursor:pointer}.zen-week-days small{font-size:10px}.zen-week-days b{display:grid;place-items:center;width:35px;height:35px;border-radius:50%;font-size:13px}.zen-week-days i{width:6px;height:6px;border-radius:50%;background:#ddd8cc}.zen-week-days button.is-today b{background:#7f8b6a;color:white}.zen-week-days button.is-today i{background:#7f8b6a}
+.zen-goal-list{display:grid;gap:16px}.zen-goal-list button{display:grid;grid-template-columns:130px 1fr 42px;align-items:center;gap:12px;border:0;background:transparent;color:#493d35;cursor:pointer}.zen-goal-list span{text-align:right;font-size:12px}.zen-goal-list div{height:6px;border-radius:99px;background:#e3ded3;overflow:hidden}.zen-goal-list div i{display:block;height:100%;border-radius:inherit;background:#7f8b6a}.zen-goal-list b{font-size:12px;font-weight:600}
+.zen-primary-action{justify-self:center;display:flex;align-items:center;gap:8px;margin-top:2px;padding:12px 25px;border:0;border-radius:999px;background:#7f8b6a;color:#fff;font-size:13px;font-weight:700;box-shadow:0 8px 20px rgba(95,108,75,.2);cursor:pointer}.zen-primary-action:hover{background:#6f7c5b;transform:translateY(-1px)}
+.zen-preview-message{position:fixed;left:28px;top:42%;display:flex;flex-direction:column;align-items:center;color:#5d5147;text-align:center}.zen-preview-message span{font-size:52px;filter:saturate(.35)}.zen-preview-message b{margin-top:7px;font-size:11px}.zen-preview-message small{font-size:10px;color:#81766e}
+@media(max-width:1100px){.zen-preview-message{display:none}.zen-preview-home{width:min(900px,100%)}}
+@media(max-width:760px){.zen-preview-home{gap:13px;margin-top:4px}.zen-today-card{padding:22px 18px 14px}.zen-today-card h2{font-size:29px}.zen-lower-grid{grid-template-columns:1fr}.zen-lower-grid article{padding:18px 15px}.zen-goal-list button{grid-template-columns:110px 1fr 38px}}
+
 /* Exact supplied final wordmark — preserve the lettering and painted O as one image. */
 .inside-out-lockup .inside-out-final-image{
   display:flex!important;align-items:center!important;justify-content:center!important;
