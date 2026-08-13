@@ -830,9 +830,9 @@ html:not(.dark-mode) .primary-sidebar>div button{color:#765947!important}
 /* Japandi home palette — walnut ink, smoked sand and linen surfaces. */
 html:not(.dark-mode) body:has(.home-canvas),
 html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#c8b69f!important;color:#3f2d22!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#e6d9c8!important;color:#3f2d22!important}
 html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{
-  background:#bba890!important;
+  background:#ddd0bf!important;
   box-shadow:-1px 0 0 rgba(63,45,34,.12),-12px 0 34px rgba(63,45,34,.07)!important;
 }
 html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar :is(h1,h2,h3,b,strong,button){color:#3f2d22!important}
@@ -876,7 +876,7 @@ html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::afte
 html:not(.dark-mode) body:has(.home-canvas) .daily-message-floating-root .daily-message-card{color:#3f2d22!important}
 
 @media(max-width:760px){
-  html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{background:#bba890!important}
+  html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{background:#ddd0bf!important}
   html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){box-shadow:0 7px 18px rgba(63,45,34,.065)!important}
 }
 
