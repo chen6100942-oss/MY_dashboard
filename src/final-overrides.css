@@ -826,3 +826,56 @@ html:not(.dark-mode) .primary-sidebar nav button,
 html:not(.dark-mode) .primary-sidebar nav button:hover,
 html:not(.dark-mode) .primary-sidebar nav button[class*="text-violet"],
 html:not(.dark-mode) .primary-sidebar>div button{color:#765947!important}
+
+/* Japandi home palette — walnut ink, smoked sand and linen surfaces. */
+html:not(.dark-mode) body:has(.home-canvas),
+html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#c8b69f!important;color:#3f2d22!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{
+  background:#bba890!important;
+  box-shadow:-1px 0 0 rgba(63,45,34,.12),-12px 0 34px rgba(63,45,34,.07)!important;
+}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar :is(h1,h2,h3,b,strong,button){color:#3f2d22!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar :is(p,small,span){color:#695749!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button{background:transparent!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button:hover{background:rgba(239,229,214,.38)!important}
+html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button[class*="bg-"]{background:#ded0bd!important;box-shadow:none!important}
+
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero,
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup{color:#3f2d22!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#3b281e!important;text-shadow:none!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .design-your-life-brush{color:#5f493a!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas) :is(.vacation-label,.dashboard-date,.dashboard-year){color:#5e4b3d!important}
+
+html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
+  background:#e8ddcd!important;
+  border:1px solid rgba(63,45,34,.075)!important;
+  box-shadow:0 12px 30px rgba(63,45,34,.075)!important;
+}
+html:not(.dark-mode) .home-canvas .home-command-row{background:#bba890!important;border:1px solid rgba(63,45,34,.08)!important}
+html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),
+html:not(.dark-mode) .home-canvas .home-soundscape-trigger{background:#ded0bd!important;color:#49362a!important;border:0!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button{background:#d8c8b3!important;color:#49362a!important;border:0!important}
+html:not(.dark-mode) .home-canvas .canvas-actions button:hover{background:#e4d7c5!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;border:0!important}
+
+html:not(.dark-mode) .home-canvas :is(h1,h2,h3,h4,h5,h6,strong,b),
+html:not(.dark-mode) .home-canvas :is(.goals-strip-title,.home-editorial-calendar>h3){color:#3f2d22!important}
+html:not(.dark-mode) .home-canvas :is(p,small,label,span,button,input,textarea){color:#665447}
+html:not(.dark-mode) .home-canvas :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-slate-600,.text-slate-700,.text-slate-800){color:#6b594b!important}
+html:not(.dark-mode) .home-canvas :is(.text-violet-400,.text-violet-500,.text-violet-600,.text-violet-700,.text-purple-500,.text-blue-500,.text-cyan-500,.text-emerald-500,.text-amber-500){color:#704c37!important}
+html:not(.dark-mode) .home-canvas :is(.bg-violet-50,.bg-violet-100,.bg-purple-50,.bg-purple-100,.bg-pink-50,.bg-emerald-50,.bg-blue-50,.bg-amber-50,.bg-slate-50,.bg-slate-100){background:#d9cab6!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card :is(.h-1,.h-1\.5){background:#c1b09a!important}
+html:not(.dark-mode) .home-canvas .goal-mini-card .h-full{background:#684834!important}
+html:not(.dark-mode) .home-canvas :is(input,textarea)::placeholder{color:#8a7767!important}
+html:not(.dark-mode) .home-canvas :is(input,textarea):focus{box-shadow:0 0 0 3px rgba(104,72,52,.13)!important}
+
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{color:#4f392c!important}
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::before,
+html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::after{background:linear-gradient(90deg,transparent,rgba(63,45,34,.34),transparent)!important}
+html:not(.dark-mode) body:has(.home-canvas) .daily-message-floating-root .daily-message-card{color:#3f2d22!important}
+
+@media(max-width:760px){
+  html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{background:#bba890!important}
+  html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){box-shadow:0 7px 18px rgba(63,45,34,.065)!important}
+}
