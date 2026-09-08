@@ -464,7 +464,6 @@ body{top:0!important}
 .daily-message-card small{color:#675b54;font-size:11px;font-weight:600}
 .home-toolbar button,.canvas-actions button,.home-soundscape-options button{border-radius:12px!important}
 .home-toolbar button:focus-visible,.canvas-actions button:focus-visible,.home-soundscape-options button:focus-visible{outline:3px solid rgba(132,87,63,.25);outline-offset:2px}
-html:not(.dark-mode) .home-canvas :is(.text-slate-400,.text-slate-500){color:#71645d!important}
 
 /* Daily choice dialog — one recommendation, five quieter alternatives */
 .daily-soul-sheet{width:min(780px,100%);padding:34px 42px 28px}
@@ -642,50 +641,6 @@ html:not(.dark-mode) .home-canvas :is(.text-slate-400,.text-slate-500){color:#71
 .vacation-exit-fixed:focus-visible,.vacation-ambient-return:focus-visible{outline:3px solid rgba(101,74,60,.3);outline-offset:3px}
 @media(max-width:600px){.vacation-exit-fixed{top:12px;left:12px;padding:10px 14px}.vacation-ambient>div{width:calc(100% - 28px);padding:22px 18px}.vacation-ambient-return{min-height:44px;padding:12px 20px}}
 
-/* Home — desert boho studio */
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas){
-  --boho-clay:#a45f43;--boho-rust:#7d4937;--boho-sand:#e8d5ba;--boho-stone:#f4ede3;--boho-olive:#7c8061;--boho-ink:#55433a;
-  background:#f3eadf!important;
-}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after{content:'⌒  ·  ◡  ·  ⌒';display:block;margin:4px auto -3px;color:rgba(145,85,61,.55);font:500 10px/1 Georgia,serif;letter-spacing:.48em;text-align:center}
-html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
-  border:1px solid rgba(120,79,57,.14)!important;
-  border-radius:24px 18px 27px 19px!important;
-  background:linear-gradient(145deg,rgba(255,252,246,.88),rgba(238,224,207,.72))!important;
-  box-shadow:0 13px 32px rgba(83,55,39,.075),inset 0 1px rgba(255,255,255,.7)!important;
-}
-html:not(.dark-mode) .home-canvas .home-command-row{border-color:rgba(120,79,57,.15)!important;border-radius:19px 14px 20px 15px!important;background:rgba(235,219,199,.82)!important;box-shadow:0 8px 24px rgba(83,55,39,.07)!important}
-html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),html:not(.dark-mode) .home-canvas .home-soundscape-trigger{border-color:rgba(132,82,57,.14)!important;color:var(--boho-ink)!important;background:rgba(255,250,242,.68)!important}
-html:not(.dark-mode) .home-canvas .canvas-actions{gap:9px!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button{border:1px solid rgba(122,82,59,.12)!important;border-radius:18px 13px 18px 13px!important;color:#655044!important;background:rgba(246,236,224,.82)!important;box-shadow:0 7px 18px rgba(82,55,41,.055)!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(3n+1){box-shadow:inset 0 -2px var(--boho-clay),0 7px 18px rgba(82,55,41,.05)!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(3n+2){box-shadow:inset 0 -2px var(--boho-olive),0 7px 18px rgba(82,55,41,.05)!important}
-html:not(.dark-mode) .home-canvas .goals-strip-title,html:not(.dark-mode) .home-canvas .home-editorial-calendar>h3{color:var(--boho-rust)!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card{border-color:rgba(126,79,55,.12)!important;background:rgba(251,244,234,.72)!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(odd){border-radius:17px 12px 19px 11px!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(even){border-radius:12px 19px 12px 18px!important}
-html:not(.dark-mode) .home-canvas .today-gamechangers{border-top-color:rgba(124,128,97,.24)!important}
-html:not(.dark-mode) .home-canvas :is(input,textarea):focus{border-color:rgba(164,95,67,.48)!important;box-shadow:0 0 0 3px rgba(164,95,67,.09)!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{color:var(--boho-rust)}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::before,html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::after{background:linear-gradient(90deg,transparent,rgba(164,95,67,.48),rgba(124,128,97,.24))!important}
-@media(prefers-reduced-motion:no-preference){html:not(.dark-mode) .home-canvas :is(.card,.canvas-actions button){transition:transform .2s ease,box-shadow .2s ease}html:not(.dark-mode) .home-canvas .canvas-actions button:hover{transform:translateY(-2px) rotate(-.25deg)}}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#6f402d!important;text-shadow:0 8px 28px rgba(111,64,45,.08)!important}
-
-/* Stronger boho signature: woven edges, desert sun and hand-drawn arches. */
-html:not(.dark-mode) .home-canvas .home-command-row{border-style:solid!important;outline:1px dashed rgba(143,91,63,.17);outline-offset:4px}
-html:not(.dark-mode) .home-canvas .goals-strip{position:relative;overflow:hidden;border-top:3px solid rgba(164,95,67,.48)!important}
-html:not(.dark-mode) .home-canvas .goals-strip::after{content:'☼';position:absolute;right:18px;top:5px;color:rgba(164,95,67,.48);font:400 22px/1 Georgia,serif;transform:rotate(8deg)}
-html:not(.dark-mode) .home-canvas .home-editorial-calendar,html:not(.dark-mode) .home-canvas .today-tasks-card{position:relative;overflow:hidden}
-html:not(.dark-mode) .home-canvas .home-editorial-calendar::before{content:'';position:absolute;left:-28px;bottom:-48px;width:118px;height:118px;border:2px solid rgba(164,95,67,.16);border-radius:50% 50% 0 0;box-shadow:0 0 0 10px rgba(164,95,67,.055),0 0 0 20px rgba(124,128,97,.045);pointer-events:none}
-html:not(.dark-mode) .home-canvas .today-tasks-card::before{content:'◠  ◠  ◠';position:absolute;left:18px;top:14px;color:rgba(124,128,97,.34);font:700 12px/1 Georgia,serif;letter-spacing:.2em;pointer-events:none}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+1){border-bottom:3px solid rgba(164,95,67,.58)!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+2){border-bottom:3px solid rgba(124,128,97,.58)!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n+3){border-bottom:3px solid rgba(190,145,91,.55)!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(4n){border-bottom:3px solid rgba(125,73,55,.5)!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button::before{content:'';width:5px;height:5px;flex:0 0 5px;border-radius:50%;background:var(--boho-clay);opacity:.55}
-html:not(.dark-mode) .home-canvas .canvas-actions button:nth-child(even)::before{background:var(--boho-olive)}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{font-family:'Palatino Linotype','Book Antiqua',Palatino,serif!important}
-@media(max-width:760px){html:not(.dark-mode) .home-canvas .home-command-row{outline-offset:2px}html:not(.dark-mode) .home-canvas .goals-strip::after{display:none}}
 
 /* Airier home rhythm — space sections without inflating their internal controls. */
 @media(min-width:761px){
@@ -700,19 +655,6 @@ html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{font-
 
 /* Calm home pass — one warm palette, no decorative stripes or visual noise. */
 html:not(.dark-mode) .primary-sidebar{border:0!important;border-left:0!important;box-shadow:none!important;background:#eee5da!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#f3eadf!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after{display:none!important;content:none!important}
-html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){border:0!important;border-radius:20px!important;background:#f8f3ec!important;box-shadow:0 8px 24px rgba(79,57,45,.055)!important}
-html:not(.dark-mode) .home-canvas .home-command-row{border:0!important;outline:0!important;border-radius:18px!important;background:#eee5da!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),html:not(.dark-mode) .home-canvas .home-soundscape-trigger{border:0!important;border-radius:11px!important;background:#f8f3ec!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button{border:0!important;border-radius:14px!important;color:#65574f!important;background:#f7f1e9!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button::before{display:none!important;content:none!important}
-html:not(.dark-mode) .home-canvas .goals-strip{border:0!important}
-html:not(.dark-mode) .home-canvas .goals-strip::after,html:not(.dark-mode) .home-canvas .home-editorial-calendar::before,html:not(.dark-mode) .home-canvas .today-tasks-card::before{display:none!important;content:none!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card,html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){border:0!important;border-radius:14px!important;background:#f3ece3!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas :is(.bg-violet-50,.bg-purple-50,.bg-pink-50,.bg-emerald-50,.bg-blue-50,.bg-amber-50){background:#f3ece3!important}
-html:not(.dark-mode) .home-canvas :is(.border-violet-100,.border-purple-100,.border-pink-100,.border-emerald-100,.border-blue-100,.border-amber-100){border-color:transparent!important}
-html:not(.dark-mode) .home-canvas .today-gamechangers{border-top:0!important}
 
 /* Final viewport anchoring: the home entrance transform otherwise traps fixed children inside the canvas. */
 .dashboard-main>.home-canvas{transform:none!important}
@@ -761,34 +703,9 @@ html:not(.dark-mode) .home-canvas .today-gamechangers{border-top:0!important}
 .dashboard-main:has(>.home-canvas)>.brand-page-footer{margin-top:64px!important;padding-top:0!important;padding-bottom:8px!important}
 .home-command-row>.home-sound-column{order:-1!important}
 
-/* Definitive quiet-home override — intentionally last. */
 html:not(.dark-mode) .primary-sidebar{border:none!important;box-shadow:none!important;background:#eee5da!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#f3eadf!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero::after,
-html:not(.dark-mode) .home-canvas .goals-strip::after,
-html:not(.dark-mode) .home-canvas .home-editorial-calendar::before,
-html:not(.dark-mode) .home-canvas .today-tasks-card::before,
-html:not(.dark-mode) .home-canvas .canvas-actions button::before{display:none!important;content:none!important}
-html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){border:none!important;background:#f8f3ec!important;box-shadow:0 7px 20px rgba(79,57,45,.045)!important}
-html:not(.dark-mode) .home-canvas .home-command-row{border:none!important;outline:none!important;background:#eee5da!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){border:none!important;background:#f3ece3!important;box-shadow:none!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button{border:none!important;background:#f7f1e9!important;box-shadow:none!important}
 
-/* Screenshot-specific cleanup: remove the remaining color bars and the sidebar seam. */
-html:not(.dark-mode) body:has(.home-canvas),html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell{background:#f3eadf!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{margin:0!important;height:100vh!important;border-radius:0!important;border:none!important;background:#f3eadf!important;box-shadow:none!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .home-editorial-calendar,
-html:not(.dark-mode) .dashboard-main .home-canvas .today-tasks-card,
-html:not(.dark-mode) .dashboard-main .home-canvas .goals-strip{border:none!important;background:#f8f3ec!important;box-shadow:0 7px 20px rgba(79,57,45,.04)!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){border:none!important;background:#f7f1e9!important;box-shadow:none!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){border:none!important;background:#f3ece3!important;box-shadow:none!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-1,
-html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-1\.5{background:#ded5ca!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .h-full{background:#afa396!important;box-shadow:none!important}
-html:not(.dark-mode) .dashboard-main .home-canvas .goal-mini-card .gradient-text{color:#70645d!important;background:none!important;-webkit-text-fill-color:currentColor!important}
 
-/* Quiet divider between the right navigation and the workspace. */
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{border-left:0!important;box-shadow:-7px 0 22px rgba(91,66,53,.045)!important}
 .home-goal-link{cursor:pointer;transition:transform .18s ease,background .18s ease!important}
 .home-goal-link:hover,.home-goal-link:focus-visible{transform:translateY(-2px);background:#faf6f0!important;outline:2px solid rgba(120,88,70,.18);outline-offset:2px}
 .domain-goal-card{scroll-margin-top:28px;transition:box-shadow .25s ease,transform .25s ease}
@@ -811,12 +728,18 @@ html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!impo
 .pearl-dialog>footer button{min-height:40px;padding:10px 22px!important;font-size:12px!important}
 @media(max-width:700px){.pearl-dialog>header h3{font-size:27px!important}.pearl-dialog .pearl-layers p{font-size:12px!important}.pearl-dialog .pearl-layers section{min-height:auto!important}}
 
-/* Exact supplied ink enso replaces the generated O in the home wordmark. */
-.inside-out-lockup .enso-o-image{display:inline-block!important;width:.86em!important;height:.86em!important;margin:0 .015em!important;vertical-align:-.095em!important;background:none!important}
-.inside-out-lockup .enso-o-image img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;transform:scale(1.13);filter:contrast(1.12)!important}
-.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;letter-spacing:.065em!important;line-height:.88!important}
-html:not(.dark-mode) .dashboard-main .inside-out-lockup .inside-out-flowing,
-html.dark-mode .dashboard-main .inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;letter-spacing:.065em!important}
+/* חותם הדיו (enso) מחליף את ה-o ב-"Your" — אותו מוטיב מ"המסר היומי" */
+.inside-out-lockup .enso-o-image{display:inline-block!important;width:.62em!important;height:.62em!important;margin:0 .04em!important;vertical-align:-.06em!important;background:none!important;color:#8a4a2f!important}
+.inside-out-lockup .enso-o-image .daily-enso-main,
+.inside-out-lockup .enso-o-image .daily-enso-upper,
+.inside-out-lockup .enso-o-image .daily-enso-dry{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.inside-out-lockup .enso-o-image .daily-enso-main{stroke-width:9.2}
+.inside-out-lockup .enso-o-image .daily-enso-upper{stroke-width:3.7;opacity:.86}
+.inside-out-lockup .enso-o-image .daily-enso-dry{stroke-width:2;opacity:.58}
+.inside-out-lockup .enso-o-image .daily-enso-dry.thin{stroke-width:1;opacity:.34}
+.inside-out-lockup .enso-o-image .daily-enso-bristle{fill:none;stroke:currentColor;stroke-width:1.15;stroke-linecap:round;opacity:.42}
+/* כותרת הבית "Design Your Life" — הגדרה אחת וסופית (הוחלפו כל שכבות ה-CSS הסותרות שהיו כאן וב-index.css) */
+.inside-out-lockup .inside-out-flowing{font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;font-size:clamp(3rem,7.6vw,5.8rem)!important;letter-spacing:.05em!important;line-height:1.05!important;color:#8a4a2f!important;text-shadow:0 3px 14px rgba(138,74,47,.18)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex-wrap:wrap!important}
 .inside-out-lockup .inside-out-exact{display:flex!important;align-items:center!important;justify-content:center!important;width:min(650px,56vw)!important;height:auto!important;margin:0 auto!important;line-height:0!important}
 .inside-out-lockup .inside-out-exact img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
 @media (max-width:700px){.inside-out-lockup .inside-out-exact{width:min(560px,90vw)!important}}
@@ -827,66 +750,6 @@ html:not(.dark-mode) .primary-sidebar nav button:hover,
 html:not(.dark-mode) .primary-sidebar nav button[class*="text-violet"],
 html:not(.dark-mode) .primary-sidebar>div button{color:#765947!important}
 
-/* Japandi home palette — walnut ink, smoked sand and linen surfaces. */
-html:not(.dark-mode) body:has(.home-canvas),
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas){background:#e6d9c8!important;color:#3f2d22!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{
-  background:#ddd0bf!important;
-  box-shadow:-1px 0 0 rgba(63,45,34,.12),-12px 0 34px rgba(63,45,34,.07)!important;
-}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar :is(h1,h2,h3,b,strong,button){color:#3f2d22!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar :is(p,small,span){color:#695749!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button{background:transparent!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button:hover{background:rgba(239,229,214,.38)!important}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar nav button[class*="bg-"]{background:#ded0bd!important;box-shadow:none!important}
-
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .dashboard-hero,
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup{color:#3f2d22!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .inside-out-lockup .inside-out-flowing{color:#3b281e!important;text-shadow:none!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) .design-your-life-brush{color:#5f493a!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas) :is(.vacation-label,.dashboard-date,.dashboard-year){color:#5e4b3d!important}
-
-html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
-  background:#e8ddcd!important;
-  border:1px solid rgba(63,45,34,.075)!important;
-  box-shadow:0 12px 30px rgba(63,45,34,.075)!important;
-}
-html:not(.dark-mode) .home-canvas .home-command-row{background:#bba890!important;border:1px solid rgba(63,45,34,.08)!important}
-html:not(.dark-mode) .home-canvas .home-toolbar :is(button,input),
-html:not(.dark-mode) .home-canvas .home-soundscape-trigger{background:#ded0bd!important;color:#49362a!important;border:0!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button{background:#d8c8b3!important;color:#49362a!important;border:0!important}
-html:not(.dark-mode) .home-canvas .canvas-actions button:hover{background:#e4d7c5!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;border:0!important}
-
-html:not(.dark-mode) .home-canvas :is(h1,h2,h3,h4,h5,h6,strong,b),
-html:not(.dark-mode) .home-canvas :is(.goals-strip-title,.home-editorial-calendar>h3){color:#3f2d22!important}
-html:not(.dark-mode) .home-canvas :is(p,small,label,span,button,input,textarea){color:#665447}
-html:not(.dark-mode) .home-canvas :is(.text-slate-300,.text-slate-400,.text-slate-500,.text-slate-600,.text-slate-700,.text-slate-800){color:#6b594b!important}
-html:not(.dark-mode) .home-canvas :is(.text-violet-400,.text-violet-500,.text-violet-600,.text-violet-700,.text-purple-500,.text-blue-500,.text-cyan-500,.text-emerald-500,.text-amber-500){color:#704c37!important}
-html:not(.dark-mode) .home-canvas :is(.bg-violet-50,.bg-violet-100,.bg-purple-50,.bg-purple-100,.bg-pink-50,.bg-emerald-50,.bg-blue-50,.bg-amber-50,.bg-slate-50,.bg-slate-100){background:#d9cab6!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card :is(.h-1,.h-1\.5){background:#c1b09a!important}
-html:not(.dark-mode) .home-canvas .goal-mini-card .h-full{background:#684834!important}
-html:not(.dark-mode) .home-canvas :is(input,textarea)::placeholder{color:#8a7767!important}
-html:not(.dark-mode) .home-canvas :is(input,textarea):focus{box-shadow:0 0 0 3px rgba(104,72,52,.13)!important}
-
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer{color:#4f392c!important}
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::before,
-html:not(.dark-mode) .dashboard-main:has(>.home-canvas)>.brand-page-footer::after{background:linear-gradient(90deg,transparent,rgba(63,45,34,.34),transparent)!important}
-html:not(.dark-mode) body:has(.home-canvas) .daily-message-floating-root .daily-message-card{color:#3f2d22!important}
-
-@media(max-width:760px){
-  html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{background:#ddd0bf!important}
-  html:not(.dark-mode) .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){box-shadow:0 7px 18px rgba(63,45,34,.065)!important}
-}
-
-/* Win over legacy component-specific colors so the home reads as one material system. */
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas :is(.card,.goals-strip,.home-editorial-calendar,.today-tasks-card){
-  background:#e8ddcd!important;border:1px solid rgba(63,45,34,.075)!important;box-shadow:0 12px 30px rgba(63,45,34,.075)!important
-}
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .home-command-row{background:#bba890!important;border:1px solid rgba(63,45,34,.08)!important}
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .canvas-actions button:nth-child(n){background:#d8c8b3!important;color:#49362a!important;border:0!important;box-shadow:none!important}
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-main .home-canvas .goal-mini-card:nth-child(n){background:#d9cab6!important;color:#49362a!important;border:0!important;box-shadow:none!important}
 
 /* Zen Focus — reversible preview mode, active only when the preview component exists. */
 html:not(.dark-mode) body:has(.zen-preview-home),
@@ -960,29 +823,3 @@ body:has(.zen-preview-home) .daily-message-floating-root{display:none!important}
 }
 .inside-out-lockup .inside-out-final-image img{display:block!important;width:100%!important;height:auto!important;object-fit:contain!important}
 @media(max-width:760px){.inside-out-lockup .inside-out-final-image{width:min(660px,92vw)!important}}
-
-/* Full home backdrop sampled from the supplied wordmark paper. */
-html:not(.dark-mode) body:has(.home-canvas),
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
-html:not(.dark-mode) body:has(.home-canvas) .dashboard-main:has(>.home-canvas){
-  background-color:#e7d2be!important;
-  background-image:url('./assets/japandi-paper-background.png')!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
-  background-attachment:fixed!important;
-}
-html:not(.dark-mode) body:has(.home-canvas) .primary-sidebar{
-  background-color:rgba(224,207,188,.86)!important;
-  background-image:url('./assets/japandi-paper-background.png')!important;
-  background-size:cover!important;
-  background-position:right center!important;
-  background-repeat:no-repeat!important;
-  background-blend-mode:soft-light!important;
-  backdrop-filter:blur(12px)!important;
-}
-@media(max-width:760px){
-  html:not(.dark-mode) body:has(.home-canvas),
-  html:not(.dark-mode) body:has(.home-canvas) .dashboard-shell,
-  html:not(.dark-mode) body:has(.home-canvas) .dashboard-main:has(>.home-canvas){background-attachment:scroll!important;background-position:center top!important}
-}

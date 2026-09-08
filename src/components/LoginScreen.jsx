@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 
 const LoginScreen = () => {
-    const [mode, setMode] = useState('login'); // 'login' | 'forgot' | 'recovery'
+    const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot' | 'recovery'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -22,6 +22,15 @@ const LoginScreen = () => {
         setLoading(true); setError('');
         const { error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) setError('מייל או סיסמה שגויים — נסי שנית.');
+        setLoading(false);
+    };
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        setLoading(true); setError(''); setMessage('');
+        const { error: err } = await supabase.auth.signUp({ email, password });
+        if (err) setError(err.message);
+        else setMessage('נרשמת בהצלחה! אם נדרש אישור מייל — בדקי את תיבת הדואר, אחרת אפשר להתחבר עכשיו.');
         setLoading(false);
     };
 
@@ -54,7 +63,7 @@ const LoginScreen = () => {
                     <span className="text-3xl">✨</span>
                 </div>
                 <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-violet-600 via-pink-500 to-amber-500 gradient-text">
-                    מרכז הבקרה של חיי
+                    Design Your Life
                 </h1>
 
                 {mode === 'recovery' && (
@@ -101,9 +110,35 @@ const LoginScreen = () => {
                             className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50">
                             {loading ? 'מתחברת...' : 'התחברות ✨'}
                         </button>
-                        <button type="button" onClick={() => { setMode('forgot'); setError(''); setMessage(''); }}
-                            className="text-slate-400 hover:text-violet-500 text-sm transition-all">
-                            שכחתי סיסמה
+                        <div className="flex items-center justify-between">
+                            <button type="button" onClick={() => { setMode('forgot'); setError(''); setMessage(''); }}
+                                className="text-slate-400 hover:text-violet-500 text-sm transition-all">
+                                שכחתי סיסמה
+                            </button>
+                            <button type="button" onClick={() => { setMode('signup'); setError(''); setMessage(''); }}
+                                className="text-slate-400 hover:text-violet-500 text-sm transition-all">
+                                יצירת חשבון חדש
+                            </button>
+                        </div>
+                    </form>
+                )}
+
+                {mode === 'signup' && (
+                    <form onSubmit={handleSignup} className="space-y-4 mt-6 text-right">
+                        <p className="text-slate-500 text-sm mb-2">יצירת חשבון חדש</p>
+                        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                            placeholder="כתובת מייל" required className={inputClass} dir="ltr" />
+                        <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                            placeholder="סיסמה (לפחות 6 תווים)" required minLength={6} className={inputClass} dir="ltr" />
+                        {error && <p className="text-rose-500 text-sm font-semibold">{error}</p>}
+                        {message && <p className="text-emerald-600 text-sm font-semibold">{message}</p>}
+                        <button type="submit" disabled={loading}
+                            className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50">
+                            {loading ? 'יוצרת חשבון...' : 'יצירת חשבון ✨'}
+                        </button>
+                        <button type="button" onClick={() => { setMode('login'); setError(''); setMessage(''); }}
+                            className="w-full py-2 text-slate-400 hover:text-violet-500 text-sm transition-all">
+                            ← חזרה להתחברות
                         </button>
                     </form>
                 )}

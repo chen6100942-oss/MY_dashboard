@@ -1044,163 +1044,9 @@ html.dark-mode .theme-toggle {
   align-items: flex-start;
 }
 
-.inside-out-lockup h1 {
-  margin: 0;
-  color: #514052 !important;
-  background: none !important;
-  -webkit-text-fill-color: currentColor !important;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(2.8rem, 6vw, 5.4rem) !important;
-  font-weight: 900;
-  letter-spacing: .075em;
-  text-shadow: 3px 3px 0 rgba(238,145,174,.2) !important;
-}
-
-.inside-out-lockup .inside-out-flowing {
-  margin: 0;
-  color: #796d76 !important;
-  background: none !important;
-  -webkit-text-fill-color: currentColor !important;
-  font-family: 'Trebuchet MS', 'Avenir Next', 'Nunito', sans-serif;
-  font-size: clamp(2.9rem, 6vw, 5.35rem) !important;
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: .065em;
-  text-shadow: 0 7px 22px rgba(95,70,89,.09) !important;
-  letter-spacing: .16em;
-  text-shadow: 0 10px 28px rgba(135,101,123,.09) !important;
-  direction: ltr;
-  transform: none;
-}
-
-.enso-o {
-  display: inline-block;
-  width: .76em;
-  height: .76em;
-  margin: 0 .025em;
-  color: #544b52;
-  vertical-align: -.07em;
-}
-
-.enso-o svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.enso-main-stroke {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 11;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: .96;
-}
-
-.enso-upper-stroke {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 4.5;
-  stroke-linecap: round;
-  opacity: .86;
-}
-
-.enso-dry-stroke {
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  opacity: .52;
-}
-.enso-dry-one { stroke-width: 2.1; opacity: .7; }
-.enso-dry-two { stroke-width: 1.15; opacity: .35; }
-.enso-dry-three { stroke-width: 1.4; opacity: .3; }
-.enso-bristle {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.3;
-  stroke-linecap: round;
-  opacity: .52;
-}
-
-.inside-out-kicker {
-  margin-bottom: 8px;
-  color: #8d7283;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(.82rem, 1.25vw, 1.02rem);
-  font-weight: 900;
-  letter-spacing: .34em;
-  direction: ltr;
-}
-
-.inside-out-lockup .inner-design-title {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: .22em;
-  direction: rtl;
-  font-family: Georgia, 'Noto Serif Hebrew', serif;
-  font-size: clamp(2.7rem, 5.4vw, 4.9rem) !important;
-  letter-spacing: -.045em;
-}
-
-.inner-word {
-  display: inline-flex;
-  align-items: baseline;
-  direction: rtl;
-}
-
-.placed-he {
-  position: relative;
-  z-index: 2;
-  display: inline-block;
-  margin-left: .015em;
-  color: #aa6c83;
-  transform: translateY(-.09em) rotate(-4deg);
-  transform-origin: center bottom;
-  animation: place-he 3.8s ease-in-out infinite;
-}
-
-.placed-he::before,
-.placed-he::after {
-  content: '';
-  position: absolute;
-  z-index: 3;
-  width: 1.42em;
-  height: 3px;
-  left: .28em;
-  right: auto;
-  top: .08em;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #594136 0 13%, #bb8963 14% 78%, #e2b98b 100%);
-  box-shadow: 0 1px 0 rgba(255,255,255,.65);
-  transform-origin: left center;
-  pointer-events: none;
-}
-
-.placed-he::before { transform: rotate(-55deg); }
-.placed-he::after {
-  top: .2em;
-  left: .48em;
-  transform: rotate(-47deg);
-}
-
-@keyframes place-he {
-  0%, 100% { transform: translateY(-.09em) rotate(-4deg); }
-  50% { transform: translateY(-.16em) rotate(-2deg); }
-}
-
-.inside-out-lockup .brand-signature {
-  position: absolute;
-  z-index: 2;
-  right: -76px;
-  top: -7px;
-  color: #aa7087;
-  font-family: 'Segoe Script', 'Brush Script MT', cursive;
-  font-size: clamp(.72rem, 1.2vw, 1rem);
-  white-space: nowrap;
-  transform: rotate(-7deg);
-}
+/* עיצוב הכותרת "Design Your Life" (h1.inside-out-flowing + enso-o-image) עבר לניקוי ואיחוד
+   מלא ב-final-overrides.css (מקור אמת יחיד) — ראו שם. הבלוקים שהיו כאן (ובכמה מקומות נוספים
+   בקובץ זה) היו שכבות ישנות שכיסו זו את זו ולא היו בתוקף בפועל; הוסרו ב-2026-09-06. */
 
 .dashboard-main footer.brand-page-footer {
   position: relative;
@@ -1262,75 +1108,6 @@ html.dark-mode .footer-hen-signature { color: #d4afc1; }
   .brand-page-footer::after { width: 16%; }
   .brand-page-footer::before { left: 2%; }
   .brand-page-footer::after { right: 2%; }
-}
-
-.inside-out-lockup .design-your-life-brush {
-  position: relative;
-  isolation: isolate;
-  margin-top: 10px;
-  padding: 3px 15px 5px;
-  color: #61545f;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: clamp(.74rem, 1.5vw, 1.34rem);
-  font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: none;
-  transform: none;
-}
-
-.inside-out-lockup .design-your-life-brush::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  left: 5px;
-  right: -2px;
-  bottom: 2px;
-  height: 58%;
-  border-radius: 48% 8% 42% 12%;
-  background: color-mix(in srgb, var(--marker-color, #dfb7d5) 62%, transparent);
-  clip-path: polygon(0 30%, 5% 18%, 12% 25%, 22% 9%, 36% 19%, 49% 5%, 63% 18%, 78% 7%, 91% 23%, 100% 16%, 97% 78%, 84% 70%, 72% 87%, 58% 74%, 42% 90%, 27% 72%, 13% 86%, 2% 70%);
-}
-
-.paintbrush-mark {
-  position: absolute;
-  right: -40px;
-  bottom: -11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 30px;
-  font-family: sans-serif;
-  cursor: pointer;
-  transform: rotate(-21deg);
-  transform-origin: left bottom;
-  filter: saturate(.82);
-  transition: transform .18s ease;
-}
-.paintbrush-mark:hover { transform: rotate(-21deg) scale(1.06); }
-.highlighter-svg {
-  display: block;
-  width: 48px;
-  height: auto;
-  overflow: visible;
-  transform: scaleX(-1);
-  filter: drop-shadow(1px 2px 1px rgba(62,48,58,.18));
-}
-.paintbrush-mark input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.inside-out-lockup em {
-  margin-top: 9px;
-  color: #908277;
-  font-family: 'Segoe Print', 'Segoe Script', cursive;
-  font-size: .76rem;
-  font-style: normal;
-  transform: rotate(-1deg);
 }
 
 .canvas-actions {
@@ -1468,8 +1245,6 @@ html.dark-mode .footer-hen-signature { color: #d4afc1; }
   letter-spacing: .06em;
 }
 
-html.dark-mode .inside-out-lockup h1,
-html.dark-mode .inside-out-lockup strong { color: #f2e8d6 !important; }
 html.dark-mode .canvas-actions > button,
 html.dark-mode .canvas-inspiration {
   color: #eee9df;
@@ -1491,8 +1266,6 @@ html.dark-mode .canvas-inspiration {
 
 @media (max-width: 600px) {
   .dashboard-hero { padding-inline: 8px !important; }
-  .inside-out-lockup h1 { font-size: 2.45rem !important; letter-spacing: .04em; }
-  .inside-out-lockup .brand-signature { right: -34px; top: -10px; font-size: .58rem; }
   .canvas-actions { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
   .canvas-actions > button b { font-size: .58rem; }
 }
@@ -1862,11 +1635,9 @@ html:not(.dark-mode) select:focus {
   box-shadow: 0 0 0 4px rgba(112,102,127,.11) !important;
 }
 
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
 html:not(.dark-mode) .footer-inside-out {
   color: var(--luxury-indigo) !important;
 }
-html:not(.dark-mode) .enso-o { color: var(--luxury-indigo) !important; }
 html:not(.dark-mode) .footer-hen-signature { color: var(--luxury-lavender) !important; }
 html:not(.dark-mode) .brand-page-footer::before,
 html:not(.dark-mode) .brand-page-footer::after {
@@ -2067,8 +1838,6 @@ html:not(.dark-mode) .manifest-progress span,
 html:not(.dark-mode) .ikigai-progress > i b {
   background: var(--ios-blue) !important;
 }
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
-html:not(.dark-mode) .enso-o,
 html:not(.dark-mode) .footer-inside-out {
   color: #38435f !important;
 }
@@ -2467,18 +2236,9 @@ html:not(.dark-mode) .manifest-card:hover {
   background:rgba(255,255,255,.48) !important;
   box-shadow:inset 0 0 28px rgba(113,100,232,.035) !important;
 }
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
 html:not(.dark-mode) .footer-inside-out {
   color:#373a55 !important;
   text-shadow:0 8px 28px rgba(71,61,160,.12) !important;
-}
-html:not(.dark-mode) .enso-o {
-  color:var(--future-violet) !important;
-  filter:drop-shadow(0 0 8px rgba(113,100,232,.2));
-}
-html:not(.dark-mode) .design-your-life-brush::before {
-  opacity:.82;
-  filter:saturate(.75);
 }
 html:not(.dark-mode) :is(
   .manifest-primary,.ikigai-primary,.hero-utility-actions button:first-child,
@@ -2533,14 +2293,6 @@ html:not(.dark-mode) a {
   }
 }
 
-/* Home typography follows the IKIGAI editorial language */
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing {
-  color:#4b403a !important;
-  font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif !important;
-  font-weight:400 !important;
-  letter-spacing:.035em !important;
-  text-shadow:none !important;
-}
 html:not(.dark-mode) .home-canvas h2,
 html:not(.dark-mode) .home-canvas h3 {
   color:#51443d !important;
@@ -2837,25 +2589,6 @@ html.dark-mode .header-date {
   -webkit-backdrop-filter:none !important;
 }
 
-/* Brand typography sampled from the supplied editorial reference */
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing {
-  color:#71351f !important;
-  font-family:'Bodoni MT','Didot','Baskerville','Times New Roman',serif !important;
-  font-weight:400 !important;
-  letter-spacing:-.035em !important;
-  line-height:.96 !important;
-  text-shadow:none !important;
-}
-html:not(.dark-mode) .inside-out-lockup .enso-o {
-  color:#71351f !important;
-  filter:none !important;
-}
-html:not(.dark-mode) .inside-out-lockup .design-your-life-brush {
-  color:#71351f !important;
-  font-family:'Arial Narrow','Aptos Narrow','Helvetica Neue',Arial,sans-serif !important;
-  font-weight:400 !important;
-  letter-spacing:.015em !important;
-}
 
 /* Ambient soundscape — a quiet control, not a media player */
 .home-soundscape {
@@ -3041,9 +2774,7 @@ html:not(.dark-mode) .soft-bg {
   color:var(--other-ink);
 }
 html:not(.dark-mode) body::before { opacity:.08; background-size:64px 64px; }
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
 html:not(.dark-mode) .footer-inside-out { color:#4b4742 !important; text-shadow:none !important; }
-html:not(.dark-mode) .enso-o { color:var(--other-gold) !important; filter:none; }
 html:not(.dark-mode) .primary-sidebar,
 html:not(.dark-mode) .quick-panel {
   background:rgba(247,243,235,.76) !important;
@@ -3216,7 +2947,6 @@ html:not(.dark-mode) .sidebar-settings-row button.bg-violet-50 {
 html:not(.dark-mode) .primary-sidebar nav button > span[style*="position: absolute"] {
   background:var(--sand-cocoa) !important;
 }
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
 html:not(.dark-mode) .footer-inside-out {
   color:var(--sand-cocoa) !important;
   font-family:'Palatino Linotype','Book Antiqua',Palatino,serif !important;
@@ -3224,7 +2954,6 @@ html:not(.dark-mode) .footer-inside-out {
   letter-spacing:.08em;
   text-shadow:none !important;
 }
-html:not(.dark-mode) .enso-o { color:var(--sand-cocoa) !important;filter:none; }
 html:not(.dark-mode) .dashboard-main :is(h2,h3) {
   color:var(--sand-ink);
 }
@@ -3371,8 +3100,7 @@ html:not(.dark-mode) .tab-help-video:not(.is-open){border:1px solid rgba(112,84,
 .morning-journey .morning-step-title h3{font-size:15px!important;line-height:1.15!important}.morning-journey .morning-step-title p{margin-top:2px!important;font-size:8px!important;line-height:1.3!important}.morning-journey .morning-step-title{grid-template-columns:20px minmax(280px,380px) 54px 20px;width:min(510px,100%)!important}.morning-journey .morning-step{min-height:50px!important}.morning-journey .morning-step-content{padding-top:7px!important;padding-bottom:7px!important}@media(max-width:700px){.morning-journey .morning-step-title{grid-template-columns:18px minmax(0,1fr) 38px 19px;width:100%!important}.morning-journey .morning-step-title h3{font-size:13px!important}.morning-journey .morning-step-title p{font-size:7px!important}}
 .primary-sidebar>.language-switcher{border:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 
-/* Final hero typography — matches the supplied editorial reference (tall condensed Didone headline + wide-tracked uppercase caption); intentionally last so earlier passes cannot soften it */
-html:not(.dark-mode) .inside-out-lockup .inside-out-flowing,
+/* Footer signature typography — "DESIGN YOUR LIFE" בתחתית העמוד (נפרד מכותרת ה-hero, שמנוהלת עכשיו כולה ב-final-overrides.css) */
 html:not(.dark-mode) .footer-inside-out {
   font-family:'Didot','Bodoni MT','Bodoni 72','Bodoni','Baskerville',serif !important;
   font-weight:400 !important;
@@ -3380,15 +3108,6 @@ html:not(.dark-mode) .footer-inside-out {
   line-height:.94 !important;
   color:#6b3a22 !important;
   text-shadow:none !important;
-}
-html:not(.dark-mode) .inside-out-lockup .enso-o { color:#6b3a22 !important; }
-html:not(.dark-mode) .inside-out-lockup .design-your-life-brush {
-  font-family:'Helvetica Neue','Arial Narrow',Arial,sans-serif !important;
-  font-size:11px !important;
-  font-weight:600 !important;
-  letter-spacing:.32em !important;
-  text-transform:uppercase !important;
-  color:#6b3a22 !important;
 }
 
 /* 2026 goals ribbon — text scaled back down to fit the compact card size instead of overpowering it */

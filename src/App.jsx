@@ -10,16 +10,19 @@ import DailyPearl from './components/DailyPearl.jsx';
 import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
 import ZenHomePreview from './components/ZenHomePreview.jsx';
+import FinanceTracker from './components/FinanceTracker.jsx';
+import NumerologyTab from './components/NumerologyTab.jsx';
 import { supabase } from './lib/supabaseClient.js';
-import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.png';
+
+    const PERSONAL_GROWTH_TAB_IDS = ['ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset'];
 
     const App = () => {
         // ============================================================
         // THE FIX: ALL useState/useEffect HOOKS BEFORE ANY EARLY RETURN
         // This was the cause of React error #310
         // ============================================================
-        const [user, setUser] = useState(() => ({ displayName: 'חן', uid: 'local', email: 'local', photoURL: null }));
-        const [loading, setLoading] = useState(false);
+        const [user, setUser] = useState(null);
+        const [loading, setLoading] = useState(true);
         const [activeTab, setActiveTab] = useState('home');
         const [focusedDomainGoalId, setFocusedDomainGoalId] = useState(null);
         const [showConfetti, setShowConfetti] = useState(false);
@@ -29,6 +32,8 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
             { id: 'tasks', name: 'משימות ופרויקטים', icon: 'list-todo', color: 'blue', emoji: '✅' },
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
+            { id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' },
+            { id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' },
             { id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' },
             { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
             { id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' },
@@ -297,7 +302,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
             { id: 'd5', value: 'community', emoji: '📱', label: 'יצירת קהילה' },
             { id: 'd6', value: 'finance', emoji: '💰', label: 'פיננסי' },
             { id: 'd7', value: 'health', emoji: '⚖️', label: 'בריאותי' },
-            { id: 'd8', value: 'inside-out', emoji: '✨', label: 'עסק INSIDE OUT' }
+            { id: 'd8', value: 'inside-out', emoji: '✨', label: 'עסק Design Your Life' }
         ]);
         const [newDomainEmoji, setNewDomainEmoji] = useState('');
         const [newDomainLabel, setNewDomainLabel] = useState('');
@@ -432,8 +437,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
         const [currentWeight, setCurrentWeight] = useState('');
         const [showWeightCard, setShowWeightCard] = useState(true);
         const [bannerImg, setBannerImg] = useState(null);
-        const [headerTitle, setHeaderTitle] = useState('מרכז הבקרה של חיי');
-        const [brandMarkerColor, setBrandMarkerColor] = useState(() => localStorage.getItem('brandMarkerColor') || '#dfb7d5');
+        const [headerTitle, setHeaderTitle] = useState('Design Your Life');
         const [editingTitle, setEditingTitle] = useState(false);
         const [headerAffirmation, setHeaderAffirmation] = useState('');
         const [editingAffirmation, setEditingAffirmation] = useState(false);
@@ -501,6 +505,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
         const [showAddBuiltinBlock, setShowAddBuiltinBlock] = useState(null); // tabId
         const [builtinLayoutEditTab, setBuiltinLayoutEditTab] = useState(null); // tabId
         const [settingsSection, setSettingsSection] = useState('profile'); // profile|design|tabs|domains|backup
+        const [personalGrowthOpen, setPersonalGrowthOpen] = useState(() => localStorage.getItem('personalGrowthNavOpen') === '1');
         const [themeAccent, setThemeAccent] = useState('violet'); // violet|blue|rose|emerald|amber|cyan
         const [darkMode, setDarkMode] = useState(() => {
             const stored = localStorage.getItem('dashboardTheme');
@@ -514,9 +519,6 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
             localStorage.setItem('dashboardTheme', String(next));
             return next;
         });
-        useEffect(() => {
-            localStorage.setItem('brandMarkerColor', brandMarkerColor);
-        }, [brandMarkerColor]);
         const [monthNotes, setMonthNotes] = useState({}); // {"2026-1": "הערה לחודש"}
         const [quarterlyGoals, setQuarterlyGoals] = useState({
             'Q1-goal':'', 'Q2-goal':'', 'Q3-goal':'', 'Q4-goal':'',
@@ -649,15 +651,27 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
         };
 
         // Effects - ALSO before any return
+        // ── כניסה עם סיסמה (Supabase Auth) — בודקת session קיים, ומאזינה לשינויי התחברות/התנתקות ──
         useEffect(() => {
-            // הסתר static loader
             const sl = document.getElementById('static-loader');
             if (sl) sl.style.display = 'none';
 
-            // פתיחה ישירה בלי התחברות — נתונים נשמרים ב-localStorage
-            setUser({ displayName: 'חן', uid: 'local', email: 'local', photoURL: null });
-            setLoading(false);
-            return () => {};
+            const toUser = session => session?.user
+                ? { displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null }
+                : null;
+
+            (async () => {
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    setUser(toUser(session));
+                } catch (e) { console.warn('Auth session check error:', e.message); setUser(null); }
+                setLoading(false);
+            })();
+
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                setUser(toUser(session));
+            });
+            return () => subscription.unsubscribe();
         }, []);
 
         // ── HELPER: ensure built-in tabs (added after a user's last save) always exist ──────────────
@@ -692,6 +706,12 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
             }
             if (!deleted.has('book-wisdom') && !result.some(t => t.id === 'book-wisdom')) {
                 result.push({ id:'book-wisdom', name:'סיכומי ספרים', icon:'book-open', color:'indigo', emoji:'◈' });
+            }
+            if (!deleted.has('finance') && !result.some(t => t.id === 'finance')) {
+                result.push({ id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' });
+            }
+            if (!deleted.has('numerology') && !result.some(t => t.id === 'numerology')) {
+                result.push({ id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' });
             }
             // Home always leads the list, no matter what order was saved or dragged
             result.sort((a, b) => (a.id === 'home' ? -1 : b.id === 'home' ? 1 : 0));
@@ -1538,7 +1558,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
-                        {tabs.filter(tab => tab.id !== 'archive').map(tab => (
+                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 draggable={tab.id !== 'tab-settings'}
                                 onDragStart={tab.id !== 'tab-settings' ? e => handleSidebarTabDragStart(e, tab.id) : undefined}
@@ -1556,6 +1576,30 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                                 <span className="text-xs">{tab.name}</span>
                             </button>
                         ))}
+
+                        {tabs.some(t => PERSONAL_GROWTH_TAB_IDS.includes(t.id)) && (
+                            <div className="nav-personal-growth-group">
+                                <button
+                                    onClick={() => setPersonalGrowthOpen(prev => { const next = !prev; localStorage.setItem('personalGrowthNavOpen', next ? '1' : '0'); return next; })}
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${PERSONAL_GROWTH_TAB_IDS.includes(activeTab) && !personalGrowthOpen ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                    <span className="nav-line-icon" aria-hidden="true" style={{color:'#9d639d'}}><Icon name="sparkles" size={17} /></span>
+                                    <span className="text-xs flex-1 text-right">התפתחות אישית</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transition:'transform .2s ease', transform: personalGrowthOpen ? 'none' : 'rotate(90deg)'}}><polyline points="6 9 12 15 18 9"/></svg>
+                                </button>
+                                {personalGrowthOpen && (
+                                    <div className="space-y-0.5" style={{paddingRight:'14px', marginTop:'2px'}}>
+                                        {tabs.filter(tab => PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
+                                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                                                className={`nav-tab-${tab.id} w-full flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                                {activeTab===tab.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'16px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
+                                                <span className="nav-line-icon" aria-hidden="true" style={{color:'#8f829c'}}><Icon name={tab.icon || 'circle'} size={15} /></span>
+                                                <span>{tab.name}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </nav>
 
                     {/* Settings — fixed below the reorderable navigation */}
@@ -1674,23 +1718,18 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                             {/* Brand lockup */}
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
-                                    <h1 className="inside-out-flowing inside-out-final-image" aria-label="INSIDE OUT">
-                                        <img src={insideOutFinalLockup} alt="INSIDE OUT" />
+                                    <h1 className="inside-out-flowing" aria-label="Design Your Life">
+                                        Design Y
+                                        <svg className="enso-o-image" viewBox="0 0 80 80" aria-hidden="true">
+                                            <path className="daily-enso-main" d="M64 58 C51 75 27 73 12 57 C-1 42 5 19 25 10"/>
+                                            <path className="daily-enso-upper" d="M23 11 C38 3 57 6 68 20"/>
+                                            <path className="daily-enso-dry" d="M67 52 C55 69 34 72 17 59 C2 47 5 26 21 14 C36 3 57 8 67 25"/>
+                                            <path className="daily-enso-dry thin" d="M60 65 C43 76 20 68 10 50 C2 34 10 17 28 8 C43 1 60 8 72 20"/>
+                                            <path className="daily-enso-bristle" d="M63 58 L73 51 M65 55 L75 47 M67 22 L74 27 M65 19 L73 22 M25 8 L18 11"/>
+                                        </svg>
+                                        ur Life
                                     </h1>
                                 </div>
-                                <strong className="design-your-life-brush" style={{'--marker-color': brandMarkerColor}}>
-                                    Design your life
-                                    <label className="paintbrush-mark" title="שינוי צבע המרקר">
-                                        <svg className="highlighter-svg" viewBox="0 0 92 42" aria-hidden="true">
-                                            <path d="M7 8h58l19 13-19 13H7z" fill={brandMarkerColor}/>
-                                            <path d="M65 8l19 13-19 13 7-13z" fill="#3f3740"/>
-                                            <path d="M78 17l9 4-9 4-6-4z" fill="#18151a"/>
-                                            <path d="M7 8h10v26H7z" fill="rgba(255,255,255,.28)"/>
-                                            <path d="M18 11h43" stroke="rgba(255,255,255,.34)" strokeWidth="3" strokeLinecap="round"/>
-                                        </svg>
-                                        <input type="color" value={brandMarkerColor} onChange={e => setBrandMarkerColor(e.target.value)} aria-label="בחירת צבע המרקר"/>
-                                    </label>
-                                </strong>
                             </div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
@@ -1893,7 +1932,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                             {showSoundLibrary && <div className="sound-library-overlay" role="dialog" aria-modal="true" aria-labelledby="sound-library-title" onClick={()=>setShowSoundLibrary(false)}>
                                 <div className="sound-library-dialog" onClick={event=>event.stopPropagation()}>
                                     <button className="sound-library-close" onClick={()=>setShowSoundLibrary(false)} aria-label="סגירה">×</button>
-                                    <span>INSIDE OUT · SOUNDSCAPE</span>
+                                    <span>DESIGN YOUR LIFE · SOUNDSCAPE</span>
                                     <h3 id="sound-library-title">איזו אנרגיה נכונה לך עכשיו?</h3>
                                     <p>בחרי צליל למרחב. אפשר להחליף או לחזור לשקט בכל רגע.</p>
                                     <div className="sound-library-options">
@@ -2379,7 +2418,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
 
                         {settingsSection === 'help' && (
                             <section className="app-help-page">
-                                <header><span>INSIDE OUT · GUIDE</span><h2>איך משתמשים באפליקציה?</h2><p>כל מה שצריך כדי להתחיל, להתארגן ולבנות שגרה שמתאימה לך.</p></header>
+                                <header><span>DESIGN YOUR LIFE · GUIDE</span><h2>איך משתמשים באפליקציה?</h2><p>כל מה שצריך כדי להתחיל, להתארגן ולבנות שגרה שמתאימה לך.</p></header>
                                 <div className="app-help-grid">
                                     {[
                                         {icon:'home',title:'דף הבית',text:'כאן רואים את תמונת היום: הברכה, מדדי החיים, משימות, יעדים ולוח השנה.',tab:'home'},
@@ -2397,6 +2436,14 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                         {/* ── PROFILE ── */}
                         {settingsSection === 'profile' && (
                             <div className="space-y-4">
+                                <div className="card p-6 space-y-3 border-t-[3px] border-emerald-300">
+                                    <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">🔐 חשבון</h3>
+                                    <p className="text-sm text-slate-600">מחוברת עם: <b>{user?.email}</b></p>
+                                    <button onClick={() => supabase.auth.signOut()}
+                                        className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition-all">
+                                        🚪 התנתקות
+                                    </button>
+                                </div>
                                 <div className="card p-6 space-y-5">
                                     <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">👤 פרופיל אישי</h3>
 
@@ -3506,6 +3553,12 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                     </div>
                 )}
 
+                {/* FINANCE TRACKER */}
+                {activeTab === 'finance' && <FinanceTracker user={user} />}
+
+                {/* NUMEROLOGY */}
+                {activeTab === 'numerology' && <NumerologyTab />}
+
                 {/* FUTURE SELF */}
                 {activeTab === 'future-self' && (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up pb-16">
@@ -3967,9 +4020,9 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                             </section>
 
                             <details className="manifest-example">
-                                <summary><Icon name="lightbulb" size={15}/> דוגמה קטנה מתוך Inside Out</summary>
+                                <summary><Icon name="lightbulb" size={15}/> דוגמה קטנה מתוך Design Your Life</summary>
                                 <div className="manifest-example-content">
-                                    <p>אם את רוצה להקים את Inside Out, מניפסטינג אינו רק לדמיין עסק מצליח. הוא כולל:</p>
+                                    <p>אם את רוצה להקים את Design Your Life, מניפסטינג אינו רק לדמיין עסק מצליח. הוא כולל:</p>
                                     <ul>
                                         <li>להגדיר בדיוק מה השירות הראשון שלך.</li>
                                         <li>לדמיין איך את מרגישה כשאת כבר עובדת עם לקוחות.</li>
@@ -4861,7 +4914,7 @@ import insideOutFinalLockup from './assets/inside-out-final-lockup-transparent.p
                     </div>
                 )}
                 <footer className="brand-page-footer max-w-5xl mx-auto mt-14 pb-8">
-                    <span className="footer-inside-out">INSIDE OUT</span>
+                    <span className="footer-inside-out">DESIGN YOUR LIFE</span>
                     <strong className="footer-hen-signature">By Hen Zerah</strong>
                 </footer>
                 </main>
