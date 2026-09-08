@@ -1600,6 +1600,13 @@ import { supabase } from './lib/supabaseClient.js';
                                 )}
                             </div>
                         )}
+
+                        {/* גישה למובייל בלבד לארכיון/הגדרות - בפס התחתון שורת ההגדרות המלאה מוסתרת (ראו CSS), אז מוסיפים כאן קיצור */}
+                        <button onClick={() => setActiveTab('tab-settings')}
+                            className={`mobile-settings-shortcut w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all relative ${activeTab==='tab-settings' ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                            <span className="nav-line-icon" aria-hidden="true" style={{color:'#747b86'}}><Icon name="settings" size={17} /></span>
+                            <span className="text-xs">הגדרות</span>
+                        </button>
                     </nav>
 
                     {/* Settings — fixed below the reorderable navigation */}
@@ -1705,6 +1712,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                         {/* תאריך - עמודה ימנית */}
                         <div className="header-date-column text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
+                            <p className="hero-caption hero-caption-right">A CLEAR MIND<br/>A BRIGHTER YOU<br/>A MORE INTENTIONAL TOMORROW</p>
                             <div className="header-vacation-slot"><VacationMode /></div>
                             {(() => {
                                 const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
@@ -1719,17 +1727,10 @@ import { supabase } from './lib/supabaseClient.js';
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
                                     <h1 className="inside-out-flowing" aria-label="Design Your Life">
-                                        Design Y
-                                        <svg className="enso-o-image" viewBox="0 0 80 80" aria-hidden="true">
-                                            <path className="daily-enso-main" d="M64 58 C51 75 27 73 12 57 C-1 42 5 19 25 10"/>
-                                            <path className="daily-enso-upper" d="M23 11 C38 3 57 6 68 20"/>
-                                            <path className="daily-enso-dry" d="M67 52 C55 69 34 72 17 59 C2 47 5 26 21 14 C36 3 57 8 67 25"/>
-                                            <path className="daily-enso-dry thin" d="M60 65 C43 76 20 68 10 50 C2 34 10 17 28 8 C43 1 60 8 72 20"/>
-                                            <path className="daily-enso-bristle" d="M63 58 L73 51 M65 55 L75 47 M67 22 L74 27 M65 19 L73 22 M25 8 L18 11"/>
-                                        </svg>
-                                        ur Life
+                                        <span className="hero-title-dark">Design</span> <span className="hero-title-rust">Your Life</span>
                                     </h1>
                                 </div>
+                                <p className="hero-tagline">PLAN · ALIGN · GROW · BE YOU</p>
                             </div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
@@ -1765,7 +1766,19 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        <div style={{gridColumn:"3"}} />
+                        <div className="hero-logo-column hidden md:flex" style={{gridColumn:"3"}}>
+                            <svg className="hero-logo-mark" viewBox="0 0 100 100" aria-hidden="true">
+                                <path d="M85 90 A75 75 0 0 0 18 14" />
+                                <path d="M10 90 L85 90" />
+                                <path d="M10 90 L82 70" />
+                                <path d="M10 90 L74 52" />
+                                <path d="M10 90 L60 36" />
+                                <path d="M10 90 L40 24" />
+                                <path d="M10 90 L18 14" />
+                                <circle cx="60" cy="36" r="3" fill="currentColor" stroke="none" />
+                            </svg>
+                            <p className="hero-caption hero-caption-left">MORE<br/>THAN A PLAN<br/>A LIFE YOU LOVE</p>
+                        </div>
 
                     </div>
                 </div>
