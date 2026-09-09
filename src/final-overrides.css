@@ -585,8 +585,8 @@ body{top:0!important}
 .sidebar-greeting .life-os-greeting-top{min-width:0;padding:0;text-align:right}
 .sidebar-greeting .life-os-greeting-top>span{display:none}
 .sidebar-greeting .life-os-greeting-top h2{margin:0 0 5px;font-size:18px;line-height:1.15;white-space:nowrap}
-.sidebar-greeting .life-os-greeting-top p{margin:0;font-size:9px;line-height:1.35}
-.sidebar-greeting .life-os-greeting-top p b{font-size:11px}
+.sidebar-greeting .life-os-greeting-top p{margin:0;font-size:11px;line-height:1.5}
+.sidebar-greeting .life-os-greeting-top p b{font-size:15px;font-weight:800}
 .life-os-row{flex-direction:row;align-items:flex-start;justify-content:center;gap:42px}
 .life-os-greeting-top{align-self:flex-start;min-width:250px;padding-top:16px;text-align:center}
 .life-wheel-standalone{width:min(330px,42vw);margin:0}
@@ -714,6 +714,18 @@ html:not(.dark-mode) .primary-sidebar{border:none!important;box-shadow:none!impo
 .selected-goal-label{position:absolute;z-index:3;top:10px;left:11px;padding:5px 9px;border-radius:999px;color:#fff;background:#8b6c5d;font-size:9px;font-weight:850;box-shadow:0 5px 14px rgba(83,60,47,.14)}
 html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!important}
 
+/* Footer signature — the exact same brand-lockup image as the hero title, shrunk down. */
+html:not(.dark-mode) .footer-inside-out{
+  display:block!important;overflow:hidden!important;
+  width:min(320px,72vw)!important;height:85px!important;
+  font-size:0!important;color:transparent!important;letter-spacing:normal!important;
+  text-shadow:none!important;background-color:transparent!important;
+  background-image:url('./assets/dashboard-title-background.png')!important;
+  background-repeat:no-repeat!important;background-size:185% auto!important;background-position:50% -7px!important;
+  -webkit-mask-image:radial-gradient(ellipse 65% 60% at 50% 45%,#000 55%,transparent 100%)!important;
+  mask-image:radial-gradient(ellipse 65% 60% at 50% 45%,#000 55%,transparent 100%)!important
+}
+
 /* Daily message readability */
 .pearl-dialog{width:min(740px,94vw)!important}
 .pearl-dialog>header span{font-size:11px!important;color:#756b96!important}
@@ -829,3 +841,291 @@ body:has(.zen-preview-home) .daily-message-floating-root{display:none!important}
 
 /* בפס הניווט הצף במובייל מציגים רק את הכרטיסיות - מנצח את הכלל הישן שמכריח flex תמיד */
 @media(max-width:767px){html body .primary-sidebar>.language-switcher{display:none!important}}
+
+/* ============================================================
+   All tabs — same warm card surface as the home page (not just
+   the reference-home dashboard). Applies globally, light mode only.
+   ============================================================ */
+html:not(.dark-mode) .card{
+  background:rgba(255,252,247,.9)!important;
+  border-color:rgba(100,71,53,.1)!important;
+  box-shadow:0 4px 12px rgba(69,44,31,.035),0 1px 3px rgba(69,44,31,.04)!important;
+}
+html:not(.dark-mode) .card:hover{
+  box-shadow:0 8px 22px rgba(69,44,31,.07)!important;
+}
+/* Lighter, clearer active-language chip (was a heavy dark-brown fill). */
+html:not(.dark-mode) .primary-sidebar>.language-switcher button.active{background:#e4d3c2!important;color:#5c4438!important;box-shadow:inset 0 0 0 1px rgba(92,66,51,.18)!important}
+
+/* Botanical atmosphere from the approved visual reference.
+   Decorative only: the dashboard cards, tabs and their behavior remain untouched. */
+html:not(.dark-mode) .dashboard-shell::before,
+html:not(.dark-mode) .dashboard-shell::after{
+  content:"";
+  position:fixed;
+  z-index:1;
+  width:clamp(120px,15vw,230px);
+  height:clamp(180px,25vw,360px);
+  pointer-events:none;
+  opacity:.26;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:sepia(.18) saturate(.68);
+}
+html body .dashboard-shell::after{display:none!important}
+html body .dashboard-shell::before{display:none!important}
+html body .dashboard-main::before,
+html body .dashboard-main::after{display:none!important}
+html:not(.dark-mode) .dashboard-shell::before{
+  top:-30px;
+  left:-22px;
+  transform:rotate(-8deg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 300'%3E%3Cg fill='none' stroke='%235d6045' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 292C48 226 61 144 78 18'/%3E%3Cpath d='M53 198c-27-15-36-37-35-62 28 8 43 26 35 62ZM66 137c-22-18-27-40-21-63 25 13 35 33 21 63ZM77 76C60 58 59 38 68 18c20 15 25 34 9 58ZM45 232c24-11 46-7 64 9-23 16-46 14-64-9ZM61 169c24-8 45-1 60 17-25 13-46 8-60-17ZM72 107c22-4 40 5 51 23-24 8-42 0-51-23Z' fill='%23787b5d' fill-opacity='.62'/%3E%3C/g%3E%3C/svg%3E");
+}
+html:not(.dark-mode) .dashboard-shell::after{
+  right:218px;
+  bottom:-100px;
+  transform:scaleX(-1) rotate(-17deg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 300'%3E%3Cg fill='none' stroke='%238b6c58' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 292C48 226 61 144 78 18'/%3E%3Cpath d='M53 198c-27-15-36-37-35-62 28 8 43 26 35 62ZM66 137c-22-18-27-40-21-63 25 13 35 33 21 63ZM77 76C60 58 59 38 68 18c20 15 25 34 9 58ZM45 232c24-11 46-7 64 9-23 16-46 14-64-9ZM61 169c24-8 45-1 60 17-25 13-46 8-60-17ZM72 107c22-4 40 5 51 23-24 8-42 0-51-23Z' fill='%23a78670' fill-opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+html:not(.dark-mode) .dashboard-main{z-index:2}
+html:not(.dark-mode) .dashboard-hero::before,
+html:not(.dark-mode) .dashboard-hero::after{
+  display:block!important;
+  content:""!important;
+  position:absolute!important;
+  z-index:0!important;
+  width:84px!important;
+  height:84px!important;
+  border:0!important;
+  border-radius:0!important;
+  opacity:.42!important;
+  pointer-events:none!important;
+  background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23776a50' stroke-width='1.5'%3E%3Cpath d='M8 83C22 57 40 35 74 8'/%3E%3Cpath d='M25 61c-13-2-20-10-21-22 14 0 22 7 21 22Zm16-19c-10-5-14-14-11-24 12 4 17 12 11 24Zm15-15c8-9 18-11 29-6-7 11-17 13-29 6ZM35 51c11 1 19 7 22 17-12 2-20-4-22-17Z' fill='%23858a67' fill-opacity='.35'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat!important;
+  filter:none!important;
+}
+html:not(.dark-mode) .dashboard-hero::before{left:8px!important;top:2px!important;transform:rotate(-18deg)!important}
+html:not(.dark-mode) .dashboard-hero::after{right:8px!important;top:1px!important;bottom:auto!important;transform:scaleX(-1) rotate(-18deg)!important}
+html:not(.dark-mode) .dashboard-hero>div{z-index:1}
+
+@media(max-width:1024px){
+  html:not(.dark-mode) .dashboard-shell::after{right:-30px}
+  html:not(.dark-mode) .dashboard-shell::before,
+  html:not(.dark-mode) .dashboard-shell::after{opacity:.16}
+}
+@media(max-width:700px){
+  html:not(.dark-mode) .dashboard-shell::before,
+  html:not(.dark-mode) .dashboard-shell::after{display:none}
+  html:not(.dark-mode) .dashboard-hero::before,
+  html:not(.dark-mode) .dashboard-hero::after{width:52px!important;height:52px!important;opacity:.24!important}
+}
+
+/* One-to-one home composition based on the supplied dashboard reference. */
+html:not(.dark-mode) body:has(.reference-home),
+html:not(.dark-mode) body:has(.reference-home) .dashboard-shell{background:#efe5d9!important;color:#49352b!important}
+body:has(.reference-home) .primary-sidebar{display:flex!important}
+/* Same wide, evenly-margined layout on every tab — not just the home page. */
+html body .dashboard-main{box-sizing:border-box!important;width:calc(100% - 240px - 2cm)!important;max-width:none!important;margin-right:240px!important;margin-left:2cm!important;padding:0 12px 24px!important;overflow-x:hidden!important}
+/* A whisper-thin line instead of empty space marks the sidebar as its own surface. */
+html:not(.dark-mode) .primary-sidebar{border-left:1px solid rgba(83,66,58,.08)!important}
+/* (superseded by the universal image-masthead rule further down) */
+body:has(.reference-home) .inside-out-lockup{transform:none!important;margin-top:18px!important}
+body:has(.reference-home) .inside-out-lockup .inside-out-final-image{width:min(610px,55vw)!important}
+body:has(.reference-home) .inside-out-lockup .design-your-life-brush{margin-top:4px!important;color:#5c4438!important;font:600 11px/1.2 Heebo,sans-serif!important;letter-spacing:.65em!important;text-transform:uppercase!important;background:none!important}
+body:has(.reference-home) .inside-out-lockup .design-your-life-brush::before,
+body:has(.reference-home) .inside-out-lockup .paintbrush-mark{display:none!important}
+body:has(.reference-home) .inside-out-lockup .inside-out-flowing{position:relative!important;display:flex!important;flex-wrap:nowrap!important;gap:.2em!important;font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-size:clamp(42px,5.25vw,72px)!important;font-weight:400!important;line-height:.98!important;letter-spacing:-.045em!important;white-space:nowrap!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-dark{color:#35221b!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-rust{position:relative!important;z-index:1;color:#9a5039!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-rust::before{content:"";position:absolute;z-index:-1;left:-.34em;top:-.7em;width:2.18em;height:2.18em;background:url('./assets/enso-brush.svg') center/contain no-repeat;transform:rotate(-7deg)}
+body:has(.reference-home) .inside-out-lockup .hero-title-rust::after{display:none!important;content:none!important}
+body:has(.reference-home) .dashboard-hero .header-date-column{padding-top:37px!important}
+body:has(.reference-home) .dashboard-hero .hero-logo-column{padding-top:31px!important}
+body:has(.reference-home) .hero-logo-mark{width:48px!important;height:48px!important;color:#9a7058!important}
+body:has(.reference-home) .hero-caption{color:#765546!important;font-family:'Bodoni Moda',serif!important;font-weight:500!important;letter-spacing:.22em!important}
+body:has(.reference-home) .mobile-vacation-slot{display:none!important}
+/* The floating trigger is replaced by the "המסר היומי" button in the quick-actions row. */
+body:has(.reference-home) .daily-message-floating-root{display:none!important}
+
+.reference-home{width:100%;margin:0 auto;color:#49382f;font-family:Heebo,Arial,sans-serif;direction:rtl}
+.reference-home button{font:inherit;color:inherit;cursor:pointer}
+.reference-utility-row{position:relative;display:grid;grid-template-columns:210px 42px 120px 120px minmax(220px,1fr);gap:8px;align-items:center;margin:8px 0 0;direction:ltr;overflow:visible}
+.reference-utility-row>*{height:38px;border:1px solid rgba(91,66,51,.08);border-radius:11px;background:rgba(255,252,247,.72);box-shadow:0 4px 13px rgba(76,51,36,.035)}
+.reference-utility-row button,.reference-search,.reference-profile{display:flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;font-size:11px}
+.reference-date{direction:rtl}.reference-icon-button{padding:0!important;color:#9a735a}.reference-add,.reference-edit{direction:rtl}.reference-search{justify-content:flex-start!important;color:#a69589;direction:rtl}.reference-search span{flex:1;text-align:right}
+.reference-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#5f4a40;font:500 11px/1.2 Heebo,sans-serif;text-align:right}
+.reference-search input::placeholder{color:#a69589}
+.reference-search button{width:22px;height:22px!important;padding:0!important;border:0!important;border-radius:50%!important;background:rgba(116,82,64,.08)!important;box-shadow:none!important;color:#826759;font-size:13px}
+.reference-edit.is-active{color:#fff!important;background:#94634a!important}
+.reference-profile{direction:rtl;justify-content:flex-start!important;background:transparent!important;border:0!important;box-shadow:none!important}.reference-profile span{display:grid;text-align:right}.reference-profile b{font-size:11px}.reference-profile small{font-size:8px;color:#9a8c82}.reference-profile i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#986748;color:#fff}
+.reference-nav{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px;margin-bottom:14px}.reference-nav button{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;border:1px solid rgba(100,71,53,.08);border-radius:12px;background:rgba(255,252,247,.78);font-size:12px;box-shadow:0 4px 12px rgba(69,44,31,.035);transition:.15s ease}.reference-nav svg{color:#8e654e;stroke-width:1.6}
+.reference-nav button.is-expanded{background:#f3e9df;border-color:rgba(100,71,53,.22)}
+.reference-nav-item{position:relative}
+.reference-nav-item button{width:100%}
+.reference-nav-expand{position:absolute;z-index:40;top:calc(100% + 6px);right:0;left:0;display:grid;gap:6px;padding:10px;border:1px solid rgba(100,71,53,.1);border-radius:12px;background:rgba(250,247,240,.98);box-shadow:0 16px 34px rgba(69,44,31,.14)}
+.reference-nav-expand button{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:0;border-radius:10px;background:transparent;color:#5c4438;font-size:12px;font-weight:600;text-align:right;transition:.15s ease}
+.reference-nav-expand button:hover{background:rgba(255,255,255,.85)}
+.reference-nav-expand button svg:first-child{color:#8e654e}
+.reference-nav-expand button svg:last-child{margin-right:auto;color:#b39d8f}
+.reference-section-title{display:flex;align-items:center;justify-content:center;gap:16px;margin:0 0 8px;font:700 13px/1.2 Heebo,sans-serif}.reference-section-title span{width:42px;height:1px;background:#b89278}
+.reference-goals-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:12px;padding:12px 14px;border:1px solid rgba(100,71,53,.07);border-radius:15px;background:rgba(255,252,247,.73);box-shadow:0 5px 16px rgba(69,44,31,.035)}
+.reference-goals-strip button{display:grid;grid-template-columns:25px 1fr 18px;align-items:center;gap:8px;min-height:60px;padding:2px 16px;border:0;border-left:1px solid rgba(92,66,51,.08);background:transparent;text-align:right}.reference-goals-strip button:last-child{border-left:0}.reference-goals-strip>button>svg:first-child{color:#91705b}.reference-goals-strip span{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}.reference-goals-strip b{font-size:11px}.reference-goals-strip small{font-size:10px}.reference-goals-strip i{grid-column:1/-1;height:5px;border-radius:99px;background:#e5ddd7;overflow:hidden}.reference-goals-strip em{display:block;height:100%;border-radius:inherit;background:#788270}
+.reference-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.reference-lower-grid article{min-height:260px;padding:17px 24px 12px;border:1px solid rgba(100,71,53,.07);border-radius:15px;background:rgba(255,253,249,.82);box-shadow:0 5px 18px rgba(69,44,31,.04)}
+.reference-lower-grid header{display:flex;align-items:center;justify-content:space-between}.reference-lower-grid h2{display:flex;align-items:center;gap:7px;margin:0;font:700 13px/1.2 Heebo,sans-serif}.reference-calendar header button{border:0;background:transparent}.reference-weekdays,.reference-month-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;text-align:center}.reference-weekdays{margin:18px 0 8px;color:#8c7e75;font-size:8px}.reference-month-grid{row-gap:7px;font-size:9px}.reference-month-grid span{display:grid;place-items:center;height:23px}.reference-month-grid .is-today{width:25px;margin:auto;border-radius:50%;background:#9a5e40;color:white;box-shadow:0 5px 10px rgba(120,67,42,.22)}.reference-calendar footer{margin-top:8px;text-align:center;color:#9b8b81;font:600 7px/1.2 'Bodoni Moda',serif;letter-spacing:.36em}
+.reference-tasks header button{display:flex;align-items:center;gap:3px;border:0;background:transparent;font-size:9px}.reference-empty-illustration{display:flex;flex-direction:column;align-items:center;margin:8px 0 5px}.reference-empty-illustration span{height:50px;color:#9b806e;font:400 54px/1 'Mrs Saint Delafield',cursive;transform:rotate(-18deg)}.reference-empty-illustration b{font:500 20px/1.2 'Bodoni Moda',serif}.reference-empty-illustration small{margin-top:2px;color:#998a81;font-size:9px;letter-spacing:.12em}.reference-task-list{border-top:1px solid rgba(91,66,51,.1)}.reference-task-list button{display:flex;align-items:center;width:100%;height:30px;padding:0 3px;border:0;border-bottom:1px solid rgba(91,66,51,.08);background:transparent;font-size:9px}.reference-task-list i{width:17px;height:17px;margin-left:8px;border:1px solid #9b8b80;border-radius:50%}
+body:has(.reference-home) .reference-empty-illustration span{display:none!important}
+body:has(.reference-home) .reference-empty-illustration small{font-size:0!important}
+body:has(.reference-home) .reference-empty-illustration small::after{
+  content:"משימות קטנות יוצרות חיים גדולים";
+  color:#9a6f5b;font:500 10px/1.4 Heebo,Arial,sans-serif;letter-spacing:.14em
+}
+body:has(.reference-home) .reference-empty-illustration .reference-empty-heart{
+  display:block;margin-top:8px;color:#9a6f5b;font-size:16px;font-style:normal;line-height:1
+}
+body:has(.reference-home) .reference-home + .home-canvas{margin-top:0!important;padding-top:0!important;border-top:0!important}
+/* Hide only the legacy duplicate calendar/tasks block below the reference cards. */
+body:has(.reference-home) .home-canvas > div:has(.home-editorial-calendar){display:none!important}
+
+/* One unified top toolbar. The legacy toolbar stays mounted for its dialogs,
+   while all visible controls live in the row directly below the masthead. */
+body:has(.reference-home) .reference-utility-row{
+  display:grid!important;
+  grid-template-columns:minmax(230px,1.1fr) minmax(160px,.78fr) minmax(300px,2fr) minmax(135px,.72fr) 42px 105px 115px!important;
+  grid-template-areas:"date countdown search sounds theme add edit"!important
+}
+body:has(.reference-home) .reference-date{display:none!important}
+body:has(.reference-home) .reference-live-date{grid-area:date;display:flex!important;align-items:center;gap:6px;overflow:hidden;direction:rtl;white-space:nowrap}
+body:has(.reference-home) .reference-live-date span{overflow:hidden;text-overflow:ellipsis;font-weight:800;color:#694b3c}
+body:has(.reference-home) .reference-icon-button{grid-area:theme}
+body:has(.reference-home) .reference-add{grid-area:add}
+body:has(.reference-home) .reference-edit{grid-area:edit}
+body:has(.reference-home) .reference-search{grid-area:search;width:100%!important;justify-content:flex-start!important;padding:0 16px!important}
+body:has(.reference-home) .reference-search>span:first-child{flex:0 0 18px!important;width:18px!important;height:18px!important;color:#704532!important}
+body:has(.reference-home) .reference-search input{width:100%!important;height:100%!important;padding:0 4px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:12px!important}
+body:has(.reference-home) .reference-search input:focus{outline:0!important;border:0!important;box-shadow:none!important}
+body:has(.reference-home) .reference-countdown{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;overflow:hidden;direction:rtl;font-size:10px;white-space:nowrap}
+body:has(.reference-home) .reference-countdown{grid-area:countdown}
+body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;font-weight:700}
+body:has(.reference-home) .reference-countdown>span[style]{color:#9a694f}
+body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px}
+body:has(.reference-home) .reference-countdown small{color:#99897e}
+body:has(.reference-home) .reference-sounds{grid-area:sounds;direction:rtl}
+body:has(.reference-home) .reference-sounds span{font-weight:700}
+body:has(.reference-home) .reference-sounds small{max-width:72px;overflow:hidden;color:#99897e;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+body:has(.reference-home) .reference-sound-menu{
+  position:absolute!important;z-index:80!important;top:46px!important;right:0!important;
+  display:grid!important;gap:5px!important;width:260px!important;height:auto!important;padding:8px!important;
+  border:1px solid rgba(92,66,51,.12)!important;border-radius:14px!important;
+  background:rgba(255,252,247,.98)!important;box-shadow:0 16px 38px rgba(72,49,37,.18)!important;
+  direction:rtl!important
+}
+body:has(.reference-home) .reference-sound-menu button{
+  display:grid;grid-template-columns:22px 1fr;align-items:center;gap:8px;width:100%;min-height:48px;padding:7px 9px;
+  border:0;border-radius:10px;background:transparent;text-align:right
+}
+body:has(.reference-home) .reference-sound-menu button:hover{background:#f3e9df}
+body:has(.reference-home) .reference-sound-menu button.is-active{color:#fff;background:#8d5d45}
+body:has(.reference-home) .reference-sound-menu span{display:block}
+body:has(.reference-home) .reference-sound-menu b{display:block;font-size:10px}
+body:has(.reference-home) .reference-sound-menu small{display:block;margin-top:2px;color:#9a897e;font-size:8px;line-height:1.35}
+body:has(.reference-home) .reference-sound-menu button.is-active small{color:rgba(255,255,255,.72)}
+body:has(.reference-home) .home-command-row{position:static!important;width:0!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+body:has(.reference-home) .home-command-row>.home-toolbar,
+body:has(.reference-home) .home-command-row .daily-message-slot,
+body:has(.reference-home) .home-command-row .home-soundscape-trigger{display:none!important}
+body:has(.reference-home) .home-command-row>.home-sound-column{width:0!important;height:0!important;flex-basis:0!important}
+/* Quick actions (save/undo/new task/...) now live inside the reference masthead;
+   the legacy row further down the page is hidden to avoid a duplicate. */
+body:has(.reference-home) .home-canvas>.canvas-actions{display:none!important}
+
+/* ---------- New quick-actions row: rounded rectangles, not pills ---------- */
+.reference-float-actions{position:fixed;top:18px;left:calc(2cm + 16px);z-index:70;display:flex;gap:6px}
+.reference-float-actions button{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid rgba(92,66,51,.14);border-radius:9px;background:rgba(250,247,240,.92);color:#6d5144;box-shadow:0 6px 16px rgba(69,61,51,.08);transition:.15s ease}
+.reference-float-actions button:hover{background:#f3e9df}
+.reference-float-actions button:disabled{opacity:.4;cursor:default}
+.reference-quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:8px}
+.reference-nav-expand{max-height:260px;overflow-y:auto}
+.reference-quick-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 10px;border:1px solid rgba(100,71,53,.08);border-radius:12px;background:rgba(255,252,247,.78);color:#49382f;font-size:12px;font-weight:400;box-shadow:0 4px 12px rgba(69,44,31,.035);transition:.15s ease}
+.reference-quick-actions button:hover{background:#f3e9df;transform:translateY(-1px)}
+.reference-quick-actions button:disabled{opacity:.45;cursor:default;transform:none}
+.reference-quick-actions button b{font-weight:400;font-size:12px}
+.reference-quick-actions svg{color:#8e654e;stroke-width:1.6}
+@media(max-width:900px){.reference-quick-actions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.reference-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+@media(max-width:900px){
+  body:has(.reference-home) .dashboard-main{padding:0 8px 90px!important}
+  body:has(.reference-home) .dashboard-hero{height:150px!important;min-height:150px!important}
+  .reference-utility-row{grid-template-columns:1.2fr 42px 1fr 1fr;grid-template-rows:38px 38px}
+  .reference-search{display:flex!important;grid-column:1/-1;grid-row:1}
+  .reference-date{grid-column:1;grid-row:2}
+  .reference-icon-button{grid-column:2;grid-row:2}
+  .reference-add{grid-column:3;grid-row:2}
+  .reference-edit{display:flex!important;grid-column:4;grid-row:2}
+  .reference-nav{grid-template-columns:repeat(3,1fr)}
+  .reference-goals-strip{grid-template-columns:1fr 1fr}.reference-goals-strip button:nth-child(2){border-left:0}
+  .reference-lower-grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){.reference-nav{grid-template-columns:repeat(2,1fr)}.reference-goals-strip{grid-template-columns:1fr}.reference-goals-strip button{border-left:0;border-bottom:1px solid rgba(92,66,51,.08)}.reference-goals-strip button:last-child{border-bottom:0}}
+@media(max-width:767px){body:has(.reference-home) .dashboard-main{width:100%!important;margin-right:0!important}}
+
+/* Final pixel-calibration for the supplied home reference. */
+body:has(.reference-home) .inside-out-lockup .inside-out-flowing{
+  display:flex!important;flex-wrap:nowrap!important;gap:.18em!important;
+  font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;
+  font-size:clamp(42px,5.25vw,72px)!important;font-weight:400!important;
+  font-optical-sizing:auto!important;line-height:.98!important;letter-spacing:.005em!important;
+  text-transform:uppercase!important;white-space:nowrap!important
+}
+body:has(.reference-home) .inside-out-lockup .hero-title-dark{color:#402a22!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-rust{color:#96513d!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-life{color:#9a5039!important}
+body:has(.reference-home) .inside-out-lockup .hero-title-rust::before{left:50%!important;top:50%!important;width:2.85em!important;height:2.85em!important;transform:translate(-50%,-55%) rotate(-5deg)!important}
+body:has(.reference-home) .hero-handwritten{
+  margin:8px 0 0;color:#815a47;text-align:left;
+  font:400 clamp(24px,2.3vw,38px)/.72 'Mrs Saint Delafield','Gveret Levin',cursive;
+  transform:rotate(-3deg)
+}
+body:has(.reference-home) .hero-handwritten span{display:inline-block;margin-top:7px;font-size:.82em}
+.reference-goals-strip button:nth-child(1) em{background:#9a6b50}
+.reference-goals-strip button:nth-child(2) em{background:#b28b83}
+.reference-goals-strip button:nth-child(3) em{background:#788b78}
+.reference-goals-strip button:nth-child(4) em{background:#9b6650}
+.reference-footer{
+  display:flex;align-items:center;gap:10px;margin-top:13px;padding:0 3px;
+  color:#9b8b81;font:600 7px/1.2 'Bodoni Moda',serif;letter-spacing:.27em
+}
+.reference-footer i{width:22px;height:1px;background:#bda997}
+.reference-footer b{margin-right:auto;color:#8b7569;font-size:7px;font-weight:600;letter-spacing:.23em}
+@media(max-width:700px){body:has(.reference-home) .hero-handwritten{display:none}.reference-footer{letter-spacing:.12em}.reference-footer b{display:none}}
+
+/* Exact brand crop from the user's approved visual reference. */
+body:has(.reference-home) .inside-out-lockup{
+  width:min(58vw,620px)!important;height:150px!important;margin-top:0!important;
+  overflow:hidden!important;background-image:url('./assets/dashboard-title-background.png')!important;
+  background-repeat:no-repeat!important;background-size:185% auto!important;
+  background-position:50% -12px!important
+}
+body:has(.reference-home) .inside-out-lockup .brand-title-line,
+body:has(.reference-home) .inside-out-lockup .hero-tagline{opacity:0!important;pointer-events:none!important}
+body:has(.reference-home) .dashboard-hero .hero-caption,
+body:has(.reference-home) .dashboard-hero .hero-handwritten{opacity:0!important}
+@media(max-width:900px){
+  body:has(.reference-home) .inside-out-lockup{width:min(72vw,540px)!important;height:125px!important;background-size:185% auto!important;background-position:50% -9px!important}
+}
+
+/* The full image masthead — on every tab, not just home, so the app feels like one place. */
+html body .dashboard-hero{
+  height:auto!important;min-height:0!important;aspect-ratio:1584/255!important;padding:0!important;
+  background-image:url('./assets/dashboard-title-background.png')!important;
+  background-color:transparent!important;background-repeat:no-repeat!important;background-size:100% auto!important;background-position:center top!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 86%,rgba(0,0,0,.72) 93%,transparent 100%)!important;
+  mask-image:linear-gradient(to bottom,#000 0%,#000 86%,rgba(0,0,0,.72) 93%,transparent 100%)!important
+}
+/* Hide the old text hero (replaced by the image) on every tab; vacation mode's
+   trigger now lives in the sidebar, so nothing interactive is lost here. */
+html body .dashboard-hero>div{opacity:0!important;pointer-events:none!important}
+html body .dashboard-hero::before,
+html body .dashboard-hero::after{display:none!important}
+@media(max-width:700px){html body .dashboard-hero{aspect-ratio:1584/265!important}}

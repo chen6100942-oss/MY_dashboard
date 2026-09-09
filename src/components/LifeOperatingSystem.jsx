@@ -29,7 +29,7 @@ const isDark = hex => {
   return (0.299 * r + 0.587 * g + 0.114 * b) < 150;
 };
 
-export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld, mode = 'all' }) {
+export default function LifeOperatingSystem({ userName = 'חן', greetingText, onOpenWorld, mode = 'all' }) {
   const [scores, setScores] = useState(() => read('insideout-life-scores', { body: 72, mind: 81, money: 58, relations: 76, purpose: 68, spirit: 84 }));
   const [selectedWorld, setSelectedWorld] = useState('mind');
   const startDate = useMemo(() => {
@@ -39,7 +39,7 @@ export default function LifeOperatingSystem({ userName = 'חן', onOpenWorld, mo
   }, []);
   const journeyDay = Math.max(1, Math.floor((new Date() - startDate) / 86400000) + 1);
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב';
+  const greeting = greetingText || (hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב');
   const selected = worlds.find(world => world.id === selectedWorld);
   const average = Math.round(Object.values(scores).reduce((sum, score) => sum + Number(score || 0), 0) / worlds.length);
 

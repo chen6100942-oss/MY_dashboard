@@ -12,17 +12,20 @@ import VacationMode from './components/VacationMode.jsx';
 import ZenHomePreview from './components/ZenHomePreview.jsx';
 import FinanceTracker from './components/FinanceTracker.jsx';
 import NumerologyTab from './components/NumerologyTab.jsx';
+import ClientsTab from './components/ClientsTab.jsx';
 import { supabase } from './lib/supabaseClient.js';
 
     const PERSONAL_GROWTH_TAB_IDS = ['ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset'];
+    const LOCAL_VISUAL_PREVIEW = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+        && new URLSearchParams(window.location.search).get('visualPreview') === '1';
 
     const App = () => {
         // ============================================================
         // THE FIX: ALL useState/useEffect HOOKS BEFORE ANY EARLY RETURN
         // This was the cause of React error #310
         // ============================================================
-        const [user, setUser] = useState(null);
-        const [loading, setLoading] = useState(true);
+        const [user, setUser] = useState(LOCAL_VISUAL_PREVIEW ? { id:'visual-preview', user_metadata:{ full_name:'Chen' } } : null);
+        const [loading, setLoading] = useState(!LOCAL_VISUAL_PREVIEW);
         const [activeTab, setActiveTab] = useState('home');
         const [focusedDomainGoalId, setFocusedDomainGoalId] = useState(null);
         const [showConfetti, setShowConfetti] = useState(false);
@@ -32,18 +35,12 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'tasks', name: 'משימות ופרויקטים', icon: 'list-todo', color: 'blue', emoji: '✅' },
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
-            { id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' },
-            { id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' },
+            { id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' },
+            { id: 'clients', name: 'ניהול לקוחות', icon: 'users', color: 'teal', emoji: '👥' },
             { id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' },
-            { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
-            { id: 'ikigai', name: 'IKIGAI', icon: 'flower-2', color: 'rose', emoji: '🪷' },
-            { id: 'inspiration', name: 'מוטיבציה והשראה', icon: 'flame', color: 'amber', emoji: '✦' },
-            { id: 'book-wisdom', name: 'סיכומי ספרים', icon: 'book-open', color: 'indigo', emoji: '◈' },
-            { id: 'mindset', name: 'Mindset', icon: 'brain', color: 'purple', emoji: '🧠' },
             { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
-            { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' },
-            { id: 'vision-board', name: 'לוח חזון', icon: 'image', color: 'pink', emoji: '🖼️' }
+            { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' }
         ]);
         const [newTabName, setNewTabName] = useState('');
         const [newTabIcon, setNewTabIcon] = useState('star');
@@ -107,10 +104,12 @@ import { supabase } from './lib/supabaseClient.js';
             applyGoogleTranslation(language);
         };
         const [showDailySoulOpening, setShowDailySoulOpening] = useState(() => {
+            if (LOCAL_VISUAL_PREVIEW) return false;
             const today = new Date().toISOString().slice(0,10);
             return localStorage.getItem('dailySoulOpeningDateV2') !== today;
         });
         const [showMotivationFilm, setShowMotivationFilm] = useState(() => {
+            if (LOCAL_VISUAL_PREVIEW) return false;
             const today = new Date().toISOString().slice(0,10);
             return localStorage.getItem('openingMotivationFilmDate') !== today;
         });
@@ -357,8 +356,14 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'p3', title: 'יצירת קהילה / יוצרת תוכן', gradient: 'from-pink-500 to-rose-500', color: 'from-pink-500 to-rose-500', emoji: '📱', startMonth: 2, endMonth: 12, showOnHome: true },
             { id: 'p4', title: 'לרדת 20 ק"ג', gradient: 'from-rose-500 to-pink-600', color: 'from-rose-500 to-pink-600', emoji: '⚖️', startMonth: 1, endMonth: 10, showOnHome: false },
             { id: 'p5', title: 'תכנון בית מש\' שוורץ', gradient: 'from-emerald-500 to-teal-500', color: 'from-emerald-500 to-teal-500', emoji: '🏗️', startMonth: 1, endMonth: 3, showOnHome: false },
+            { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false },
         ]);
-        const [tasks, setTasks] = useState([]);
+        const [tasks, setTasks] = useState([
+            { id: 't-launch-1', text: 'להחזיר את המדריך הפיננסי בכרטיסיית מעקב פיננסי', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-launch-2', text: 'אבטחה — כניסה עם מייל וסיסמה אמיתיים לכל משתמש', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+        ]);
         const [resources, setResources] = useState([
             { id: 'r1', title: 'השראה לאדריכלות מודרנית', url: 'https://www.archdaily.com', projectId: 'p1', completed: true, emoji: '🏗️' },
             { id: 'r2', title: 'רפרנסים לעיצוב פוסטים', url: 'https://www.instagram.com', projectId: 'p3', completed: false, emoji: '📱' },
@@ -655,6 +660,7 @@ import { supabase } from './lib/supabaseClient.js';
         useEffect(() => {
             const sl = document.getElementById('static-loader');
             if (sl) sl.style.display = 'none';
+            if (LOCAL_VISUAL_PREVIEW) return undefined;
 
             const toUser = session => session?.user
                 ? { displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null }
@@ -678,7 +684,10 @@ import { supabase } from './lib/supabaseClient.js';
         const ensureBuiltinTabs = (tabsArr) => {
             let deletedIds = [];
             try { deletedIds = JSON.parse(localStorage.getItem('deleted_tab_ids') || '[]'); } catch(e) {}
-            const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule']);
+            // 'numerology', 'vision-board' and the whole "התפתחות אישית" sidebar group
+            // (ikigai, manifesting, book-wisdom, inspiration, mindset) are reached from
+            // home-page shortcuts now ("התפתחות רוחנית" / "התפתחות אישית"), not the sidebar.
+            const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule', 'numerology', 'vision-board', 'ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset']);
             const result = [...tabsArr]
                 .filter(tab => !deleted.has(tab.id))
                 .map(tab => tab.id === 'manifesting' ? {...tab, name: 'Manifesting'} : tab)
@@ -708,7 +717,10 @@ import { supabase } from './lib/supabaseClient.js';
                 result.push({ id:'book-wisdom', name:'סיכומי ספרים', icon:'book-open', color:'indigo', emoji:'◈' });
             }
             if (!deleted.has('finance') && !result.some(t => t.id === 'finance')) {
-                result.push({ id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' });
+                result.push({ id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' });
+            }
+            if (!deleted.has('clients') && !result.some(t => t.id === 'clients')) {
+                result.push({ id: 'clients', name: 'ניהול לקוחות', icon: 'users', color: 'teal', emoji: '👥' });
             }
             if (!deleted.has('numerology') && !result.some(t => t.id === 'numerology')) {
                 result.push({ id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' });
@@ -1554,7 +1566,7 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* SIDEBAR */}
                 <aside style={{width:'240px',flexShrink:0,...(darkMode?{backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}:{boxShadow:'0 0 10px rgba(0,0,0,0.08)'})}} className="primary-sidebar bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
                     <div className="sidebar-greeting">
-                        <LifeOperatingSystem mode="greeting" userName={user?.user_metadata?.full_name?.split(' ')[0] || 'חן'} />
+                        <LifeOperatingSystem mode="greeting" greetingText="בוקר טוב" userName={profileName || 'חן זרח'} />
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
@@ -1631,6 +1643,11 @@ import { supabase } from './lib/supabaseClient.js';
                                 </svg>
                             </span>
                             <span className="text-xs">הוראות שימוש</span>
+                        </button>
+                        <button onClick={() => window.dispatchEvent(new CustomEvent('open-vacation-mode'))}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:bg-slate-50 hover:text-slate-700">
+                            <span className="nav-line-icon" aria-hidden="true" style={{color:'#a9785d'}}><Icon name="palm-tree" size={17} /></span>
+                            <span className="text-xs">מצב חופשה</span>
                         </button>
                     </div>
                     <div className="language-switcher" aria-label="בחירת שפה">
@@ -1713,7 +1730,7 @@ import { supabase } from './lib/supabaseClient.js';
                         {/* תאריך - עמודה ימנית */}
                         <div className="header-date-column text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
                             <p className="hero-caption hero-caption-right">A CLEAR MIND<br/>A BRIGHTER YOU<br/>A MORE INTENTIONAL TOMORROW</p>
-                            <div className="header-vacation-slot"><VacationMode /></div>
+                            <div className="header-vacation-slot"><VacationMode hideTrigger={true} /></div>
                             {(() => {
                                 const d = new Date().toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long'});
                                 const year = new Date().getFullYear();
@@ -1727,10 +1744,10 @@ import { supabase } from './lib/supabaseClient.js';
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
                                     <h1 className="inside-out-flowing" aria-label="Design Your Life">
-                                        <span className="hero-title-dark">Design</span> <span className="hero-title-rust">Your Life</span>
+                                        <span className="hero-title-dark">Design</span> <span className="hero-title-rust">Your</span> <span className="hero-title-life">Life</span>
                                     </h1>
                                 </div>
-                                <p className="hero-tagline">PLAN · ALIGN · GROW · BE YOU</p>
+                                <p className="hero-tagline">PLAN · ELEVATE · GROW</p>
                             </div>
 
                             {/* ציטוטים תחת הכותרת — רק בדף הבית */}
@@ -1767,17 +1784,7 @@ import { supabase } from './lib/supabaseClient.js';
                         </div>
 
                         <div className="hero-logo-column hidden md:flex" style={{gridColumn:"3"}}>
-                            <svg className="hero-logo-mark" viewBox="0 0 100 100" aria-hidden="true">
-                                <path d="M85 90 A75 75 0 0 0 18 14" />
-                                <path d="M10 90 L85 90" />
-                                <path d="M10 90 L82 70" />
-                                <path d="M10 90 L74 52" />
-                                <path d="M10 90 L60 36" />
-                                <path d="M10 90 L40 24" />
-                                <path d="M10 90 L18 14" />
-                                <circle cx="60" cy="36" r="3" fill="currentColor" stroke="none" />
-                            </svg>
-                            <p className="hero-caption hero-caption-left">MORE<br/>THAN A PLAN<br/>A LIFE YOU LOVE</p>
+                            <p className="hero-handwritten">More<br/>than a plan<br/><span>A life you love</span></p>
                         </div>
 
                     </div>
@@ -1883,13 +1890,30 @@ import { supabase } from './lib/supabaseClient.js';
 
 
 
-                {/* ZEN HOME PREVIEW — enabled only through ?zenPreview=1 */}
-                {activeTab === 'home' && new URLSearchParams(window.location.search).get('zenPreview') === '1' && (
-                    <ZenHomePreview tasks={tasks} goals={domainGoals} onNavigate={setActiveTab} />
+                {/* Reference-composition home dashboard */}
+                {activeTab === 'home' && (
+                    <ZenHomePreview
+                        tasks={tasks} goals={domainGoals} projects={projects} tabs={tabs} onNavigate={setActiveTab}
+                        searchQuery={searchQuery}
+                        onSearchChange={value => { setSearchQuery(value); performSearch(value); }}
+                        onClearSearch={() => { setSearchQuery(''); setSearchResults([]); }}
+                        layoutEditMode={layoutEditMode} onToggleLayout={() => setLayoutEditMode(value => !value)}
+                        onAddBlock={() => setShowAddHomeBlock(value => !value)}
+                        darkMode={darkMode} onToggleTheme={toggleDarkMode}
+                        onOpenSoundLibrary={() => setShowSoundLibrary(true)}
+                        activeSoundLabel={activeYoutubeTrack?.label || 'שקט'}
+                        soundTracks={youtubeAmbientTracks.filter(track => !track.scope)}
+                        activeSoundId={youtubeAmbientId}
+                        onSelectSound={trackId => trackId ? toggleYoutubeAmbient(trackId) : setYoutubeAmbientId('')}
+                        onSave={saveAllData}
+                        onUndo={undo}
+                        canUndo={undoStack.length > 0}
+                        onNewGoal={() => setShowAddGoalModal(true)}
+                    />
                 )}
 
                 {/* HOME */}
-                {activeTab === 'home' && new URLSearchParams(window.location.search).get('zenPreview') !== '1' && (
+                {activeTab === 'home' && (
                     <div className="home-canvas max-w-5xl mx-auto space-y-6 animate-slide-in-up">
 
                         <div className="home-command-row">
@@ -1959,6 +1983,9 @@ import { supabase } from './lib/supabaseClient.js';
                         </div>
 
                         {/* Quick actions moved from the left rail onto the canvas */}
+                        {/* This row now also renders inside ZenHomePreview's reference-utility area
+                            (moved up per request); kept mounted here for saved-layout compatibility
+                            on non-reference views, hidden when the reference home is active. */}
                         <div className="canvas-actions">
                             <button onClick={saveAllData}><span>💾</span><b>שמור</b></button>
                             <button onClick={undo} disabled={undoStack.length===0}><span>↩️</span><b>בטל</b></button>
@@ -3568,6 +3595,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* FINANCE TRACKER */}
                 {activeTab === 'finance' && <FinanceTracker user={user} />}
+                {activeTab === 'clients' && <ClientsTab />}
 
                 {/* NUMEROLOGY */}
                 {activeTab === 'numerology' && <NumerologyTab />}

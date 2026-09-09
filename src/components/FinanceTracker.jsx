@@ -645,7 +645,7 @@ export default function FinanceTracker({ user }) {
         <button onClick={() => setView('loans')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'loans' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הלוואות ומשכנתא</button>
         <button onClick={() => setView('funds')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'funds' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>נכסים ושווי נקי</button>
         <button onClick={() => setView('goals')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'goals' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>🎯 יעד פיננסי</button>
-        <button onClick={() => setView('guide')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'guide' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>מדריך</button>
+        {/* "מדריך" הוסר זמנית — יוחזר לפני השקה לציבור (ר' פרויקט "לפני השקה לציבור") */}
       </div>
 
       {(view === 'overview' || view === 'monthly' || view === 'cards') && (
