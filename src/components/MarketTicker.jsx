@@ -23,7 +23,7 @@ export default function MarketTicker() {
     script.innerHTML = JSON.stringify({
       symbols: SYMBOLS,
       showSymbolLogo: true,
-      isTransparent: false,
+      isTransparent: true,
       displayMode: 'adaptive',
       colorTheme: 'light',
       locale: 'he',

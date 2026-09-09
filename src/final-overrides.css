@@ -846,6 +846,38 @@ body:has(.zen-preview-home) .daily-message-floating-root{display:none!important}
    All tabs — same warm card surface as the home page (not just
    the reference-home dashboard). Applies globally, light mode only.
    ============================================================ */
+/* Tab content everywhere uses Tailwind's max-w-5xl/4xl/3xl "centered column"
+   pattern, which — now that .dashboard-main itself is wide — leaves big
+   unwanted empty margins on every tab except home. Let content fill it. */
+html body .dashboard-main .max-w-5xl,
+html body .dashboard-main .max-w-4xl,
+html body .dashboard-main .max-w-3xl,
+html body .dashboard-main .max-w-2xl{max-width:none!important}
+
+/* Every plain white/slate input, select and textarea across the whole app —
+   not just home — gets the same warm, rounded field style. */
+html:not(.dark-mode) input[class*="border-slate-2"],
+html:not(.dark-mode) select[class*="border-slate-2"],
+html:not(.dark-mode) textarea[class*="border-slate-2"],
+html:not(.dark-mode) input[class*="bg-white"][class*="border"],
+html:not(.dark-mode) select[class*="bg-white"][class*="border"],
+html:not(.dark-mode) textarea[class*="bg-white"][class*="border"]{
+  background:rgba(255,252,247,.92)!important;
+  border-color:rgba(100,71,53,.16)!important;
+  color:#49382f!important;
+  border-radius:12px!important;
+}
+html:not(.dark-mode) input[class*="border-slate-2"]:focus,
+html:not(.dark-mode) select[class*="border-slate-2"]:focus,
+html:not(.dark-mode) textarea[class*="border-slate-2"]:focus,
+html:not(.dark-mode) input[class*="bg-white"][class*="border"]:focus,
+html:not(.dark-mode) select[class*="bg-white"][class*="border"]:focus,
+html:not(.dark-mode) textarea[class*="bg-white"][class*="border"]:focus{
+  border-color:#a2472f!important;
+}
+html:not(.dark-mode) input[class*="border-slate-2"]::placeholder,
+html:not(.dark-mode) textarea[class*="border-slate-2"]::placeholder{color:#8a7264!important}
+
 html:not(.dark-mode) .card{
   background:rgba(255,252,247,.9)!important;
   border-color:rgba(100,71,53,.1)!important;
@@ -1116,6 +1148,7 @@ body:has(.reference-home) .dashboard-hero .hero-handwritten{opacity:0!important}
 
 /* The full image masthead — on every tab, not just home, so the app feels like one place. */
 html body .dashboard-hero{
+  width:100%!important;max-width:none!important;
   height:auto!important;min-height:0!important;aspect-ratio:1584/255!important;padding:0!important;
   background-image:url('./assets/dashboard-title-background.png')!important;
   background-color:transparent!important;background-repeat:no-repeat!important;background-size:100% auto!important;background-position:center top!important;
