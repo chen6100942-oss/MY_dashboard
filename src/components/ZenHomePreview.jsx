@@ -82,7 +82,7 @@ export default function ZenHomePreview({
     <section className="reference-home" aria-label="לוח הבקרה הראשי">
       <div className="reference-utility-row">
         <button className="reference-live-date" onClick={() => onNavigate?.('gantt')}><Icon name="calendar" size={13}/><span>{today.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · {today.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span></button>
-        <div className="reference-countdown"><Icon name="hourglass" size={14}/><span>{weeksToEndOf2026} שבועות</span><b>{daysToEndOf2026} ימים</b><small>עד סוף 2026</small></div>
+        <div className="reference-countdown"><span>{weeksToEndOf2026} שבועות</span><b>{daysToEndOf2026} ימים</b><small>עד סוף 2026</small></div>
         <button className="reference-sounds" onClick={() => setSoundMenuOpen(open => !open)} aria-expanded={soundMenuOpen}><Icon name="volume-2" size={14}/><span>מוזיקת רקע</span><small>{activeSoundLabel}</small><Icon name="chevron-down" size={12}/></button>
         {soundMenuOpen && <div className="reference-sound-menu">
           {soundTracks.map(track => <button key={track.id} className={activeSoundId === track.id ? 'is-active' : ''} onClick={() => { onSelectSound?.(track.id); setSoundMenuOpen(false); }}><Icon name="music-2" size={13}/><span><b>{track.label}</b><small>{track.note}</small></span></button>)}

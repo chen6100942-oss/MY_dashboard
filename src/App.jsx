@@ -681,6 +681,11 @@ import { supabase } from './lib/supabaseClient.js';
             })();
 
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+                // קישור לאיפוס סיסמה יוצר session תקף לפני שהמשתמשת בחרה סיסמה
+                // חדשה בפועל — אם נכנסים ישר ללוח הבקרה כאן, מסך "קביעת סיסמה
+                // חדשה" ב-LoginScreen לעולם לא נראה. משאירים את זה שם עד שהיא
+                // באמת מעדכנת סיסמה (updateUser משדר event 'USER_UPDATED').
+                if (_event === 'PASSWORD_RECOVERY') return;
                 setUser(toUser(session));
             });
             return () => subscription.unsubscribe();

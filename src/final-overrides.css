@@ -714,6 +714,17 @@ html:not(.dark-mode) .primary-sidebar{border:none!important;box-shadow:none!impo
 .selected-goal-label{position:absolute;z-index:3;top:10px;left:11px;padding:5px 9px;border-radius:999px;color:#fff;background:#8b6c5d;font-size:9px;font-weight:850;box-shadow:0 5px 14px rgba(83,60,47,.14)}
 html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!important}
 
+/* Login screen — same brand lockup (image + enso) as everywhere else, instead
+   of the old generic violet gradient circle + text. */
+html:not(.dark-mode) .login-brand-lockup{
+  display:block!important;overflow:hidden!important;
+  width:min(360px,90%)!important;height:96px!important;margin:0 auto 10px!important;
+  background-image:url('./assets/dashboard-title-background.png')!important;
+  background-repeat:no-repeat!important;background-size:185% auto!important;background-position:50% -7px!important;
+  -webkit-mask-image:radial-gradient(ellipse 65% 60% at 50% 45%,#000 55%,transparent 100%)!important;
+  mask-image:radial-gradient(ellipse 65% 60% at 50% 45%,#000 55%,transparent 100%)!important
+}
+
 /* Footer signature — the exact same brand-lockup image as the hero title, shrunk down. */
 html:not(.dark-mode) .footer-inside-out{
   display:block!important;overflow:hidden!important;
@@ -961,7 +972,13 @@ html:not(.dark-mode) body:has(.reference-home),
 html:not(.dark-mode) body:has(.reference-home) .dashboard-shell{background:#efe5d9!important;color:#49352b!important}
 body:has(.reference-home) .primary-sidebar{display:flex!important}
 /* Same wide, evenly-margined layout on every tab — not just the home page. */
-html body .dashboard-main{box-sizing:border-box!important;width:calc(100% - 240px - 6cm)!important;max-width:none!important;margin-right:calc(240px + 3cm)!important;margin-left:3cm!important;padding:0 12px 24px!important;overflow-x:hidden!important}
+html body .dashboard-main{box-sizing:border-box!important;width:calc(100% - 240px - 3cm)!important;max-width:none!important;margin-right:calc(240px + 1.5cm)!important;margin-left:1.5cm!important;padding:0 12px 24px!important;overflow-x:hidden!important}
+/* On mobile the sidebar becomes a floating bottom bar, not a side rail —
+   the desktop side-margins would just waste the whole screen here. */
+@media(max-width:767px){
+  html body .dashboard-main{width:100%!important;margin-right:0!important;margin-left:0!important;padding:0 10px 90px!important}
+  html body .dashboard-hero{aspect-ratio:1584/265!important}
+}
 /* A whisper-thin line instead of empty space marks the sidebar as its own surface. */
 html:not(.dark-mode) .primary-sidebar{border-left:1px solid rgba(83,66,58,.08)!important}
 /* (superseded by the universal image-masthead rule further down) */
@@ -1091,13 +1108,17 @@ body:has(.reference-home) .home-canvas>.canvas-actions{display:none!important}
 
 @media(max-width:900px){
   body:has(.reference-home) .dashboard-main{padding:0 8px 90px!important}
-  body:has(.reference-home) .dashboard-hero{height:150px!important;min-height:150px!important}
-  .reference-utility-row{grid-template-columns:1.2fr 42px 1fr 1fr;grid-template-rows:38px 38px}
-  .reference-search{display:flex!important;grid-column:1/-1;grid-row:1}
-  .reference-date{grid-column:1;grid-row:2}
-  .reference-icon-button{grid-column:2;grid-row:2}
-  .reference-add{grid-column:3;grid-row:2}
-  .reference-edit{display:flex!important;grid-column:4;grid-row:2}
+  html body .dashboard-hero{aspect-ratio:1584/300!important}
+  /* The named-area grid only fits a wide desktop row; on mobile it just wraps. */
+  html body .reference-utility-row{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+  html body .reference-utility-row>*{flex:1 1 auto;min-width:0}
+  html body .reference-search{flex-basis:100%!important;width:100%!important}
+  html body .reference-live-date,html body .reference-countdown,html body .reference-sounds{flex:1 1 45%}
+  html body .reference-icon-button{flex:0 0 42px}
+  html body .reference-add,html body .reference-edit{flex:1 1 30%}
+  /* The two floating icon buttons overlap the hero text at this width — drop
+     them below the (shorter) mobile hero instead of over it. */
+  html body .reference-float-actions{top:110px!important;left:8px!important}
   .reference-nav{grid-template-columns:repeat(3,1fr)}
   .reference-goals-strip{grid-template-columns:1fr 1fr}.reference-goals-strip button:nth-child(2){border-left:0}
   .reference-lower-grid{grid-template-columns:1fr}

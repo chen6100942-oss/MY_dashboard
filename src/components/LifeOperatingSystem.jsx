@@ -10,6 +10,18 @@ const worlds = [
   { id: 'spirit', label: 'רוח', icon: '🕊', color: '#C9BBA4', prompt: 'מה יחזיר אותך היום למרכז שלך?' }
 ];
 
+const EMPOWERMENT_QUOTES = [
+  'את בונה את החיים שלך צעד אחד קטן בכל פעם.',
+  'כל יום הוא הזדמנות חדשה לעצב מחדש את המחר שלך.',
+  'הביטחון נבנה מפעולה, לא ממחשבה. קדימה.',
+  'את חזקה יותר ממה שאת חושבת, ומוכשרת יותר ממה שאת מרגישה.',
+  'להתקדם באיטיות זה עדיין להתקדם.',
+  'הדרך שלך ייחודית — אין צורך להשוות אותה לאף אחת אחרת.',
+  'את מותרת לגדול, להשתנות ולבחור מחדש בכל רגע.',
+  'הפעולה הקטנה של היום היא הבסיס להצלחה של מחר.',
+  'תני לעצמך קרדיט על כל צעד — גם הקטנים ביותר.',
+  'הכי חשוב זה שאת ממשיכה — הקצב הוא שלך.',
+];
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 const polar = (cx, cy, radius, angle) => {
   const radians = (angle - 90) * Math.PI / 180;
@@ -37,7 +49,7 @@ export default function LifeOperatingSystem({ userName = 'חן', greetingText, o
     if (saved) return new Date(saved);
     const d = new Date(); d.setDate(d.getDate() - 183); localStorage.setItem('insideout-journey-start', d.toISOString()); return d;
   }, []);
-  const journeyDay = Math.max(1, Math.floor((new Date() - startDate) / 86400000) + 1);
+  const [dailyQuote] = useState(() => EMPOWERMENT_QUOTES[Math.floor(Math.random() * EMPOWERMENT_QUOTES.length)]);
   const hour = new Date().getHours();
   const greeting = greetingText || (hour < 12 ? 'בוקר טוב' : hour < 17 ? 'צהריים טובים' : 'ערב טוב');
   const selected = worlds.find(world => world.id === selectedWorld);
@@ -63,7 +75,7 @@ export default function LifeOperatingSystem({ userName = 'חן', greetingText, o
       {mode !== 'wheel' && <>
       <div className="life-os-greeting-top">
         <h2>{greeting}, {userName}</h2>
-        <p>היום הוא היום ה־<b>{journeyDay}</b> במסע שלך</p>
+        <p>{dailyQuote}</p>
       </div>
       </>}
       {mode !== 'greeting' && <>

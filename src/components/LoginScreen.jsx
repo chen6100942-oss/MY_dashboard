@@ -69,12 +69,7 @@ const LoginScreen = () => {
     return (
         <div className="min-h-screen soft-bg flex items-center justify-center p-4">
             <div className="card max-w-md w-full p-8 text-center animate-slide-in-up">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center">
-                    <span className="text-3xl">✨</span>
-                </div>
-                <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-r from-violet-600 via-pink-500 to-amber-500 gradient-text">
-                    Design Your Life
-                </h1>
+                <div className="login-brand-lockup" aria-label="Design Your Life" />
 
                 {(mode === 'login' || mode === 'signup') && (
                     <div className="mt-6 space-y-3">
