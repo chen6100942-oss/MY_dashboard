@@ -1,7 +1,7 @@
 {
   "name": "Design Your Life",
   "short_name": "Design Your Life",
-  "description": "מרכז הבקרה האישי שלי",
+  "description": "Design Your Life — מרכז הבקרה האישי שלי",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8f7ff",

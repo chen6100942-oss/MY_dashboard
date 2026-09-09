@@ -961,7 +961,7 @@ html:not(.dark-mode) body:has(.reference-home),
 html:not(.dark-mode) body:has(.reference-home) .dashboard-shell{background:#efe5d9!important;color:#49352b!important}
 body:has(.reference-home) .primary-sidebar{display:flex!important}
 /* Same wide, evenly-margined layout on every tab — not just the home page. */
-html body .dashboard-main{box-sizing:border-box!important;width:calc(100% - 240px - 2cm)!important;max-width:none!important;margin-right:240px!important;margin-left:2cm!important;padding:0 12px 24px!important;overflow-x:hidden!important}
+html body .dashboard-main{box-sizing:border-box!important;width:calc(100% - 240px - 6cm)!important;max-width:none!important;margin-right:calc(240px + 3cm)!important;margin-left:3cm!important;padding:0 12px 24px!important;overflow-x:hidden!important}
 /* A whisper-thin line instead of empty space marks the sidebar as its own surface. */
 html:not(.dark-mode) .primary-sidebar{border-left:1px solid rgba(83,66,58,.08)!important}
 /* (superseded by the universal image-masthead rule further down) */
