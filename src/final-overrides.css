@@ -849,10 +849,14 @@ body:has(.zen-preview-home) .daily-message-floating-root{display:none!important}
 /* Tab content everywhere uses Tailwind's max-w-5xl/4xl/3xl "centered column"
    pattern, which — now that .dashboard-main itself is wide — leaves big
    unwanted empty margins on every tab except home. Let content fill it. */
+html body .dashboard-main .max-w-7xl,
+html body .dashboard-main .max-w-6xl,
 html body .dashboard-main .max-w-5xl,
 html body .dashboard-main .max-w-4xl,
 html body .dashboard-main .max-w-3xl,
-html body .dashboard-main .max-w-2xl{max-width:none!important}
+html body .dashboard-main .max-w-2xl,
+html body .dashboard-main .max-w-xl,
+html body .dashboard-main .max-w-lg{max-width:none!important}
 
 /* Every plain white/slate input, select and textarea across the whole app —
    not just home — gets the same warm, rounded field style. */

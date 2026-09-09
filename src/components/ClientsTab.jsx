@@ -9,8 +9,23 @@ const STATUSES = [
   { id: 'lost', label: 'לא רלוונטי', color: '#a97a6f', bg: '#f5eae7' },
 ];
 const statusMeta = id => STATUSES.find(s => s.id === id) || STATUSES[0];
+const INTERACTION_TYPES = [
+  { id: 'call', label: 'שיחה', icon: 'phone' },
+  { id: 'meeting', label: 'פגישה', icon: 'users' },
+  { id: 'note', label: 'הערה', icon: 'edit-3' },
+  { id: 'email', label: 'מייל', icon: 'send' },
+  { id: 'other', label: 'אחר', icon: 'star' },
+];
+const interactionMeta = id => INTERACTION_TYPES.find(t => t.id === id) || INTERACTION_TYPES[2];
 const uid = () => `c-${Date.now()}-${Math.floor(Math.random() * 1e5)}`;
 const emptyDraft = () => ({ name: '', phone: '', email: '', service: '', status: 'lead', value: '', notes: '', nextFollowUp: '' });
+const fileToDataUrl = file => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+const formatBytes = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${(bytes/1024).toFixed(0)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;
 
 export default function ClientsTab() {
   const [clients, setClients] = useState(() => {
@@ -21,6 +36,8 @@ export default function ClientsTab() {
   const [openId, setOpenId] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
   const [draft, setDraft] = useState(emptyDraft());
+  const [noteType, setNoteType] = useState('call');
+  const [noteText, setNoteText] = useState('');
 
   useEffect(() => { localStorage.setItem('crm-clients', JSON.stringify(clients)); }, [clients]);
 
@@ -45,6 +62,24 @@ export default function ClientsTab() {
   };
   const updateClient = (id, patch) => setClients(prev => prev.map(c => c.id === id ? { ...c, ...patch } : c));
   const deleteClient = id => { if (window.confirm('למחוק את הלקוח הזה?')) { setClients(prev => prev.filter(c => c.id !== id)); if (openId === id) setOpenId(null); } };
+
+  const addInteraction = (clientId, type, text) => {
+    if (!text.trim()) return;
+    const entry = { id: uid(), type, text: text.trim(), date: new Date().toISOString() };
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, interactions: [entry, ...(c.interactions || [])] } : c));
+  };
+  const deleteInteraction = (clientId, entryId) => setClients(prev => prev.map(c => c.id === clientId ? { ...c, interactions: (c.interactions || []).filter(i => i.id !== entryId) } : c));
+
+  const addFiles = async (clientId, fileList) => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+    const tooBig = files.filter(f => f.size > 4 * 1024 * 1024);
+    if (tooBig.length) alert(`הקבצים הבאים גדולים מדי לשמירה מקומית (מעל 4MB) ולא יועלו: ${tooBig.map(f=>f.name).join(', ')}`);
+    const okFiles = files.filter(f => f.size <= 4 * 1024 * 1024);
+    const uploaded = await Promise.all(okFiles.map(async f => ({ id: uid(), name: f.name, size: f.size, type: f.type, dataUrl: await fileToDataUrl(f) })));
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, files: [...(c.files || []), ...uploaded] } : c));
+  };
+  const deleteFile = (clientId, fileId) => setClients(prev => prev.map(c => c.id === clientId ? { ...c, files: (c.files || []).filter(f => f.id !== fileId) } : c));
 
   return (
     <div className="max-w-5xl mx-auto space-y-5 animate-slide-in-up">
@@ -168,9 +203,74 @@ export default function ClientsTab() {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-slate-400 block mb-1">הערות</label>
+                      <label className="text-[10px] font-bold text-slate-400 block mb-1">הערות כלליות</label>
                       <textarea value={c.notes||''} onChange={e => updateClient(c.id, {notes: e.target.value})} rows={2} className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none resize-none"/>
                     </div>
+
+                    {/* Interaction log */}
+                    <div className="border-t border-slate-100 pt-3">
+                      <label className="text-[10px] font-bold text-slate-400 block mb-2">יומן אינטראקציות — שיחה, פגישה, הערה...</label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {INTERACTION_TYPES.map(t => (
+                          <button key={t.id} onClick={() => setNoteType(t.id)} className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${noteType===t.id ? 'bg-slate-700 text-white' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
+                            <Icon name={t.icon} size={12}/> {t.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          value={openId===c.id ? noteText : ''}
+                          onChange={e => setNoteText(e.target.value)}
+                          onKeyDown={e => { if (e.key==='Enter') { addInteraction(c.id, noteType, noteText); setNoteText(''); } }}
+                          placeholder={`תיאור ה${interactionMeta(noteType).label}...`}
+                          className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none"
+                        />
+                        <button onClick={() => { addInteraction(c.id, noteType, noteText); setNoteText(''); }} disabled={!noteText.trim()} className="px-3 bg-slate-700 hover:bg-slate-800 disabled:opacity-30 text-white rounded-lg text-xs font-bold shrink-0">הוספה</button>
+                      </div>
+                      {(c.interactions||[]).length > 0 && (
+                        <div className="space-y-1.5 mt-3">
+                          {c.interactions.map(entry => {
+                            const im = interactionMeta(entry.type);
+                            return (
+                              <div key={entry.id} className="flex items-start gap-2 p-2 bg-slate-50 rounded-lg group">
+                                <span className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-500"><Icon name={im.icon} size={12}/></span>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <b className="text-[10px] font-bold text-slate-500">{im.label}</b>
+                                    <small className="text-[9px] text-slate-400">{new Date(entry.date).toLocaleDateString('he-IL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</small>
+                                  </div>
+                                  <p className="text-xs text-slate-700 mt-0.5">{entry.text}</p>
+                                </div>
+                                <button onClick={() => deleteInteraction(c.id, entry.id)} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 shrink-0">✕</button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Documents */}
+                    <div className="border-t border-slate-100 pt-3">
+                      <label className="text-[10px] font-bold text-slate-400 block mb-2">מסמכים</label>
+                      <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-slate-200 rounded-lg text-xs font-bold text-slate-400 hover:border-emerald-300 hover:text-emerald-500 cursor-pointer transition-all">
+                        <Icon name="paperclip" size={14}/> להעלאת מסמך (עד 4MB לקובץ)
+                        <input type="file" multiple className="hidden" onChange={e => { addFiles(c.id, e.target.files); e.target.value = ''; }}/>
+                      </label>
+                      {(c.files||[]).length > 0 && (
+                        <div className="space-y-1.5 mt-2">
+                          {c.files.map(f => (
+                            <div key={f.id} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                              <Icon name="paperclip" size={13} className="text-slate-400 shrink-0"/>
+                              <span className="flex-1 min-w-0 text-xs text-slate-700 truncate">{f.name}</span>
+                              <small className="text-[9px] text-slate-400 shrink-0">{formatBytes(f.size)}</small>
+                              <a href={f.dataUrl} download={f.name} className="text-slate-400 hover:text-slate-600 shrink-0"><Icon name="download" size={13}/></a>
+                              <button onClick={() => deleteFile(c.id, f.id)} className="text-slate-300 hover:text-rose-500 shrink-0">✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     <button onClick={() => deleteClient(c.id)} className="text-xs font-bold text-rose-500 hover:text-rose-600 flex items-center gap-1"><Icon name="trash-2" size={13}/> מחיקת לקוח</button>
                   </div>
                 )}

@@ -1587,6 +1587,16 @@ html:not(.dark-mode) .dashboard-main :is(
   background-color: var(--mono-soft-2) !important;
   border-color: var(--mono-line) !important;
 }
+/* Any button/element that pairs a desaturated color background above with
+   white text becomes unreadable (pale bg + white text). Force dark text. */
+html:not(.dark-mode) .dashboard-main :is(
+  [class*="bg-violet-"],[class*="bg-purple-"],[class*="bg-pink-"],
+  [class*="bg-blue-"],[class*="bg-cyan-"],[class*="bg-emerald-"],
+  [class*="bg-green-"],[class*="bg-amber-"],[class*="bg-yellow-"],
+  [class*="bg-orange-"],[class*="bg-red-"],[class*="bg-rose-"]
+):is([class*="text-white"],[class*="text-slate-50"],[class*="text-slate-100"]) {
+  color: var(--mono-accent-deep) !important;
+}
 html:not(.dark-mode) .dashboard-main :is(
   [class*="text-violet-"],[class*="text-purple-"],[class*="text-pink-"],
   [class*="text-blue-"],[class*="text-cyan-"],[class*="text-emerald-"],

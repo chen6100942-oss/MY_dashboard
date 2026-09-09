@@ -363,6 +363,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 't-launch-2', text: 'אבטחה — כניסה עם מייל וסיסמה אמיתיים לכל משתמש', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
         ]);
         const [resources, setResources] = useState([
             { id: 'r1', title: 'השראה לאדריכלות מודרנית', url: 'https://www.archdaily.com', projectId: 'p1', completed: true, emoji: '🏗️' },
@@ -730,6 +731,25 @@ import { supabase } from './lib/supabaseClient.js';
             return result;
         };
 
+        // ── HELPER: "לפני השקה לציבור" הוא פרויקט מובנה שתמיד אמור להיות קיים.
+        // בלי זה, נתונים שמורים (ענן/localStorage) מכל שלב לפני שהפרויקט נוצר
+        // היו דורסים אותו בכל טעינה. מוסיפים אותו + כל משימה חסרה שלו בלי לגעת
+        // בשאר הנתונים.
+        const ensureLaunchProject = (projectsArr, tasksArr) => {
+            const launchTasks = [
+                { id: 't-launch-1', text: 'להחזיר את המדריך הפיננסי בכרטיסיית מעקב פיננסי' },
+                { id: 't-launch-2', text: 'אבטחה — כניסה עם מייל וסיסמה אמיתיים לכל משתמש' },
+                { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך' },
+                { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)' },
+                { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית' },
+            ];
+            const projects = (projectsArr || []).some(p => p.id === 'p-launch') ? (projectsArr || []) : [...(projectsArr || []), { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false }];
+            const existingIds = new Set((tasksArr || []).map(t => t.id));
+            const missing = launchTasks.filter(t => !existingIds.has(t.id)).map(t => ({ ...t, projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' }));
+            const tasks = missing.length ? [...(tasksArr || []), ...missing] : (tasksArr || []);
+            return { projects, tasks };
+        };
+
         // ── HELPER: apply loaded data object to state ──────────────
         const applyDataToState = (d) => {
             const movedHeaderSentences = [d.visionText, d.headerAffirmation].filter(text => typeof text === 'string' && text.trim());
@@ -738,8 +758,11 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.headerTitle) setHeaderTitle(d.headerTitle);
             setHeaderAffirmation('');
             if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t)));
-            if (d.projects) setProjects(d.projects);
-            if (d.tasks) setTasks(d.tasks);
+            if (d.projects || d.tasks) {
+                const ensured = ensureLaunchProject(d.projects, d.tasks);
+                setProjects(ensured.projects);
+                setTasks(ensured.tasks);
+            }
             if (d.resources) setResources(d.resources);
             if (d.morningRitual) setMorningRitual(d.morningRitual);
             if (d.gameChangers) setGameChangers(d.gameChangers);
@@ -994,7 +1017,8 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.bannerImg) setBannerImg(d.bannerImg);
                     if (d.headerTitle) setHeaderTitle(d.headerTitle);
                     if (d.headerAffirmation !== undefined) setHeaderAffirmation(d.headerAffirmation);
-                    if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t))); if (d.projects) setProjects(d.projects); if (d.tasks) setTasks(d.tasks);
+                    if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t)));
+                    if (d.projects || d.tasks) { const ensured = ensureLaunchProject(d.projects, d.tasks); setProjects(ensured.projects); setTasks(ensured.tasks); }
                     if (d.resources) setResources(d.resources); if (d.morningRitual) setMorningRitual(d.morningRitual);
                     if (d.gameChangers) setGameChangers(d.gameChangers); if (d.dailySchedule) setDailySchedule(d.dailySchedule);
                     if (d.ideas) setIdeas(d.ideas); if (d.domains) setDomains(d.domains); if (d.domainGoals) setDomainGoals(d.domainGoals);
@@ -2899,8 +2923,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                 r.onload = ev => {
                                                     try {
                                                         const d = JSON.parse(ev.target.result);
-                                                        if (d.tasks) setTasks(d.tasks);
-                                                        if (d.projects) setProjects(d.projects);
+                                                        if (d.tasks || d.projects) { const ensured = ensureLaunchProject(d.projects, d.tasks); setProjects(ensured.projects); setTasks(ensured.tasks); }
                                                         if (d.resources) setResources(d.resources);
                                                         if (d.morningRitual) setMorningRitual(d.morningRitual);
                                                         if (d.gameChangers) setGameChangers(d.gameChangers);

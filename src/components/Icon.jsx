@@ -46,6 +46,10 @@ const fallbackIcons = {
     users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
     'trash-2': '<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/>',
     'palm-tree': '<path d="M13 8c0-2.76-2.5-5-5.5-5S2 5.24 2 8c1.5-1 3-1 4.5 0"/><path d="M13 8c0-2.76 2.5-5 5.5-5S24 5.24 24 8c-1.5-1-3-1-4.5 0"/><path d="M13 8v13"/><path d="M13 8c-2 0-4 1-5 3"/><path d="M9 21h8"/>',
+    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.3a16 16 0 0 0 6 6l1.5-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/>',
+    send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+    'paperclip': '<path d="M21.4 11.4 12 20.8a5 5 0 0 1-7-7l8.5-8.5a3.5 3.5 0 0 1 5 5L9.9 18.6a2 2 0 0 1-3-3l7.5-7.4"/>',
+    download: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/>',
 };
 
 // A few glyphs are more recognizable (and safer than a hand-drawn path) rendered
