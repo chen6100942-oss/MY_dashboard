@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Icon from './Icon.jsx';
 
 const STATUSES = [
@@ -27,10 +27,7 @@ const fileToDataUrl = file => new Promise((resolve, reject) => {
 });
 const formatBytes = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1024*1024 ? `${(bytes/1024).toFixed(0)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;
 
-export default function ClientsTab() {
-  const [clients, setClients] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('crm-clients')) || []; } catch { return []; }
-  });
+export default function ClientsTab({ clients, setClients }) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [openId, setOpenId] = useState(null);
@@ -38,8 +35,6 @@ export default function ClientsTab() {
   const [draft, setDraft] = useState(emptyDraft());
   const [noteType, setNoteType] = useState('call');
   const [noteText, setNoteText] = useState('');
-
-  useEffect(() => { localStorage.setItem('crm-clients', JSON.stringify(clients)); }, [clients]);
 
   const filtered = useMemo(() => clients
     .filter(c => statusFilter === 'all' || c.status === statusFilter)
