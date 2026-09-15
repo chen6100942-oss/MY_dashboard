@@ -147,7 +147,6 @@ export default function ZenHomePreview({
           <div className="reference-task-list">{taskRows.map((task, index) => <button key={`${task}-${index}`} onClick={() => onNavigate?.('tasks')}><i/>{task}</button>)}</div>
         </article>
       </div>
-      <footer className="reference-footer"><span>INTENTIONAL DAYS</span><i/><span>A MEANINGFUL LIFE</span><b>PLAN · ELEVATE · GROW</b></footer>
     </section>
   );
 }

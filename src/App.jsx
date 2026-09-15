@@ -357,6 +357,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'p4', title: 'לרדת 20 ק"ג', gradient: 'from-rose-500 to-pink-600', color: 'from-rose-500 to-pink-600', emoji: '⚖️', startMonth: 1, endMonth: 10, showOnHome: false },
             { id: 'p5', title: 'תכנון בית מש\' שוורץ', gradient: 'from-emerald-500 to-teal-500', color: 'from-emerald-500 to-teal-500', emoji: '🏗️', startMonth: 1, endMonth: 3, showOnHome: false },
             { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false },
+            { id: 'p-brand-video', title: 'עריכת סרטון תדמית — Design Your Life', gradient: 'from-indigo-500 to-blue-600', color: 'from-indigo-500 to-blue-600', emoji: '🎬', startMonth: 1, endMonth: 12, showOnHome: true },
         ]);
         const [tasks, setTasks] = useState([
             { id: 't-launch-1', text: 'להחזיר את המדריך הפיננסי בכרטיסיית מעקב פיננסי', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
@@ -365,6 +366,12 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-6', text: 'להגדיר ספק מייל חיצוני (כמו Resend) ב-Supabase — כרגע שולח האימייל המובנה מוגבל בכמות הודעות לשעה, וזו הסיבה שמיילים לאיפוס סיסמה לפעמים לא מגיעים', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-1', text: 'לכתוב תסריט/קונספט לסרטון שמציג את תחומי העסק: Design Your Home, עיצוב מוצר ו-Design Your Life', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-2', text: 'לאסוף חומרי גלם — תמונות וסרטונים מעבודות קיימות בכל אחד מהתחומים', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-3', text: 'לגבש את חלק המיתוג — לוגו, טיפוגרפיה וצבעים אחידים לאורך כל הסרטון', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-4', text: 'לבחור מוזיקת רקע ופסקול שמתאימים לתדמית המותג', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-5', text: 'לערוך את הסרטון הסופי ולהוסיף כתוביות/טקסט מנחה', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-brand-6', text: 'להעלות ולשתף את הסרטון — אתר ורשתות חברתיות', projectId: 'p-brand-video', domain: 'general', completed: false, dueDate: '' },
         ]);
         const [resources, setResources] = useState([
             { id: 'r1', title: 'השראה לאדריכלות מודרנית', url: 'https://www.archdaily.com', projectId: 'p1', completed: true, emoji: '🏗️' },
@@ -747,18 +754,33 @@ import { supabase } from './lib/supabaseClient.js';
         // היו דורסים אותו בכל טעינה. מוסיפים אותו + כל משימה חסרה שלו בלי לגעת
         // בשאר הנתונים.
         const ensureLaunchProject = (projectsArr, tasksArr) => {
-            const launchTasks = [
-                { id: 't-launch-1', text: 'להחזיר את המדריך הפיננסי בכרטיסיית מעקב פיננסי' },
-                { id: 't-launch-2', text: 'אבטחה — כניסה עם מייל וסיסמה אמיתיים לכל משתמש' },
-                { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך' },
-                { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)' },
-                { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית' },
-                { id: 't-launch-6', text: 'להגדיר ספק מייל חיצוני (כמו Resend) ב-Supabase — כרגע שולח האימייל המובנה מוגבל בכמות הודעות לשעה, וזו הסיבה שמיילים לאיפוס סיסמה לפעמים לא מגיעים' },
+            const seedProjects = [
+                { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false, tasks: [
+                    { id: 't-launch-1', text: 'להחזיר את המדריך הפיננסי בכרטיסיית מעקב פיננסי' },
+                    { id: 't-launch-2', text: 'אבטחה — כניסה עם מייל וסיסמה אמיתיים לכל משתמש' },
+                    { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך' },
+                    { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)' },
+                    { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית' },
+                    { id: 't-launch-6', text: 'להגדיר ספק מייל חיצוני (כמו Resend) ב-Supabase — כרגע שולח האימייל המובנה מוגבל בכמות הודעות לשעה, וזו הסיבה שמיילים לאיפוס סיסמה לפעמים לא מגיעים' },
+                ] },
+                { id: 'p-brand-video', title: 'עריכת סרטון תדמית — Design Your Life', gradient: 'from-indigo-500 to-blue-600', color: 'from-indigo-500 to-blue-600', emoji: '🎬', startMonth: 1, endMonth: 12, showOnHome: true, tasks: [
+                    { id: 't-brand-1', text: 'לכתוב תסריט/קונספט לסרטון שמציג את תחומי העסק: Design Your Home, עיצוב מוצר ו-Design Your Life' },
+                    { id: 't-brand-2', text: 'לאסוף חומרי גלם — תמונות וסרטונים מעבודות קיימות בכל אחד מהתחומים' },
+                    { id: 't-brand-3', text: 'לגבש את חלק המיתוג — לוגו, טיפוגרפיה וצבעים אחידים לאורך כל הסרטון' },
+                    { id: 't-brand-4', text: 'לבחור מוזיקת רקע ופסקול שמתאימים לתדמית המותג' },
+                    { id: 't-brand-5', text: 'לערוך את הסרטון הסופי ולהוסיף כתוביות/טקסט מנחה' },
+                    { id: 't-brand-6', text: 'להעלות ולשתף את הסרטון — אתר ורשתות חברתיות' },
+                ] },
             ];
-            const projects = (projectsArr || []).some(p => p.id === 'p-launch') ? (projectsArr || []) : [...(projectsArr || []), { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false }];
-            const existingIds = new Set((tasksArr || []).map(t => t.id));
-            const missing = launchTasks.filter(t => !existingIds.has(t.id)).map(t => ({ ...t, projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' }));
-            const tasks = missing.length ? [...(tasksArr || []), ...missing] : (tasksArr || []);
+            let projects = projectsArr || [];
+            let tasks = tasksArr || [];
+            const existingProjectIds = new Set(projects.map(p => p.id));
+            const existingTaskIds = new Set(tasks.map(t => t.id));
+            seedProjects.forEach(({ tasks: seedTasks, ...project }) => {
+                if (!existingProjectIds.has(project.id)) projects = [...projects, project];
+                const missing = seedTasks.filter(t => !existingTaskIds.has(t.id)).map(t => ({ ...t, projectId: project.id, domain: 'general', completed: false, dueDate: '' }));
+                if (missing.length) tasks = [...tasks, ...missing];
+            });
             return { projects, tasks };
         };
 

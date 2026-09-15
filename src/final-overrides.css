@@ -936,23 +936,33 @@ html:not(.dark-mode) .dashboard-shell::after{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 300'%3E%3Cg fill='none' stroke='%238b6c58' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M15 292C48 226 61 144 78 18'/%3E%3Cpath d='M53 198c-27-15-36-37-35-62 28 8 43 26 35 62ZM66 137c-22-18-27-40-21-63 25 13 35 33 21 63ZM77 76C60 58 59 38 68 18c20 15 25 34 9 58ZM45 232c24-11 46-7 64 9-23 16-46 14-64-9ZM61 169c24-8 45-1 60 17-25 13-46 8-60-17ZM72 107c22-4 40 5 51 23-24 8-42 0-51-23Z' fill='%23a78670' fill-opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
 }
 html:not(.dark-mode) .dashboard-main{z-index:2}
+/* Two soft corner patches that blend out the photographed branch sprigs baked
+   into the hero image's top-left/top-right corners — the user found them
+   distracting/unrelated to the rest of the composition. */
 html:not(.dark-mode) .dashboard-hero::before,
 html:not(.dark-mode) .dashboard-hero::after{
   display:block!important;
   content:""!important;
   position:absolute!important;
-  z-index:0!important;
-  width:84px!important;
-  height:84px!important;
+  z-index:5!important;
+  top:0!important;bottom:auto!important;
+  width:34%!important;
+  height:92%!important;
   border:0!important;
   border-radius:0!important;
-  opacity:.42!important;
+  opacity:1!important;
   pointer-events:none!important;
-  background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Cg fill='none' stroke='%23776a50' stroke-width='1.5'%3E%3Cpath d='M8 83C22 57 40 35 74 8'/%3E%3Cpath d='M25 61c-13-2-20-10-21-22 14 0 22 7 21 22Zm16-19c-10-5-14-14-11-24 12 4 17 12 11 24Zm15-15c8-9 18-11 29-6-7 11-17 13-29 6ZM35 51c11 1 19 7 22 17-12 2-20-4-22-17Z' fill='%23858a67' fill-opacity='.35'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat!important;
   filter:none!important;
+  transform:none!important;
 }
-html:not(.dark-mode) .dashboard-hero::before{left:8px!important;top:2px!important;transform:rotate(-18deg)!important}
-html:not(.dark-mode) .dashboard-hero::after{right:8px!important;top:1px!important;bottom:auto!important;transform:scaleX(-1) rotate(-18deg)!important}
+html:not(.dark-mode) .dashboard-hero::before{
+  left:0!important;right:auto!important;
+  background:radial-gradient(circle at top left,rgba(247,242,235,.98) 0%,rgba(247,242,235,.85) 45%,rgba(247,242,235,0) 78%)!important;
+}
+html:not(.dark-mode) .dashboard-hero::after{
+  right:0!important;left:auto!important;
+  background:radial-gradient(circle at top right,rgba(239,233,227,.98) 0%,rgba(239,233,227,.85) 45%,rgba(239,233,227,0) 78%)!important;
+}
 html:not(.dark-mode) .dashboard-hero>div{z-index:1}
 
 @media(max-width:1024px){
@@ -963,8 +973,6 @@ html:not(.dark-mode) .dashboard-hero>div{z-index:1}
 @media(max-width:700px){
   html:not(.dark-mode) .dashboard-shell::before,
   html:not(.dark-mode) .dashboard-shell::after{display:none}
-  html:not(.dark-mode) .dashboard-hero::before,
-  html:not(.dark-mode) .dashboard-hero::after{width:52px!important;height:52px!important;opacity:.24!important}
 }
 
 /* One-to-one home composition based on the supplied dashboard reference. */
@@ -1024,8 +1032,10 @@ body:has(.reference-home) .daily-message-floating-root{display:none!important}
 .reference-goals-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:12px;padding:12px 14px;border:1px solid rgba(100,71,53,.07);border-radius:15px;background:rgba(255,252,247,.73);box-shadow:0 5px 16px rgba(69,44,31,.035)}
 .reference-goals-strip button{display:grid;grid-template-columns:25px 1fr 18px;align-items:center;gap:8px;min-height:60px;padding:2px 16px;border:0;border-left:1px solid rgba(92,66,51,.08);background:transparent;text-align:right}.reference-goals-strip button:last-child{border-left:0}.reference-goals-strip>button>svg:first-child{color:#91705b}.reference-goals-strip span{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center}.reference-goals-strip b{font-size:11px}.reference-goals-strip small{font-size:10px}.reference-goals-strip i{grid-column:1/-1;height:5px;border-radius:99px;background:#e5ddd7;overflow:hidden}.reference-goals-strip em{display:block;height:100%;border-radius:inherit;background:#788270}
 .reference-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.reference-lower-grid article{min-height:260px;padding:17px 24px 12px;border:1px solid rgba(100,71,53,.07);border-radius:15px;background:rgba(255,253,249,.82);box-shadow:0 5px 18px rgba(69,44,31,.04)}
-.reference-lower-grid header{display:flex;align-items:center;justify-content:space-between}.reference-lower-grid h2{display:flex;align-items:center;gap:7px;margin:0;font:700 13px/1.2 Heebo,sans-serif}.reference-calendar header button{border:0;background:transparent}.reference-weekdays,.reference-month-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;text-align:center}.reference-weekdays{margin:18px 0 8px;color:#8c7e75;font-size:8px}.reference-month-grid{row-gap:7px;font-size:9px}.reference-month-grid span{display:grid;place-items:center;height:23px}.reference-month-grid .is-today{width:25px;margin:auto;border-radius:50%;background:#9a5e40;color:white;box-shadow:0 5px 10px rgba(120,67,42,.22)}.reference-calendar footer{margin-top:8px;text-align:center;color:#9b8b81;font:600 7px/1.2 'Bodoni Moda',serif;letter-spacing:.36em}
-.reference-tasks header button{display:flex;align-items:center;gap:3px;border:0;background:transparent;font-size:9px}.reference-empty-illustration{display:flex;flex-direction:column;align-items:center;margin:8px 0 5px}.reference-empty-illustration span{height:50px;color:#9b806e;font:400 54px/1 'Mrs Saint Delafield',cursive;transform:rotate(-18deg)}.reference-empty-illustration b{font:500 20px/1.2 'Bodoni Moda',serif}.reference-empty-illustration small{margin-top:2px;color:#998a81;font-size:9px;letter-spacing:.12em}.reference-task-list{border-top:1px solid rgba(91,66,51,.1)}.reference-task-list button{display:flex;align-items:center;width:100%;height:30px;padding:0 3px;border:0;border-bottom:1px solid rgba(91,66,51,.08);background:transparent;font-size:9px}.reference-task-list i{width:17px;height:17px;margin-left:8px;border:1px solid #9b8b80;border-radius:50%}
+.reference-lower-grid header{display:flex;align-items:center;justify-content:space-between}.reference-lower-grid h2{display:flex;align-items:center;gap:7px;margin:0;font:700 13px/1.2 Heebo,sans-serif}.reference-calendar header button{border:0;background:transparent}.reference-weekdays,.reference-month-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;text-align:center}.reference-weekdays{margin:18px 0 8px;color:#8c7e75;font-size:8px}.reference-month-grid{row-gap:7px;font-size:13px}.reference-month-grid span{display:grid;place-items:center;height:27px}.reference-month-grid .is-today{width:29px;height:29px;margin:auto;border-radius:50%;background:#9a5e40;color:white;box-shadow:0 5px 10px rgba(120,67,42,.22)}.reference-calendar footer{margin-top:8px;text-align:center;color:#9b8b81;font:600 7px/1.2 'Bodoni Moda',serif;letter-spacing:.36em}
+.reference-tasks header button{display:flex;align-items:center;gap:3px;border:0;background:transparent;font-size:9px}.reference-empty-illustration{display:flex;flex-direction:column;align-items:center;margin:8px 0 5px}.reference-empty-illustration span{height:50px;color:#9b806e;font:400 54px/1 'Mrs Saint Delafield',cursive;transform:rotate(-18deg)}.reference-empty-illustration b{font:500 20px/1.2 'Bodoni Moda',serif}.reference-empty-illustration small{margin-top:2px;color:#998a81;font-size:9px;letter-spacing:.12em}.reference-task-list{border-top:1px solid rgba(91,66,51,.1)}.reference-task-list button{display:flex;align-items:center;width:100%;height:38px;padding:0 3px;border:0;border-bottom:1px solid rgba(91,66,51,.08);background:transparent;font-size:14px}.reference-task-list i{width:19px;height:19px;margin-left:10px;border:1px solid #9b8b80;border-radius:50%}
+.reference-calendar header h2,.reference-tasks header h2{flex:1;justify-content:center;font:500 20px/1.2 'Bodoni Moda',serif;gap:9px}
+.reference-tasks header{gap:8px}
 body:has(.reference-home) .reference-empty-illustration span{display:none!important}
 body:has(.reference-home) .reference-empty-illustration small{font-size:0!important}
 body:has(.reference-home) .reference-empty-illustration small::after{
@@ -1149,12 +1159,12 @@ body:has(.reference-home) .hero-handwritten span{display:inline-block;margin-top
 .reference-goals-strip button:nth-child(3) em{background:#788b78}
 .reference-goals-strip button:nth-child(4) em{background:#9b6650}
 .reference-footer{
-  display:flex;align-items:center;gap:10px;margin-top:13px;padding:0 3px;
-  color:#9b8b81;font:600 7px/1.2 'Bodoni Moda',serif;letter-spacing:.27em
+  display:flex;align-items:center;gap:14px;margin-top:13px;padding:10px 16px;
+  color:#8b7569;font:600 12px/1.2 'Bodoni Moda',serif;letter-spacing:.2em
 }
-.reference-footer i{width:22px;height:1px;background:#bda997}
-.reference-footer b{margin-right:auto;color:#8b7569;font-size:7px;font-weight:600;letter-spacing:.23em}
-@media(max-width:700px){body:has(.reference-home) .hero-handwritten{display:none}.reference-footer{letter-spacing:.12em}.reference-footer b{display:none}}
+.reference-footer i{width:26px;height:1px;background:#bda997;flex:0 0 auto}
+.reference-footer b{margin-right:auto;color:#6f5a4d;font-size:12px;font-weight:600;letter-spacing:.18em}
+@media(max-width:700px){body:has(.reference-home) .hero-handwritten{display:none}.reference-footer{font-size:10px;letter-spacing:.1em;padding:8px 12px}.reference-footer b{font-size:10px}.reference-footer b{display:none}}
 
 /* Exact brand crop from the user's approved visual reference. */
 body:has(.reference-home) .inside-out-lockup{
