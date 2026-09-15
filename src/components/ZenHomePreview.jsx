@@ -17,6 +17,7 @@ export default function ZenHomePreview({
   onOpenSoundLibrary, activeSoundLabel = 'Quiet',
   soundTracks = [], activeSoundId = '', onSelectSound,
   onSave, onUndo, canUndo = false, onNewGoal,
+  tabPlacementOverrides = {}, onMoveTabToSidebar,
 }) {
   const [today, setToday] = useState(() => new Date());
   const [soundMenuOpen, setSoundMenuOpen] = useState(false);
@@ -45,7 +46,7 @@ export default function ZenHomePreview({
       { id: 'goals', label: 'להוסיף את הטיסה כיעד', icon: 'target' },
     ] },
     { id: 'goals', label: 'בריאות וכושר', icon: 'dumbbell' },
-    { id: 'resources', label: 'פרויקטים', icon: 'folder', children: projects.length
+    { id: 'featured-projects', label: 'פרויקטים', icon: 'folder', children: projects.length
       ? [...projects.map(project => ({ id: 'tasks', label: project.title, icon: 'folder' })), { id: 'tasks', label: 'הצג הכל', icon: 'chevron-left' }]
       : [{ id: 'tasks', label: 'אין עדיין פרויקטים — לפתיחת הכרטיסייה', icon: 'folder' }] },
     { id: 'tasks-list', label: 'משימות', icon: 'check-square', children: openTasks.length
@@ -69,12 +70,18 @@ export default function ZenHomePreview({
   const sidebarOnlyIds = new Set(['home', 'gantt', 'finance', 'numerology', 'morning-ritual', 'ikigai', 'inspiration', 'mindset', 'archive', 'vision-board', 'tasks', 'manifesting', 'resources', 'book-wisdom', 'clients']);
   const [expandedNavId, setExpandedNavId] = useState('');
   const expandedNavItem = featuredNavItems.find(item => item.id === expandedNavId && item.children);
+  // ברירת המחדל הקבועה למעלה נקבעת בקוד, אבל אם המשתמשת הזיזה כרטיסייה
+  // ידנית (דרך כפתור ה"העברה" בסרגל או כאן בדף הבית), ההזזה שלה גוברת.
+  const isOnHome = tab => tabPlacementOverrides[tab.id]
+    ? tabPlacementOverrides[tab.id] === 'home'
+    : !sidebarOnlyIds.has(tab.id);
   const navItems = tabs.length ? [
     ...featuredNavItems.filter(item => item.children || tabs.some(tab => tab.id === item.id)),
-    ...tabs.filter(tab => !featuredIds.has(tab.id) && !sidebarOnlyIds.has(tab.id)).map(tab => ({
+    ...tabs.filter(tab => !featuredIds.has(tab.id) && isOnHome(tab)).map(tab => ({
       id: tab.id,
       label: tab.name,
       icon: tab.icon || 'circle',
+      movable: true,
     })),
   ] : featuredNavItems;
 
@@ -118,6 +125,12 @@ export default function ZenHomePreview({
               <Icon name={item.icon} size={18}/><span>{item.label}</span>
               {item.children && <Icon name={expandedNavId === item.id ? 'chevron-up' : 'chevron-down'} size={14}/>}
             </button>
+            {item.movable && onMoveTabToSidebar && (
+              <button type="button" className="reference-nav-move" title="העברה לסרגל מימין" aria-label={`העברת "${item.label}" לסרגל מימין`}
+                onClick={event => { event.stopPropagation(); onMoveTabToSidebar(item.id); }}>
+                <Icon name="panel-right" size={12}/>
+              </button>
+            )}
             {expandedNavId === item.id && item.children && (
               <div className="reference-nav-expand">
                 {item.children.map(child => (

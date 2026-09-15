@@ -554,6 +554,14 @@ import { supabase } from './lib/supabaseClient.js';
         const [visionBoardItems, setVisionBoardItems] = useState([]);
         const [manifestations, setManifestations] = useState([]);
         const [manifestDailyDone, setManifestDailyDone] = useState({});
+        // מיקום כרטיסיות שהמשתמשת שינתה ידנית: 'home' (כפתור בדף הבית) או 'sidebar' (בסרגל מימין).
+        // כרטיסיות שלא הוזזו משתמשות בברירת המחדל הקבועה בקוד.
+        const [tabPlacementOverrides, setTabPlacementOverrides] = useState(() => {
+            try { return JSON.parse(localStorage.getItem('tab-placement-overrides')) || {}; } catch { return {}; }
+        });
+        const moveTabToHome = (tabId) => setTabPlacementOverrides(prev => ({ ...prev, [tabId]: 'home' }));
+        const moveTabToSidebar = (tabId) => setTabPlacementOverrides(prev => ({ ...prev, [tabId]: 'sidebar' }));
+        useEffect(() => { try { localStorage.setItem('tab-placement-overrides', JSON.stringify(tabPlacementOverrides)); } catch(e) {} }, [tabPlacementOverrides]);
         const [crmClients, setCrmClients] = useState(() => {
             // הגירה חד-פעמית מהגרסה המקומית-בלבד הקודמת, כדי לא לאבד לקוחות
             // שכבר הוזנו לפני שהכרטיסייה חוברה לענן.
@@ -855,6 +863,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.manifestations) setManifestations(d.manifestations);
             if (d.manifestDailyDone) setManifestDailyDone(d.manifestDailyDone);
             if (d.crmClients) setCrmClients(d.crmClients);
+            if (d.tabPlacementOverrides) setTabPlacementOverrides(d.tabPlacementOverrides);
         };
 
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
@@ -919,7 +928,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
                     if (supabase && u?.uid && u.uid !== 'local') {
@@ -928,7 +937,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients]);
+        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides]);
 
 
         // lucide icons handled per-component
@@ -1031,7 +1040,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -1627,8 +1636,9 @@ import { supabase } from './lib/supabaseClient.js';
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
-                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
-                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id) && tabPlacementOverrides[tab.id] !== 'home').map(tab => (
+                            <div key={tab.id} className="sidebar-nav-row">
+                            <button onClick={() => setActiveTab(tab.id)}
                                 draggable={tab.id !== 'tab-settings'}
                                 onDragStart={tab.id !== 'tab-settings' ? e => handleSidebarTabDragStart(e, tab.id) : undefined}
                                 onDragOver={tab.id !== 'tab-settings' ? e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; } : undefined}
@@ -1644,6 +1654,13 @@ import { supabase } from './lib/supabaseClient.js';
                                 }[tab.id] || '#8f829c')}}><Icon name={tab.icon || 'circle'} size={17} /></span>
                                 <span className="text-xs">{tab.name}</span>
                             </button>
+                            {tab.id !== 'home' && tab.id !== 'tab-settings' && (
+                                <button type="button" className="sidebar-nav-move" title="העברה לדף הבית" aria-label={`העברת "${tab.name}" לדף הבית`}
+                                    onClick={event => { event.stopPropagation(); moveTabToHome(tab.id); }}>
+                                    <Icon name="home" size={12}/>
+                                </button>
+                            )}
+                            </div>
                         ))}
 
                         {tabs.some(t => PERSONAL_GROWTH_TAB_IDS.includes(t.id)) && (
@@ -1966,6 +1983,8 @@ import { supabase } from './lib/supabaseClient.js';
                         onUndo={undo}
                         canUndo={undoStack.length > 0}
                         onNewGoal={() => setShowAddGoalModal(true)}
+                        tabPlacementOverrides={tabPlacementOverrides}
+                        onMoveTabToSidebar={moveTabToSidebar}
                     />
                 )}
 
