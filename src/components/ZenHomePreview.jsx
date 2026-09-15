@@ -135,9 +135,9 @@ export default function ZenHomePreview({
         {goalRows.map(goal => <button key={goal.title} onClick={() => onNavigate?.('goals')}><Icon name={goal.icon} size={18}/><span><b>{goal.title}</b><small>{goal.progress}%</small><i><em style={{ width: `${Math.min(100, goal.progress)}%` }}/></i></span><Icon name="chevron-left" size={13}/></button>)}
       </div>
       <div className="reference-lower-grid">
-        <article className="reference-calendar">
-          <header><button aria-label="החודש הקודם"><Icon name="chevron-right" size={14}/></button><h2><Icon name="calendar" size={16}/>{monthName} {year}</h2><button aria-label="החודש הבא"><Icon name="chevron-left" size={14}/></button></header>
-          <div className="reference-weekdays">{['א','ב','ג','ד','ה','ו','ש'].map(day => <b key={day}>{day}</b>)}</div>
+        <article className="reference-calendar" role="button" tabIndex={0} onClick={() => onNavigate?.('gantt')} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') onNavigate?.('gantt'); }} aria-label="פתיחת לוח השנה המלא">
+          <header><button aria-label="החודש הקודם" onClick={event => event.stopPropagation()}><Icon name="chevron-left" size={14}/></button><h2>{monthName} {year}</h2><button aria-label="החודש הבא" onClick={event => event.stopPropagation()}><Icon name="chevron-right" size={14}/></button></header>
+          <div className="reference-weekdays">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day => <b key={day}>{day}</b>)}</div>
           <div className="reference-month-grid">{calendarCells.map((day, index) => <span key={index} className={day === today.getDate() ? 'is-today' : ''}>{day}</span>)}</div>
         </article>
         <article className="reference-tasks">
