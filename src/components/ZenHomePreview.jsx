@@ -27,7 +27,7 @@ export default function ZenHomePreview({
   const year = today.getFullYear();
   const daysToEndOf2026 = Math.max(0, Math.ceil((new Date(2026, 11, 31, 23, 59, 59) - today) / 864e5));
   const weeksToEndOf2026 = Math.floor(daysToEndOf2026 / 7);
-  const monthName = today.toLocaleDateString('he-IL', { month: 'long' });
+  const monthName = today.toLocaleDateString('en-US', { month: 'long' });
   const firstDay = new Date(year, today.getMonth(), 1).getDay();
   const daysInMonth = new Date(year, today.getMonth() + 1, 0).getDate();
   const calendarCells = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
