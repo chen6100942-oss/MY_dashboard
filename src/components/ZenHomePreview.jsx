@@ -100,9 +100,9 @@ export default function ZenHomePreview({
       </div>
       <div className="reference-quick-actions">
         <button onClick={() => window.dispatchEvent(new CustomEvent('open-daily-message'))}><Icon name="star" size={16}/><b>המסר היומי</b></button>
+        <button onClick={() => onNavigate?.('morning-ritual')}><Icon name="coffee" size={16}/><b>טקס הבוקר</b></button>
         <button onClick={() => onNavigate?.('tasks')}><Icon name="check-square" size={16}/><b>משימה חדשה</b></button>
         <button onClick={() => onNavigate?.('tasks')}><Icon name="folder" size={16}/><b>פרויקט חדש</b></button>
-        <button onClick={() => onNavigate?.('mindset')}><Icon name="edit-3" size={16}/><b>רשומה ביומן</b></button>
         <button onClick={onNewGoal}><Icon name="target" size={16}/><b>יעד ל-2026</b></button>
       </div>
       <nav className="reference-nav" aria-label="כרטיסיות מרכזיות">

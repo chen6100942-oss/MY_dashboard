@@ -718,12 +718,8 @@ html.dark-mode .quick-panel {
   .home-toolbar { border-radius: 16px; }
 }
 
-html.dark-mode .dashboard-hero {
-  background:
-    radial-gradient(circle at 15% 10%, rgba(83, 201, 166, .14), transparent 16rem),
-    linear-gradient(130deg, rgba(65, 43, 126, .92), rgba(17, 25, 55, .92)) !important;
-  border-color: rgba(139,92,246,.24);
-}
+/* The hero is one branded photo now, on every tab and in both themes —
+   dark mode no longer swaps in a solid gradient behind it. */
 
 html.dark-mode .dashboard-hero h1 {
   background: linear-gradient(95deg, #f4efff, #bba6ff 58%, #75e4c0);
@@ -990,12 +986,7 @@ html.dark-mode .primary-sidebar nav button.bg-violet-50 {
 
 html.dark-mode .quick-panel { background: rgba(24,22,21,.92) !important; }
 
-html.dark-mode .dashboard-hero {
-  background:
-    radial-gradient(circle at 85% 12%, rgba(255,255,255,.04), transparent 10rem),
-    linear-gradient(125deg, #292420, #1b1918 60%, #25291d) !important;
-  border-color: rgba(255,255,255,.08);
-}
+/* (superseded — see the note near the first .dark-mode .dashboard-hero rule) */
 
 html.dark-mode .dashboard-hero h1 {
   color: #f2e8d6 !important;

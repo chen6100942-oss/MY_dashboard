@@ -36,7 +36,6 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' },
             { id: 'clients', name: 'ניהול לקוחות', icon: 'users', color: 'teal', emoji: '👥' },
-            { id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' },
             { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
             { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' }
@@ -705,7 +704,7 @@ import { supabase } from './lib/supabaseClient.js';
             // 'numerology', 'vision-board' and the whole "התפתחות אישית" sidebar group
             // (ikigai, manifesting, book-wisdom, inspiration, mindset) are reached from
             // home-page shortcuts now ("התפתחות רוחנית" / "התפתחות אישית"), not the sidebar.
-            const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule', 'numerology', 'vision-board', 'ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset', 'gantt']);
+            const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule', 'numerology', 'vision-board', 'ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset', 'gantt', 'morning-ritual']);
             const result = [...tabsArr]
                 .filter(tab => !deleted.has(tab.id))
                 .map(tab => tab.id === 'manifesting' ? {...tab, name: 'Manifesting'} : tab)
