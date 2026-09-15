@@ -141,7 +141,7 @@ export default function ZenHomePreview({
           <div className="reference-month-grid">{calendarCells.map((day, index) => <span key={index} className={day === today.getDate() ? 'is-today' : ''}>{day}</span>)}</div>
         </article>
         <article className="reference-tasks">
-          <header><h2>משימות להיום</h2><button onClick={() => onNavigate?.('tasks')}>הצג הכל <Icon name="chevron-left" size={12}/></button></header>
+          <header><h2>TO DO LIST</h2><button onClick={() => onNavigate?.('tasks')}>הצג הכל <Icon name="chevron-left" size={12}/></button></header>
           <div className="reference-empty-illustration"><span>⌁</span><small>{dailyTasks.length ? 'צעד אחד בכל פעם' : 'פעם נפלאה לפתוח יצירה חדשה'}</small><i className="reference-empty-heart">♡</i></div>
           <div className="reference-task-list">{taskRows.map((task, index) => <button key={`${task}-${index}`} onClick={() => onNavigate?.('tasks')}><i/>{task}</button>)}</div>
         </article>

@@ -1013,16 +1013,16 @@ body:has(.reference-home) .daily-message-floating-root{display:none!important}
 .reference-lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.reference-lower-grid article{min-height:260px;padding:17px 24px 12px;border:1px solid rgba(100,71,53,.07);border-radius:15px;background:rgba(255,253,249,.82);box-shadow:0 5px 18px rgba(69,44,31,.04)}
 .reference-lower-grid header{display:flex;align-items:center;justify-content:space-between}.reference-lower-grid h2{display:flex;align-items:center;gap:7px;margin:0;font:700 13px/1.2 Heebo,sans-serif}.reference-calendar header button{border:0;background:transparent}.reference-weekdays,.reference-month-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:ltr;text-align:center}.reference-weekdays{margin:18px 0 10px;padding-bottom:9px;border-bottom:1px solid rgba(100,71,53,.12);color:#a08d80;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.reference-month-grid{row-gap:0;font-size:13px;color:#5c473c}.reference-month-grid span{display:grid;place-items:center;height:36px;border-bottom:1px solid rgba(100,71,53,.07)}.reference-month-grid .is-today{width:32px;height:32px;margin:auto;border-radius:50%;background:#9a5e40;color:white;box-shadow:0 5px 10px rgba(120,67,42,.22)}
 .reference-tasks header button{display:flex;align-items:center;gap:3px;border:0;background:transparent;font-size:9px}.reference-empty-illustration{display:flex;flex-direction:column;align-items:center;margin:8px 0 5px}.reference-empty-illustration span{height:50px;color:#9b806e;font:400 54px/1 'Mrs Saint Delafield',cursive;transform:rotate(-18deg)}.reference-empty-illustration b{font:500 20px/1.2 'Bodoni Moda',serif}.reference-empty-illustration small{margin-top:2px;color:#998a81;font-size:9px;letter-spacing:.12em}.reference-task-list{border-top:1px solid rgba(91,66,51,.1)}.reference-task-list button{display:flex;align-items:center;width:100%;height:38px;padding:0 3px;border:0;border-bottom:1px solid rgba(91,66,51,.08);background:transparent;font-size:14px}.reference-task-list i{width:19px;height:19px;margin-left:10px;border:1px solid #9b8b80;border-radius:50%}
-.reference-calendar header h2,.reference-tasks header h2{flex:1;justify-content:center;font:500 20px/1.2 'Bodoni Moda',serif;gap:9px;color:#9a5e40}
-.reference-calendar header h2{font:400 32px/1 'Mrs Saint Delafield','Gveret Levin',cursive}
+.reference-calendar header h2,.reference-tasks header h2{flex:1;justify-content:center;font:400 26px/1 'Patrick Hand',cursive;letter-spacing:.02em;gap:9px;color:#8a5636}
 .reference-calendar{cursor:pointer;transition:box-shadow .2s}
 .reference-calendar:hover{box-shadow:0 8px 22px rgba(69,44,31,.09)}
 .reference-calendar header button{position:relative;z-index:1}
 .reference-tasks header{gap:8px}
 body:has(.reference-home) .reference-empty-illustration span{display:none!important}
-body:has(.reference-home) .reference-empty-illustration small{font-size:0!important}
+body:has(.reference-home) .reference-empty-illustration small{display:block;width:100%;text-align:center;font-size:0!important}
 body:has(.reference-home) .reference-empty-illustration small::after{
   content:"משימות קטנות יוצרות חיים גדולים";
+  display:block;text-align:center;
   color:#9a6f5b;font:500 10px/1.4 Heebo,Arial,sans-serif;letter-spacing:.14em
 }
 body:has(.reference-home) .reference-empty-illustration .reference-empty-heart{
