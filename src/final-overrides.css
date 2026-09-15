@@ -957,11 +957,11 @@ html:not(.dark-mode) .dashboard-hero::after{
 }
 html:not(.dark-mode) .dashboard-hero::before{
   left:0!important;right:auto!important;
-  background:radial-gradient(circle at top left,rgba(247,242,235,.98) 0%,rgba(247,242,235,.85) 45%,rgba(247,242,235,0) 78%)!important;
+  background:radial-gradient(circle at top left,rgba(247,242,235,.55) 0%,rgba(247,242,235,.4) 35%,rgba(247,242,235,0) 62%)!important;
 }
 html:not(.dark-mode) .dashboard-hero::after{
   right:0!important;left:auto!important;
-  background:radial-gradient(circle at top right,rgba(239,233,227,.98) 0%,rgba(239,233,227,.85) 45%,rgba(239,233,227,0) 78%)!important;
+  background:radial-gradient(circle at top right,rgba(239,233,227,.55) 0%,rgba(239,233,227,.4) 35%,rgba(239,233,227,0) 62%)!important;
 }
 html:not(.dark-mode) .dashboard-hero>div{z-index:1}
 
@@ -1066,15 +1066,18 @@ body:has(.reference-home) .reference-search{grid-area:search;width:100%!importan
 body:has(.reference-home) .reference-search>span:first-child{flex:0 0 18px!important;width:18px!important;height:18px!important;color:#704532!important}
 body:has(.reference-home) .reference-search input{width:100%!important;height:100%!important;padding:0 4px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:12px!important}
 body:has(.reference-home) .reference-search input:focus{outline:0!important;border:0!important;box-shadow:none!important}
-body:has(.reference-home) .reference-countdown{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;overflow:hidden;direction:rtl;font-size:10px;white-space:nowrap}
+body:has(.reference-home) .reference-countdown{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;overflow:hidden;direction:rtl;font-size:11px;font-weight:400;white-space:nowrap}
 body:has(.reference-home) .reference-countdown{grid-area:countdown}
-body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;font-weight:700}
+body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;font-weight:400}
 body:has(.reference-home) .reference-countdown>span[style]{color:#9a694f}
-body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px}
-body:has(.reference-home) .reference-countdown small{color:#99897e}
+body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px;font-weight:400}
+body:has(.reference-home) .reference-countdown small{color:#99897e;font-weight:400}
 body:has(.reference-home) .reference-sounds{grid-area:sounds;direction:rtl}
-body:has(.reference-home) .reference-sounds span{font-weight:700}
-body:has(.reference-home) .reference-sounds small{max-width:72px;overflow:hidden;color:#99897e;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+body:has(.reference-home) .reference-sounds span{font-weight:400;font-size:11px}
+body:has(.reference-home) .reference-sounds small{max-width:72px;overflow:hidden;color:#99897e;font-size:8px;font-weight:400;text-overflow:ellipsis;white-space:nowrap}
+/* Every item in the utility row shares one plain weight/size — only the
+   live date/time chip (below) is allowed to stand out from the rest. */
+body:has(.reference-home) .reference-search input{font:400 11px/1.2 Heebo,sans-serif!important}
 body:has(.reference-home) .reference-sound-menu{
   position:absolute!important;z-index:80!important;top:46px!important;right:0!important;
   display:grid!important;gap:5px!important;width:260px!important;height:auto!important;padding:8px!important;
