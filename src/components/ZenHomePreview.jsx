@@ -139,11 +139,10 @@ export default function ZenHomePreview({
           <header><button aria-label="החודש הקודם"><Icon name="chevron-right" size={14}/></button><h2><Icon name="calendar" size={16}/>{monthName} {year}</h2><button aria-label="החודש הבא"><Icon name="chevron-left" size={14}/></button></header>
           <div className="reference-weekdays">{['א','ב','ג','ד','ה','ו','ש'].map(day => <b key={day}>{day}</b>)}</div>
           <div className="reference-month-grid">{calendarCells.map((day, index) => <span key={index} className={day === today.getDate() ? 'is-today' : ''}>{day}</span>)}</div>
-          <footer>A NEW DAY · A BRIGHTER YOU</footer>
         </article>
         <article className="reference-tasks">
           <header><h2>משימות להיום</h2><button onClick={() => onNavigate?.('tasks')}>הצג הכל <Icon name="chevron-left" size={12}/></button></header>
-          <div className="reference-empty-illustration"><span>⌁</span><b>{dailyTasks.length ? 'המשימות החשובות שלך' : 'אין משימות להיום'}</b><small>{dailyTasks.length ? 'צעד אחד בכל פעם' : 'פעם נפלאה לפתוח יצירה חדשה'}</small><i className="reference-empty-heart">♡</i></div>
+          <div className="reference-empty-illustration"><span>⌁</span><small>{dailyTasks.length ? 'צעד אחד בכל פעם' : 'פעם נפלאה לפתוח יצירה חדשה'}</small><i className="reference-empty-heart">♡</i></div>
           <div className="reference-task-list">{taskRows.map((task, index) => <button key={`${task}-${index}`} onClick={() => onNavigate?.('tasks')}><i/>{task}</button>)}</div>
         </article>
       </div>
