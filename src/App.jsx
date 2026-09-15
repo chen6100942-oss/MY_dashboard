@@ -364,6 +364,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
             { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
+            { id: 't-launch-6', text: 'להגדיר ספק מייל חיצוני (כמו Resend) ב-Supabase — כרגע שולח האימייל המובנה מוגבל בכמות הודעות לשעה, וזו הסיבה שמיילים לאיפוס סיסמה לפעמים לא מגיעים', projectId: 'p-launch', domain: 'general', completed: false, dueDate: '' },
         ]);
         const [resources, setResources] = useState([
             { id: 'r1', title: 'השראה לאדריכלות מודרנית', url: 'https://www.archdaily.com', projectId: 'p1', completed: true, emoji: '🏗️' },
@@ -752,6 +753,7 @@ import { supabase } from './lib/supabaseClient.js';
                 { id: 't-launch-3', text: 'סרטוני הדרכה — להקליט את עצמי ולתת דוגמאות עם צילומי מסך' },
                 { id: 't-launch-4', text: 'להסיר/להפוך לתשלום נוסף את כרטיסיית "ניהול לקוחות" (רלוונטי רק לעצמאים)' },
                 { id: 't-launch-5', text: 'להיכנס לפינטרסט ולקחת רעיונות לבניית והסבר של כל כרטיסייה, ודוגמאות להעשרה נוספת לתחומי העולם הרוחני וההתפתחות האישית' },
+                { id: 't-launch-6', text: 'להגדיר ספק מייל חיצוני (כמו Resend) ב-Supabase — כרגע שולח האימייל המובנה מוגבל בכמות הודעות לשעה, וזו הסיבה שמיילים לאיפוס סיסמה לפעמים לא מגיעים' },
             ];
             const projects = (projectsArr || []).some(p => p.id === 'p-launch') ? (projectsArr || []) : [...(projectsArr || []), { id: 'p-launch', title: 'לפני השקה לציבור', gradient: 'from-amber-500 to-orange-500', color: 'from-amber-500 to-orange-500', emoji: '🚀', startMonth: 1, endMonth: 12, showOnHome: false }];
             const existingIds = new Set((tasksArr || []).map(t => t.id));
