@@ -36,6 +36,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' },
             { id: 'clients', name: 'ניהול לקוחות', icon: 'users', color: 'teal', emoji: '👥' },
+            { id: 'help', name: 'HELP', icon: 'life-buoy', color: 'rose', emoji: '🆘' },
             { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
             { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' }
@@ -325,9 +326,10 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'm5', domain: 'תוכן', daily: '✓ תוכן יומי', weekly: 'עוקבים חדשים', monthly: '1K+ עוקבים חדשים' },
         ]);
         const [domainGoals, setDomainGoals] = useState([
-            { id: 'dg1', title: 'הוצאת הספר לאור', emoji: '📚', color: 'from-blue-500 to-cyan-500', points: [{ id: 'p1', label: 'יעד קרוב', text: 'סיום עריכה ל-120,000 מילים' }, { id: 'p2', label: 'יעד בינוני', text: 'שליחה לעורכת מקצועית' }, { id: 'p3', label: 'יעד רחוק', text: 'פרסום הספר - יוני 2027' }] },
-            { id: 'dg2', title: 'פרויקט גמר באדריכלות', emoji: '🎓', color: 'from-violet-500 to-purple-500', points: [{ id: 'p1', label: 'יעד קרוב', text: 'שיחה עם נדב + תוכנית עבודה' }, { id: 'p2', label: 'יעד בינוני', text: 'השלמת 50% - מרץ 2026' }, { id: 'p3', label: 'יעד רחוק', text: 'הגשה וקבלת רישיון - אפריל-מאי 2026' }] },
-            { id: 'dg4', title: 'יוצרת תוכן ברשתות', emoji: '📱', color: 'from-pink-500 to-rose-500', current: '160 עוקבים', points: [{ id: 'p1', label: 'יעד קרוב', text: '500 עוקבים (פברואר)' }, { id: 'p2', label: 'יעד בינוני', text: '5,000 עוקבים (יוני)' }, { id: 'p3', label: 'יעד רחוק', text: '500,000 עוקבים' }] },
+            { id: 'dg1', title: 'הוצאת הספר לאור', emoji: '📚', color: 'from-blue-500 to-cyan-500', progress: 60, points: [{ id: 'p1', label: 'יעד קרוב', text: 'סיום עריכה ל-120,000 מילים' }, { id: 'p2', label: 'יעד בינוני', text: 'שליחה לעורכת מקצועית' }, { id: 'p3', label: 'יעד רחוק', text: 'פרסום הספר - יוני 2027' }] },
+            { id: 'dg2', title: 'פרויקט גמר באדריכלות', emoji: '🎓', color: 'from-violet-500 to-purple-500', progress: 40, points: [{ id: 'p1', label: 'יעד קרוב', text: 'שיחה עם נדב + תוכנית עבודה' }, { id: 'p2', label: 'יעד בינוני', text: 'השלמת 50% - מרץ 2026' }, { id: 'p3', label: 'יעד רחוק', text: 'הגשה וקבלת רישיון - אפריל-מאי 2026' }] },
+            { id: 'dg4', title: 'יוצרת תוכן ברשתות', emoji: '📱', color: 'from-pink-500 to-rose-500', current: '160 עוקבים', progress: 75, points: [{ id: 'p1', label: 'יעד קרוב', text: '500 עוקבים (פברואר)' }, { id: 'p2', label: 'יעד בינוני', text: '5,000 עוקבים (יוני)' }, { id: 'p3', label: 'יעד רחוק', text: '500,000 עוקבים' }] },
+            { id: 'dg3', title: 'יעדים פיננסיים', emoji: '🎯', color: 'from-amber-500 to-orange-500', progress: 30, points: [{ id: 'p1', label: 'יעד קרוב', text: '' }, { id: 'p2', label: 'יעד בינוני', text: '' }, { id: 'p3', label: 'יעד רחוק', text: '' }] },
         ]);
         const [newTaskText, setNewTaskText] = useState('');
         const [newTaskEmoji, setNewTaskEmoji] = useState('✅');
@@ -442,6 +444,33 @@ import { supabase } from './lib/supabaseClient.js';
         const [mindsetTab, setMindsetTab] = useState('writing');
         const [mindsetListItems, setMindsetListItems] = useState([]);
         const [newMindsetListItem, setNewMindsetListItem] = useState('');
+        // שלוש רשימות "דברים לעשות עד גיל X" — כל אחת עצמאית, ניתנת לעריכה כי היא משתנה עם הזמן.
+        const [bucketLists, setBucketLists] = useState({ age40: [], age50: [], age60: [] });
+        const [newBucketItemText, setNewBucketItemText] = useState({ age40: '', age50: '', age60: '' });
+        const addBucketItem = (ageKey) => {
+            const text = (newBucketItemText[ageKey] || '').trim();
+            if (!text) return;
+            setBucketLists(prev => ({ ...prev, [ageKey]: [...(prev[ageKey] || []), { id: `bl${Date.now()}`, text, completed: false }] }));
+            setNewBucketItemText(prev => ({ ...prev, [ageKey]: '' }));
+        };
+        const toggleBucketItem = (ageKey, id) => setBucketLists(prev => ({ ...prev, [ageKey]: prev[ageKey].map(i => i.id === id ? { ...i, completed: !i.completed } : i) }));
+        const updateBucketItemText = (ageKey, id, text) => setBucketLists(prev => ({ ...prev, [ageKey]: prev[ageKey].map(i => i.id === id ? { ...i, text } : i) }));
+        const removeBucketItem = (ageKey, id) => setBucketLists(prev => ({ ...prev, [ageKey]: prev[ageKey].filter(i => i.id !== id) }));
+        // כרטיסיית HELP — טיפים קטנים בשיטת הקאיזן, לחזרה הדרגתית לרוטינה אחרי שהתרחקתי ממנה.
+        const [helpTips, setHelpTips] = useState([
+            { id: 'ht1', text: 'תתחילי במשימה אחת קטנה בלבד — הכי קטנה שאת יכולה לדמיין. גם 2 דקות זה ניצחון.', completed: false },
+            { id: 'ht2', text: 'אל תשפטי את עצמך על ההפסקה. חזרה לרוטינה מתחילה ברגע הזה, לא ב"איפה הייתי".', completed: false },
+            { id: 'ht3', text: 'בחרי הרגל אחד בודד לחדש היום — לא הכל בבת אחת.', completed: false },
+            { id: 'ht4', text: 'תני לעצמך תזכורת חזותית קטנה (פתק, תזכורת בטלפון) במקום שתראי אותה כל בוקר.', completed: false },
+            { id: 'ht5', text: 'חגגי כל צעד קטן — גם וי על משימה זעירה הוא חיזוק חיובי אמיתי.', completed: false },
+            { id: 'ht6', text: 'אם פספסת יום — זה בסדר. הכלל הוא לא לפספס פעמיים ברצף.', completed: false },
+            { id: 'ht7', text: 'קשרי הרגל חדש להרגל קיים (למשל: אחרי צחצוח שיניים, 3 נשימות עמוקות).', completed: false },
+            { id: 'ht8', text: 'תני לעצמך רף נמוך בכוונה בהתחלה — עשוי תמיד עדיף על מושלם.', completed: false },
+        ]);
+        const [newHelpTip, setNewHelpTip] = useState('');
+        const addHelpTip = () => { if (!newHelpTip.trim()) return; setHelpTips(prev => [...prev, { id: `ht${Date.now()}`, text: newHelpTip.trim(), completed: false }]); setNewHelpTip(''); };
+        const toggleHelpTip = (id) => setHelpTips(prev => prev.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+        const removeHelpTip = (id) => setHelpTips(prev => prev.filter(t => t.id !== id));
         const [futureSelfEntries, setFutureSelfEntries] = useState([]);
         const [newFutureSelfText, setNewFutureSelfText] = useState('');
         const [newFutureSelfEmoji, setNewFutureSelfEmoji] = useState('✨');
@@ -554,14 +583,6 @@ import { supabase } from './lib/supabaseClient.js';
         const [visionBoardItems, setVisionBoardItems] = useState([]);
         const [manifestations, setManifestations] = useState([]);
         const [manifestDailyDone, setManifestDailyDone] = useState({});
-        // מיקום כרטיסיות שהמשתמשת שינתה ידנית: 'home' (כפתור בדף הבית) או 'sidebar' (בסרגל מימין).
-        // כרטיסיות שלא הוזזו משתמשות בברירת המחדל הקבועה בקוד.
-        const [tabPlacementOverrides, setTabPlacementOverrides] = useState(() => {
-            try { return JSON.parse(localStorage.getItem('tab-placement-overrides')) || {}; } catch { return {}; }
-        });
-        const moveTabToHome = (tabId) => setTabPlacementOverrides(prev => ({ ...prev, [tabId]: 'home' }));
-        const moveTabToSidebar = (tabId) => setTabPlacementOverrides(prev => ({ ...prev, [tabId]: 'sidebar' }));
-        useEffect(() => { try { localStorage.setItem('tab-placement-overrides', JSON.stringify(tabPlacementOverrides)); } catch(e) {} }, [tabPlacementOverrides]);
         const [crmClients, setCrmClients] = useState(() => {
             // הגירה חד-פעמית מהגרסה המקומית-בלבד הקודמת, כדי לא לאבד לקוחות
             // שכבר הוזנו לפני שהכרטיסייה חוברה לענן.
@@ -735,6 +756,9 @@ import { supabase } from './lib/supabaseClient.js';
             if (!deleted.has('morning-ritual') && !result.some(t => t.id === 'morning-ritual')) {
                 result.push({ id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' });
             }
+            if (!deleted.has('help') && !result.some(t => t.id === 'help')) {
+                result.push({ id: 'help', name: 'HELP', icon: 'life-buoy', color: 'rose', emoji: '🆘' });
+            }
             if (!deleted.has('inspiration') && !result.some(t => t.id === 'inspiration')) {
                 result.push({ id:'inspiration', name:'מוטיבציה והשראה', icon:'flame', color:'amber', emoji:'✦' });
             }
@@ -753,6 +777,20 @@ import { supabase } from './lib/supabaseClient.js';
             // Home always leads the list, no matter what order was saved or dragged
             result.sort((a, b) => (a.id === 'home' ? -1 : b.id === 'home' ? 1 : 0));
             return result;
+        };
+
+        // ── HELPER: יעדי הבית ("יעדים לשנת 2026") קיבלו לאחרונה שדה progress אמיתי,
+        // ויעד רביעי קבוע ("יעדים פיננסיים") שלפני כן היה רק עיטור קבוע בקוד ולא
+        // יעד שמור באמת. משתמשת חוזרת עם נתונים ישנים לא תאבד את זה בטעינה הבאה:
+        // משלימים progress חסר (לפי הערכים המקוריים שהוצגו) ומוסיפים את היעד הרביעי
+        // אם הוא עדיין לא קיים, בלי לגעת בשאר היעדים שהיא כבר ערכה בעצמה.
+        const ensureGoalDefaults = (goalsArr) => {
+            const legacyProgress = { dg1: 60, dg2: 40, dg4: 75 };
+            const withProgress = (goalsArr || []).map(g => (g.progress === undefined || g.progress === null)
+                ? { ...g, progress: legacyProgress[g.id] ?? 0 }
+                : g);
+            if (withProgress.some(g => g.id === 'dg3')) return withProgress;
+            return [...withProgress, { id: 'dg3', title: 'יעדים פיננסיים', emoji: '🎯', color: 'from-amber-500 to-orange-500', progress: 30, points: [{ id: 'p1', label: 'יעד קרוב', text: '' }, { id: 'p2', label: 'יעד בינוני', text: '' }, { id: 'p3', label: 'יעד רחוק', text: '' }] }];
         };
 
         // ── HELPER: "לפני השקה לציבור" הוא פרויקט מובנה שתמיד אמור להיות קיים.
@@ -809,7 +847,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.dailySchedule) setDailySchedule(d.dailySchedule);
             if (d.ideas) setIdeas(d.ideas);
             if (d.domains) setDomains(d.domains);
-            if (d.domainGoals) setDomainGoals(d.domainGoals);
+            if (d.domainGoals) setDomainGoals(ensureGoalDefaults(d.domainGoals));
             if (d.successMetrics) setSuccessMetrics(d.successMetrics);
             if (d.morningRitualTitle) setMorningRitualTitle(d.morningRitualTitle);
             if (d.morningRitualEmoji) setMorningRitualEmoji(d.morningRitualEmoji);
@@ -818,7 +856,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.archive) setArchive(d.archive);
             if (d.permanentArchive) setPermanentArchive(d.permanentArchive);
             if (d.mindsetEntries) setMindsetEntries(d.mindsetEntries);
-            if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems);
+            if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems); if (d.bucketLists) setBucketLists(d.bucketLists); if (d.helpTips) setHelpTips(d.helpTips);
             if (d.futureSelfEntries) setFutureSelfEntries(d.futureSelfEntries);
             if (d.futureSelfFiles) setFutureSelfFiles(d.futureSelfFiles);
             if (d.dayScheduleTasks) setDayScheduleTasks(d.dayScheduleTasks);
@@ -863,7 +901,6 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.manifestations) setManifestations(d.manifestations);
             if (d.manifestDailyDone) setManifestDailyDone(d.manifestDailyDone);
             if (d.crmClients) setCrmClients(d.crmClients);
-            if (d.tabPlacementOverrides) setTabPlacementOverrides(d.tabPlacementOverrides);
         };
 
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
@@ -928,7 +965,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
                     if (supabase && u?.uid && u.uid !== 'local') {
@@ -937,7 +974,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides]);
+        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
 
 
         // lucide icons handled per-component
@@ -1040,7 +1077,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, tabPlacementOverrides, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -1063,7 +1100,7 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.projects || d.tasks) { const ensured = ensureLaunchProject(d.projects, d.tasks); setProjects(ensured.projects); setTasks(ensured.tasks); }
                     if (d.resources) setResources(d.resources); if (d.morningRitual) setMorningRitual(d.morningRitual);
                     if (d.gameChangers) setGameChangers(d.gameChangers); if (d.dailySchedule) setDailySchedule(d.dailySchedule);
-                    if (d.ideas) setIdeas(d.ideas); if (d.domains) setDomains(d.domains); if (d.domainGoals) setDomainGoals(d.domainGoals);
+                    if (d.ideas) setIdeas(d.ideas); if (d.domains) setDomains(d.domains); if (d.domainGoals) setDomainGoals(ensureGoalDefaults(d.domainGoals));
                     if (d.successMetrics) setSuccessMetrics(d.successMetrics);
                     if (d.morningRitualTitle) setMorningRitualTitle(d.morningRitualTitle);
                     if (d.morningRitualEmoji) setMorningRitualEmoji(d.morningRitualEmoji);
@@ -1072,7 +1109,7 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.archive) setArchive(d.archive);
                     if (d.permanentArchive) setPermanentArchive(d.permanentArchive);
                     if (d.mindsetEntries) setMindsetEntries(d.mindsetEntries);
-                    if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems);
+                    if (d.mindsetListItems) setMindsetListItems(d.mindsetListItems); if (d.bucketLists) setBucketLists(d.bucketLists); if (d.helpTips) setHelpTips(d.helpTips);
                     if (d.futureSelfEntries) setFutureSelfEntries(d.futureSelfEntries);
                     if (d.futureSelfFiles) setFutureSelfFiles(d.futureSelfFiles);
                     if (d.dayScheduleTasks) setDayScheduleTasks(d.dayScheduleTasks);
@@ -1278,6 +1315,7 @@ import { supabase } from './lib/supabaseClient.js';
         const updateGoalTitle = (gid, v) => setDomainGoals(p => p.map(g => g.id===gid?{...g,title:v}:g));
         const updateGoalEmoji = (gid, v) => setDomainGoals(p => p.map(g => g.id===gid?{...g,emoji:v}:g));
         const updateGoalCurrent = (gid, v) => setDomainGoals(p => p.map(g => g.id===gid?{...g,current:v}:g));
+        const updateGoalProgress = (gid, v) => setDomainGoals(p => p.map(g => g.id===gid?{...g,progress:Math.max(0,Math.min(100,Number(v)||0))}:g));
         const updateGoalPoint = (gid, pid, v) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:g.points.map(pt => pt.id===pid?{...pt,text:v}:pt)}:g));
         const addGoalPoint = (gid) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:[...g.points,{id:`p${Date.now()}`,label:`יעד ${g.points.length+1}`,text:''}]}:g));
         const removeGoalPoint = (gid, pid) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:g.points.filter(pt => pt.id!==pid)}:g));
@@ -1636,9 +1674,8 @@ import { supabase } from './lib/supabaseClient.js';
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
-                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id) && tabPlacementOverrides[tab.id] !== 'home').map(tab => (
-                            <div key={tab.id} className="sidebar-nav-row">
-                            <button onClick={() => setActiveTab(tab.id)}
+                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
+                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 draggable={tab.id !== 'tab-settings'}
                                 onDragStart={tab.id !== 'tab-settings' ? e => handleSidebarTabDragStart(e, tab.id) : undefined}
                                 onDragOver={tab.id !== 'tab-settings' ? e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; } : undefined}
@@ -1650,17 +1687,10 @@ import { supabase } from './lib/supabaseClient.js';
                                     home:'#c07898', tasks:'#6f9bc2', schedule:'#d29a65', metrics:'#65a88f',
                                     goals:'#b080ad', gantt:'#6fa7ae', 'future-self':'#cf8292', mindset:'#9b86bd',
                                     ideas:'#c49a54', resources:'#718fbd', 'my-world':'#5e9e88',
-                                    'vision-board':'#c47d9d', manifesting:'#9d639d', ikigai:'#a95673'
+                                    'vision-board':'#c47d9d', manifesting:'#9d639d', ikigai:'#a95673', help:'#e0637a'
                                 }[tab.id] || '#8f829c')}}><Icon name={tab.icon || 'circle'} size={17} /></span>
                                 <span className="text-xs">{tab.name}</span>
                             </button>
-                            {tab.id !== 'home' && tab.id !== 'tab-settings' && (
-                                <button type="button" className="sidebar-nav-move" title="העברה לדף הבית" aria-label={`העברת "${tab.name}" לדף הבית`}
-                                    onClick={event => { event.stopPropagation(); moveTabToHome(tab.id); }}>
-                                    <Icon name="home" size={12}/>
-                                </button>
-                            )}
-                            </div>
                         ))}
 
                         {tabs.some(t => PERSONAL_GROWTH_TAB_IDS.includes(t.id)) && (
@@ -1983,8 +2013,6 @@ import { supabase } from './lib/supabaseClient.js';
                         onUndo={undo}
                         canUndo={undoStack.length > 0}
                         onNewGoal={() => setShowAddGoalModal(true)}
-                        tabPlacementOverrides={tabPlacementOverrides}
-                        onMoveTabToSidebar={moveTabToSidebar}
                     />
                 )}
 
@@ -2981,7 +3009,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                         if (d.gameChangers) setGameChangers(d.gameChangers);
                                                         if (d.ideas) setIdeas(d.ideas);
                                                         if (d.domains) setDomains(d.domains);
-                                                        if (d.domainGoals) setDomainGoals(d.domainGoals);
+                                                        if (d.domainGoals) setDomainGoals(ensureGoalDefaults(d.domainGoals));
                                                         if (d.successMetrics) setSuccessMetrics(d.successMetrics);
                                                         if (d.archive) setArchive(d.archive);
                                                         if (d.permanentArchive) setPermanentArchive(d.permanentArchive);
@@ -3458,7 +3486,7 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'goals' && (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up pb-16">
                         <div className="card p-5 flex items-center gap-3 justify-center text-center"><h2 id="domain-goals-heading" className="text-xl font-bold text-slate-800">🎯 יעדים אסטרטגיים לפי תחומים</h2></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{domainGoals.map(goal => (<div id={`domain-goal-${goal.id}`} key={goal.id} className={`card domain-goal-card overflow-hidden flex flex-col group/goal ${focusedDomainGoalId===goal.id?'is-focused':''}`}>{focusedDomainGoalId===goal.id&&<span className="selected-goal-label">✓ היעד שבחרת</span>}<div className={`h-1 bg-gradient-to-r ${goal.color}`}></div><div className="p-4 pb-2 flex items-center gap-2.5"><EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" /><input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" /><button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><div className="px-4 pb-4 space-y-3 flex-1">{goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}<div className="space-y-2.5">{goal.points.map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}<button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button></div></div></div>))}</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{domainGoals.map(goal => (<div id={`domain-goal-${goal.id}`} key={goal.id} className={`card domain-goal-card overflow-hidden flex flex-col group/goal ${focusedDomainGoalId===goal.id?'is-focused':''}`}>{focusedDomainGoalId===goal.id&&<span className="selected-goal-label">✓ היעד שבחרת</span>}<div className={`h-1 bg-gradient-to-r ${goal.color}`}></div><div className="p-4 pb-2 flex items-center gap-2.5"><EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" /><input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" /><button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><div className="px-4 pb-1 flex items-center gap-2"><input type="range" min="0" max="100" value={goal.progress||0} onChange={e => updateGoalProgress(goal.id, e.target.value)} className="flex-1 accent-violet-500" /><span className="text-[10px] font-bold text-slate-400 w-8 text-left">{goal.progress||0}%</span></div><div className="px-4 pb-4 space-y-3 flex-1">{goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}<div className="space-y-2.5">{goal.points.map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}<button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button></div></div></div>))}</div>
                         <div className="card p-5 border-t-[3px] border-pink-400"><div className="space-y-2.5"><input type="text" value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} placeholder="שם היעד..." className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><div className="flex items-center gap-2"><EmojiPicker value={newGoalEmoji} onChange={setNewGoalEmoji} /><span className="text-xs text-slate-400">בחרי אימוג'י ליעד</span></div><select value={newGoalColor} onChange={e => setNewGoalColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select><button onClick={addNewGoal} className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-pink-600 transition-all">הוסף יעד</button></div></div>
                         {renderBuiltinExtra('goals')}
                     </div>
@@ -3672,6 +3700,52 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'finance' && <FinanceTracker user={user} />}
                 {activeTab === 'clients' && <ClientsTab clients={crmClients} setClients={setCrmClients} />}
 
+                {/* HELP — חזרה הדרגתית לרוטינה בשיטת הקאיזן, צעד קטן בכל פעם */}
+                {activeTab === 'help' && (
+                    <div className="max-w-3xl mx-auto space-y-6 animate-slide-in-up pb-16">
+                        <div className="card p-6 text-center bg-gradient-to-br from-rose-50 to-orange-50 border-2 border-rose-100">
+                            <span className="text-4xl block mb-2">🆘</span>
+                            <h2 className="text-xl font-bold text-slate-800 mb-2">את לא לבד — קדימה, צעד אחד קטן</h2>
+                            <p className="text-sm text-slate-500 leading-relaxed max-w-lg mx-auto">
+                                הלכת לאיבוד? יצאת מהרוטינה? זה קורה לכולן. הדף הזה כאן כדי להחזיר אותך פנימה לאט לאט —
+                                לא בקפיצה אחת גדולה, אלא בשיטת הקאיזן: שינויים קטנטנים, אחד בכל פעם, שנצברים להרגל.
+                                תסמני מה כבר ניסית, ותוסיפי טיפים משלך בהמשך.
+                            </p>
+                        </div>
+
+                        <div className="card overflow-hidden">
+                            <div className="p-4 border-b border-slate-50 flex items-center justify-between">
+                                <h3 className="text-sm font-bold text-slate-700">טיפים לצעד קטן הבא</h3>
+                                <span className="text-xs font-semibold text-rose-500">{helpTips.filter(t => t.completed).length} / {helpTips.length} ניסיתי</span>
+                            </div>
+                            <div className="p-4 pb-3 flex gap-2">
+                                <input
+                                    type="text"
+                                    value={newHelpTip}
+                                    onChange={e => setNewHelpTip(e.target.value)}
+                                    onKeyDown={e => { if (e.key === 'Enter') addHelpTip(); }}
+                                    placeholder="להוסיף טיפ קטן משלי..."
+                                    className="flex-1 p-2.5 bg-rose-50 border border-rose-200 rounded-xl outline-none text-sm focus:border-rose-300 transition-all"
+                                />
+                                <button onClick={addHelpTip} className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                </button>
+                            </div>
+                            <div className="divide-y divide-slate-50">
+                                {helpTips.map(tip => (
+                                    <div key={tip.id} className="flex items-start gap-3 px-4 py-3 group hover:bg-rose-50/40 transition-all">
+                                        <button onClick={() => toggleHelpTip(tip.id)} className="shrink-0 mt-0.5">
+                                            {tip.completed ? <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-rose-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-200" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}
+                                        </button>
+                                        <p className={`flex-1 text-sm leading-relaxed ${tip.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>{tip.text}</p>
+                                        <button onClick={() => removeHelpTip(tip.id)} className="opacity-0 group-hover:opacity-100 w-7 h-7 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center justify-center text-rose-400 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* NUMEROLOGY */}
                 {activeTab === 'numerology' && <NumerologyTab />}
 
@@ -3752,6 +3826,9 @@ import { supabase } from './lib/supabaseClient.js';
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>רשימה
                                 {mindsetListItems.length > 0 && <span className="bg-purple-100 text-purple-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{mindsetListItems.length}</span>}
                             </button>
+                            <button onClick={() => setMindsetTab('bucket-lists')} className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all border ${mindsetTab==='bucket-lists' ? 'bg-purple-500 text-white border-transparent shadow-lg' : 'bg-white text-slate-500 border-slate-200 hover:border-purple-300 hover:text-purple-600'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>דברים לעשות עד גיל...
+                            </button>
                         </div>
 
                         {/* כתיבה חופשית */}
@@ -3806,6 +3883,60 @@ import { supabase } from './lib/supabaseClient.js';
                                 <div className="card p-12 text-center"><span className="text-4xl mb-4 block">📋</span><p className="text-slate-400 font-medium text-sm">הרשימה ריקה — הוסיפי את הפריט הראשון</p></div>
                             )}
                         </>)}
+
+                        {/* דברים לעשות עד גיל 40 / 50 / 60 — שלוש רשימות עצמאיות, ניתנות לעריכה */}
+                        {mindsetTab === 'bucket-lists' && (
+                            <div className="space-y-6">
+                                {[
+                                    { key: 'age40', label: 'עד גיל 40', emoji: '🌱' },
+                                    { key: 'age50', label: 'עד גיל 50', emoji: '🌿' },
+                                    { key: 'age60', label: 'עד גיל 60', emoji: '🌳' },
+                                ].map(({ key, label, emoji }) => {
+                                    const items = bucketLists[key] || [];
+                                    return (
+                                        <div key={key} className="card overflow-hidden">
+                                            <div className="p-4 border-b border-slate-50 flex items-center gap-2" style={{background:'linear-gradient(to left, #faf5ff, transparent)'}}>
+                                                <span className="text-xl">{emoji}</span>
+                                                <h3 className="text-sm font-bold text-slate-700 flex-1">{label}</h3>
+                                                {items.length > 0 && <span className="bg-purple-100 text-purple-600 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{items.length}</span>}
+                                            </div>
+                                            <div className="p-4 pb-3 flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={newBucketItemText[key] || ''}
+                                                    onChange={e => setNewBucketItemText(prev => ({ ...prev, [key]: e.target.value }))}
+                                                    onKeyDown={e => { if (e.key === 'Enter') addBucketItem(key); }}
+                                                    placeholder={`להוסיף דבר שאני רוצה לעשות ${label}...`}
+                                                    className="flex-1 p-2.5 bg-purple-50 border border-purple-200 rounded-xl outline-none text-sm focus:border-purple-300 transition-all"
+                                                />
+                                                <button onClick={() => addBucketItem(key)} className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold text-sm transition-all">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                                </button>
+                                            </div>
+                                            {items.length > 0 ? (
+                                                <div className="divide-y divide-slate-50">
+                                                    {items.map(item => (
+                                                        <div key={item.id} className="flex items-center gap-3 px-4 py-2.5 group hover:bg-purple-50/40 transition-all">
+                                                            <button onClick={() => toggleBucketItem(key, item.id)} className="shrink-0">
+                                                                {item.completed ? <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-purple-500" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-200" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/></svg>}
+                                                            </button>
+                                                            <input
+                                                                value={item.text}
+                                                                onChange={e => updateBucketItemText(key, item.id, e.target.value)}
+                                                                className={`flex-1 text-sm font-medium bg-transparent border-none outline-none ${item.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}
+                                                            />
+                                                            <button onClick={() => removeBucketItem(key, item.id)} className="opacity-0 group-hover:opacity-100 w-6 h-6 bg-rose-50 hover:bg-rose-100 rounded-lg flex items-center justify-center text-rose-400 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-slate-400 text-xs text-center py-5">הרשימה ריקה עדיין</p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                         {renderBuiltinExtra('mindset')}
                     </div>
                 )}
@@ -4966,7 +5097,7 @@ import { supabase } from './lib/supabaseClient.js';
                                     <input value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none" placeholder="שם היעד..." />
                                 </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => { if (!newGoalTitle.trim()) return; setProjects(prev => [...prev, { id:"p"+Date.now(), title: newGoalTitle, emoji: newGoalEmoji, gradient: "from-violet-500 to-purple-600", color: "from-violet-500 to-purple-600", startMonth: new Date().getMonth()+1, endMonth: 12, showOnHome: true }]); setNewGoalTitle(""); setNewGoalEmoji(""); setShowAddGoalModal(false); }} className="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all">הוסף</button>
+                                    <button onClick={() => { if (!newGoalTitle.trim()) return; saveSnapshot(); setDomainGoals(prev => [...prev, { id:"dg"+Date.now(), title: newGoalTitle, emoji: newGoalEmoji || '🎯', color: "from-violet-500 to-purple-600", progress: 0, points: [{id:'p1',label:'יעד קרוב',text:''},{id:'p2',label:'יעד בינוני',text:''},{id:'p3',label:'יעד רחוק',text:''}] }]); setNewGoalTitle(""); setNewGoalEmoji(""); setShowAddGoalModal(false); }} className="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all">הוסף</button>
                                     <button onClick={() => setShowAddGoalModal(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-all">ביטול</button>
                                 </div>
                             </div>

@@ -17,7 +17,6 @@ export default function ZenHomePreview({
   onOpenSoundLibrary, activeSoundLabel = 'Quiet',
   soundTracks = [], activeSoundId = '', onSelectSound,
   onSave, onUndo, canUndo = false, onNewGoal,
-  tabPlacementOverrides = {}, onMoveTabToSidebar,
 }) {
   const [today, setToday] = useState(() => new Date());
   const [soundMenuOpen, setSoundMenuOpen] = useState(false);
@@ -34,10 +33,12 @@ export default function ZenHomePreview({
   const calendarCells = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
   const dailyTasks = tasks.filter(task => !task.completed).slice(0, 3);
   const taskRows = dailyTasks.length ? dailyTasks.map(task => task.text || task.title) : fallbackTasks;
-  const goalRows = fallbackGoals.map((fallback, index) => {
-    const goal = goals[index];
-    return goal ? { ...fallback, title: goal.title || goal.text || fallback.title, progress: Number(goal.progress ?? goal.percent ?? fallback.progress) || 0 } : fallback;
-  });
+  // כל היעדים האמיתיים שיצרה, לא רק ארבעה קבועים — כך ש"יעד ל-2026" חדש
+  // באמת מופיע ומתעדכן כאן, ולא רק בארבעת התאים הראשונים.
+  const goalRows = goals.length ? goals.map((goal, index) => {
+    const fallback = fallbackGoals[index % fallbackGoals.length];
+    return { title: goal.title || goal.text || fallback.title, icon: fallback.icon, progress: Number(goal.progress ?? goal.percent ?? 0) || 0 };
+  }) : fallbackGoals;
   const openTasks = tasks.filter(task => !task.completed);
   const featuredNavItems = [
     { id: 'my-world', label: 'תכנון ונופש', icon: 'plane', children: [
@@ -70,18 +71,12 @@ export default function ZenHomePreview({
   const sidebarOnlyIds = new Set(['home', 'gantt', 'finance', 'numerology', 'morning-ritual', 'ikigai', 'inspiration', 'mindset', 'archive', 'vision-board', 'tasks', 'manifesting', 'resources', 'book-wisdom', 'clients']);
   const [expandedNavId, setExpandedNavId] = useState('');
   const expandedNavItem = featuredNavItems.find(item => item.id === expandedNavId && item.children);
-  // ברירת המחדל הקבועה למעלה נקבעת בקוד, אבל אם המשתמשת הזיזה כרטיסייה
-  // ידנית (דרך כפתור ה"העברה" בסרגל או כאן בדף הבית), ההזזה שלה גוברת.
-  const isOnHome = tab => tabPlacementOverrides[tab.id]
-    ? tabPlacementOverrides[tab.id] === 'home'
-    : !sidebarOnlyIds.has(tab.id);
   const navItems = tabs.length ? [
     ...featuredNavItems.filter(item => item.children || tabs.some(tab => tab.id === item.id)),
-    ...tabs.filter(tab => !featuredIds.has(tab.id) && isOnHome(tab)).map(tab => ({
+    ...tabs.filter(tab => !featuredIds.has(tab.id) && !sidebarOnlyIds.has(tab.id)).map(tab => ({
       id: tab.id,
       label: tab.name,
       icon: tab.icon || 'circle',
-      movable: true,
     })),
   ] : featuredNavItems;
 
@@ -125,12 +120,6 @@ export default function ZenHomePreview({
               <Icon name={item.icon} size={18}/><span>{item.label}</span>
               {item.children && <Icon name={expandedNavId === item.id ? 'chevron-up' : 'chevron-down'} size={14}/>}
             </button>
-            {item.movable && onMoveTabToSidebar && (
-              <button type="button" className="reference-nav-move" title="העברה לסרגל מימין" aria-label={`העברת "${item.label}" לסרגל מימין`}
-                onClick={event => { event.stopPropagation(); onMoveTabToSidebar(item.id); }}>
-                <Icon name="panel-right" size={12}/>
-              </button>
-            )}
             {expandedNavId === item.id && item.children && (
               <div className="reference-nav-expand">
                 {item.children.map(child => (
