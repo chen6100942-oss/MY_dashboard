@@ -61,6 +61,11 @@ html .dashboard-main .goal-mini-card button {
 }
 #google_translate_element,.goog-te-gadget,.goog-te-banner-frame,.skiptranslate iframe{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;opacity:0!important;pointer-events:none!important}
 body{top:0!important}
+/* ארבע הכרטיסיות שבשימוש היומיומי הכי תדיר — בולטות יותר בסרגל. */
+html:not(.dark-mode) .primary-sidebar nav button.nav-tab-home .text-xs,
+html:not(.dark-mode) .primary-sidebar nav button.nav-tab-tasks .text-xs,
+html:not(.dark-mode) .primary-sidebar nav button.nav-tab-finance .text-xs,
+html:not(.dark-mode) .primary-sidebar nav button.nav-tab-help .text-xs{font-weight:800!important}
 .primary-sidebar>.language-switcher{display:flex!important;align-items:center;justify-content:center;gap:5px;padding:8px 10px!important;border-top:1px solid rgba(83,66,58,.08)!important;background:transparent!important;box-shadow:none!important}
 .primary-sidebar>.language-switcher button{min-width:30px;height:25px;padding:0 6px;border:0;border-radius:8px;color:#84756d;background:transparent;font-size:9px;font-weight:800;transition:.18s ease}
 .primary-sidebar>.language-switcher button:hover,.primary-sidebar>.language-switcher button.active{color:#654b3e;background:rgba(116,82,64,.09)}

@@ -36,7 +36,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' },
             { id: 'clients', name: 'ניהול לקוחות', icon: 'users', color: 'teal', emoji: '👥' },
-            { id: 'help', name: 'HELP', icon: 'life-buoy', color: 'rose', emoji: '🆘' },
+            { id: 'help', name: 'RESET ME', icon: 'life-buoy', color: 'rose', emoji: '🆘' },
             { id: 'resources', name: 'ספריית כלים', icon: 'link', color: 'indigo', emoji: '🔗' },
             { id: 'archive', name: 'ארכיון', icon: 'archive', color: 'slate', emoji: '🗃️' },
             { id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' }
@@ -740,7 +740,8 @@ import { supabase } from './lib/supabaseClient.js';
                 .map(tab => tab.id === 'ikigai' ? {...tab, name: 'IKIGAI', icon: 'flower-2', emoji: '🪷'} : tab)
                 .map(tab => tab.id === 'resources' ? {...tab, name: 'ספריית כלים'} : tab)
                 .map(tab => tab.id === 'inspiration' ? {...tab, name: 'מוטיבציה והשראה'} : tab)
-                .map(tab => tab.id === 'book-wisdom' ? {...tab, name: 'סיכומי ספרים'} : tab);
+                .map(tab => tab.id === 'book-wisdom' ? {...tab, name: 'סיכומי ספרים'} : tab)
+                .map(tab => tab.id === 'help' ? {...tab, name: 'RESET ME'} : tab);
             if (!deleted.has('my-world') && !result.some(t => t.id === 'my-world')) {
                 result.push({ id: 'my-world', name: 'My World', icon: 'globe', color: 'cyan', emoji: '🌍' });
             }
@@ -757,7 +758,7 @@ import { supabase } from './lib/supabaseClient.js';
                 result.push({ id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' });
             }
             if (!deleted.has('help') && !result.some(t => t.id === 'help')) {
-                result.push({ id: 'help', name: 'HELP', icon: 'life-buoy', color: 'rose', emoji: '🆘' });
+                result.push({ id: 'help', name: 'RESET ME', icon: 'life-buoy', color: 'rose', emoji: '🆘' });
             }
             if (!deleted.has('inspiration') && !result.some(t => t.id === 'inspiration')) {
                 result.push({ id:'inspiration', name:'מוטיבציה והשראה', icon:'flame', color:'amber', emoji:'✦' });

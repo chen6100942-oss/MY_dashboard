@@ -68,7 +68,7 @@ export default function ZenHomePreview({
   const featuredIds = new Set(featuredNavItems.map(item => item.id));
   // "משימות היום" ו"רווחה והתפתחות" לא מוצגים כאן — הראשון תמיד גלוי בדף הבית עצמו,
   // והשני פוצל ל"התפתחות אישית" ו"התפתחות רוחנית".
-  const sidebarOnlyIds = new Set(['home', 'gantt', 'finance', 'numerology', 'morning-ritual', 'ikigai', 'inspiration', 'mindset', 'archive', 'vision-board', 'tasks', 'manifesting', 'resources', 'book-wisdom', 'clients']);
+  const sidebarOnlyIds = new Set(['home', 'gantt', 'finance', 'numerology', 'morning-ritual', 'ikigai', 'inspiration', 'mindset', 'archive', 'vision-board', 'tasks', 'manifesting', 'resources', 'book-wisdom', 'clients', 'help']);
   const [expandedNavId, setExpandedNavId] = useState('');
   const expandedNavItem = featuredNavItems.find(item => item.id === expandedNavId && item.children);
   const navItems = tabs.length ? [
