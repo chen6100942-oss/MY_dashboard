@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Icon from './Icon.jsx';
 import MarketTicker from './MarketTicker.jsx';
 import FinancialGoals from './FinancialGoals.jsx';
+import LiveBankDashboard from './LiveBankDashboard.jsx';
 import { supabase } from '../lib/supabaseClient.js';
 
 // ── קטגוריות ברירת מחדל (ניתנות לעריכה מלאה בתוך הטבלה) ──
@@ -66,6 +67,7 @@ const monthKey = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 const monthLabel = key => { const [y, m] = key.split('-').map(Number); return `${HE_MONTHS[m - 1]} ${y}`; };
 const shiftMonth = (key, delta) => { const [y, m] = key.split('-').map(Number); const d = new Date(y, m - 1 + delta, 1); return monthKey(d); };
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+const todayISO = () => new Date().toISOString().slice(0, 10);
 const fmtILS = n => (Number(n) || 0).toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 });
 // שמות כרטיסים נפוצים בישראל — מזוהים גם בלי המילה "כרטיס" לפניהם
 const CARD_BRAND_KEYWORDS = ['ישראכרט', 'כאל', 'מקס', 'לאומי קארד', 'ויזה כאל', 'ויזה', 'מאסטרקארד', 'אמריקן אקספרס', 'דיינרס', 'הפועלים', 'פועלים', 'דיסקונט', 'מזרחי'];
@@ -133,10 +135,12 @@ function parseQuickExpenseText(rawText) {
     'חינוך': ['חינוך', 'בית ספר', 'גן', 'לימודים', 'חוג'],
     'מנויים ותקשורת': ['מנוי', 'מנויים', 'נטפליקס', 'סלולר', 'טלפון', 'אינטרנט', 'תקשורת'],
   };
+  // חשוב: מילת הקטגוריה לא מוסרת מ-remaining - היא לרוב שם בית העסק עצמו (למשל "רמי לוי")
+  // וצריכה להישאר כדי שתופיע בתיאור העסקה, ולא רק תיקבע את הקטגוריה בשקט.
   let category = 'שונות';
   for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     const hit = keywords.find(kw => remaining.includes(kw));
-    if (hit) { category = cat; remaining = remaining.split(hit).join(' '); break; }
+    if (hit) { category = cat; break; }
   }
 
   // שם כרטיס: "כרטיס X" מפורש, או שם מותג ידוע — נבדק אחרון, אחרי שהמספרים והקטגוריה כבר הוסרו
@@ -203,7 +207,7 @@ function CatTable({ type, title, color, categories, monthEntries, sumBy, setAmou
   );
 }
 
-function TrendChart({ data, onMonthClick }) {
+export function TrendChart({ data, onMonthClick }) {
   const W = 640, H = 220;
   const padL = 46, padR = 16, padT = 16, padB = 34;
   const plotW = W - padL - padR, plotH = H - padT - padB;
@@ -260,7 +264,7 @@ function TrendChart({ data, onMonthClick }) {
   );
 }
 
-function CategoryBars({ data, month }) {
+export function CategoryBars({ data, month }) {
   const max = Math.max(1, ...data.map(d => d.value));
   return (
     <div className="card p-5">
@@ -293,6 +297,7 @@ export default function FinanceTracker({ user }) {
   const [loans, setLoans] = useState([]);
   const [cards, setCards] = useState([]); // finance_credit_cards rows (all months)
   const [goals, setGoals] = useState([]); // finance_goals rows (יעדים פיננסיים - לא תלויי חודש)
+  const [cardStatuses, setCardStatuses] = useState([]); // finance_card_status rows: {id, card_name, is_active} - עצמאי מחודש
   const [incomeCategories, setIncomeCategories] = useState(DEFAULT_INCOME_CATEGORIES);
   const [expenseCategories, setExpenseCategories] = useState(DEFAULT_EXPENSE_CATEGORIES);
   const [editingCats, setEditingCats] = useState(null); // 'income' | 'expense' | null
@@ -306,17 +311,18 @@ export default function FinanceTracker({ user }) {
   // ── טעינה ראשונית ──
   useEffect(() => {
     (async () => {
-      let e = [], f = [], l = [], c = [], g = [];
+      let e = [], f = [], l = [], c = [], g = [], cs = [];
       if (isCloud) {
         try {
-          const [r1, r2, r3, r4, r5] = await Promise.all([
+          const [r1, r2, r3, r4, r5, r6] = await Promise.all([
             supabase.from('finance_entries').select('*').eq('user_id', user.uid),
             supabase.from('finance_funds').select('*').eq('user_id', user.uid),
             supabase.from('finance_loans').select('*').eq('user_id', user.uid),
             supabase.from('finance_credit_cards').select('*').eq('user_id', user.uid),
             supabase.from('finance_goals').select('*').eq('user_id', user.uid),
+            supabase.from('finance_card_status').select('*').eq('user_id', user.uid),
           ]);
-          e = r1.data || []; f = r2.data || []; l = r3.data || []; c = r4.data || []; g = r5.data || [];
+          e = r1.data || []; f = r2.data || []; l = r3.data || []; c = r4.data || []; g = r5.data || []; cs = r6.data || [];
         } catch (err) { console.warn('Finance cloud load error:', err.message); }
       }
       if (!isCloud) {
@@ -325,6 +331,7 @@ export default function FinanceTracker({ user }) {
         try { l = JSON.parse(localStorage.getItem('finance_loans') || '[]'); } catch { l = []; }
         try { c = JSON.parse(localStorage.getItem('finance_cards') || '[]'); } catch { c = []; }
         try { g = JSON.parse(localStorage.getItem('finance_goals') || '[]'); } catch { g = []; }
+        try { cs = JSON.parse(localStorage.getItem('finance_card_status') || '[]'); } catch { cs = []; }
       }
       try {
         const savedIncomeCats = JSON.parse(localStorage.getItem('finance_income_categories') || 'null');
@@ -367,7 +374,7 @@ export default function FinanceTracker({ user }) {
         localStorage.setItem('finance_assets_v3_seeded', '1');
       }
 
-      setEntries(e); setFunds(f); setLoans(l); setCards(c); setGoals(g);
+      setEntries(e); setFunds(f); setLoans(l); setCards(c); setGoals(g); setCardStatuses(cs);
       setLoaded(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -379,6 +386,7 @@ export default function FinanceTracker({ user }) {
   useEffect(() => { if (loaded) localStorage.setItem('finance_loans', JSON.stringify(loans)); }, [loans, loaded]);
   useEffect(() => { if (loaded) localStorage.setItem('finance_cards', JSON.stringify(cards)); }, [cards, loaded]);
   useEffect(() => { if (loaded) localStorage.setItem('finance_goals', JSON.stringify(goals)); }, [goals, loaded]);
+  useEffect(() => { if (loaded) localStorage.setItem('finance_card_status', JSON.stringify(cardStatuses)); }, [cardStatuses, loaded]);
   useEffect(() => { localStorage.setItem('finance_income_categories', JSON.stringify(incomeCategories)); }, [incomeCategories]);
   useEffect(() => { localStorage.setItem('finance_expense_categories', JSON.stringify(expenseCategories)); }, [expenseCategories]);
 
@@ -459,7 +467,7 @@ export default function FinanceTracker({ user }) {
 
     const midInstallmentCards = prevCards.filter(c => (Number(c.installments_total) || 1) > 1 && (Number(c.installments_remaining) || 1) > 1);
     if (midInstallmentCards.length > 0) {
-      const copied = midInstallmentCards.map(c => ({ ...c, id: uid(), month, installments_remaining: (Number(c.installments_remaining) || 1) - 1 }));
+      const copied = midInstallmentCards.map(c => ({ ...c, id: uid(), month, txn_date: `${month}-01`, installments_remaining: (Number(c.installments_remaining) || 1) - 1 }));
       setCards(prev => [...prev, ...copied]);
       copied.forEach(row => pushRow('finance_credit_cards', row));
     }
@@ -495,13 +503,15 @@ export default function FinanceTracker({ user }) {
   const cardsByName = useMemo(() => {
     const map = {};
     monthCards.forEach(row => { (map[row.card_name] ||= []).push(row); });
+    // חדש לישן בתוך כל כרטיס - שורות בלי תאריך יורדות לסוף
+    Object.values(map).forEach(rows => rows.sort((a, b) => (b.txn_date || '') < (a.txn_date || '') ? -1 : (b.txn_date || '') > (a.txn_date || '') ? 1 : 0));
     return map;
   }, [monthCards]);
 
   const addCardRowManually = () => {
     const card_name = window.prompt('שם הכרטיס:');
     if (!card_name || !card_name.trim()) return;
-    const row = { id: uid(), month, card_name: card_name.trim(), description: 'עסקה חדשה', category: 'שונות', monthly_amount: 0, installments_remaining: 1, installments_total: 1, full_amount: 0 };
+    const row = { id: uid(), month, card_name: card_name.trim(), txn_date: todayISO(), description: 'עסקה חדשה', category: 'שונות', monthly_amount: 0, installments_remaining: 1, installments_total: 1, full_amount: 0 };
     setCards(prev => [...prev, row]);
     pushRow('finance_credit_cards', row);
   };
@@ -510,11 +520,42 @@ export default function FinanceTracker({ user }) {
   const addParsedRow = (parsed, fallbackCardName) => {
     const card_name = parsed.card_name || fallbackCardName || 'כללי';
     const { card_name: _drop, ...rest } = parsed;
-    const row = { id: uid(), month, card_name, ...rest };
+    const row = { id: uid(), month, card_name, txn_date: todayISO(), ...rest };
     setCards(prev => [...prev, row]);
     pushRow('finance_credit_cards', row);
     return card_name;
   };
+
+  // ── סטטוס כרטיס (פעיל / לא בשימוש) - עצמאי מהחודש, ברירת מחדל: פעיל ──
+  const isCardActive = cardName => {
+    const row = cardStatuses.find(s => s.card_name === cardName);
+    return row ? row.is_active !== false : true;
+  };
+  const toggleCardActive = cardName => {
+    const existing = cardStatuses.find(s => s.card_name === cardName);
+    const row = existing ? { ...existing, is_active: !isCardActive(cardName) } : { id: uid(), card_name: cardName, is_active: false };
+    setCardStatuses(prev => (existing ? prev.map(s => (s.id === row.id ? row : s)) : [...prev, row]));
+    pushRow('finance_card_status', row, 'updated_at');
+  };
+
+  // ── תווית תשלום ידידותית מהשדות הקיימים: "תשלום 1/2", חד-פעמי = בלי תווית, אחרון = 🎉 ──
+  const installmentLabel = row => {
+    const total = Number(row.installments_total) || 1;
+    if (total <= 1) return null;
+    const remaining = Number(row.installments_remaining) || 1;
+    const current = total - remaining + 1;
+    return remaining <= 1 ? { text: 'תשלום אחרון 🎉', last: true } : { text: `תשלום ${current}/${total}`, last: false };
+  };
+
+  // ── פילוח קטגוריות באחוזים לרשימת שורות כרטיס נתונה ──
+  const percentBreakdown = rows => {
+    const total = rows.reduce((s, r) => s + (Number(r.monthly_amount) || 0), 0);
+    if (total <= 0) return [];
+    const map = {};
+    rows.forEach(r => { const cat = r.category || 'שונות'; map[cat] = (map[cat] || 0) + (Number(r.monthly_amount) || 0); });
+    return Object.entries(map).map(([category, value]) => ({ category, pct: Math.round((value / total) * 100) })).sort((a, b) => b.pct - a.pct);
+  };
+  const allCardsPercentBreakdown = useMemo(() => percentBreakdown(monthCards), [monthCards]);
 
   const addQuickExpense = () => {
     if (!quickText.trim()) return;
@@ -638,244 +679,15 @@ export default function FinanceTracker({ user }) {
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        <button onClick={() => setView('overview')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'overview' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>סקירה כללית</button>
-        <button onClick={() => setView('monthly')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'monthly' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>תזרים חודשי</button>
-        <button onClick={() => setView('cards')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'cards' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>כרטיסי אשראי</button>
-        <button onClick={() => setView('loans')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'loans' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הלוואות ומשכנתא</button>
-        <button onClick={() => setView('funds')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'funds' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>נכסים ושווי נקי</button>
-        <button onClick={() => setView('goals')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'goals' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>🎯 יעד פיננסי</button>
-        {/* "מדריך" הוסר זמנית — יוחזר לפני השקה לציבור (ר' פרויקט "לפני השקה לציבור") */}
-      </div>
-
-      {(view === 'overview' || view === 'monthly' || view === 'cards') && (
-        <div className="card p-4 flex items-center justify-between">
-          <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="px-4 py-2 bg-violet-100 hover:bg-violet-200 rounded-xl font-semibold text-sm text-violet-700 transition-all">→ חודש קודם</button>
-          <h3 className="text-lg font-bold text-slate-800">{monthLabel(month)}</h3>
-          <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="px-4 py-2 bg-violet-100 hover:bg-violet-200 rounded-xl font-semibold text-sm text-violet-700 transition-all">חודש הבא ←</button>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {kpis.map(k => (
-          <div key={k.label} className="card p-4 text-center">
-            <div className={`text-xl font-extrabold ${k.cls}`}>{fmtILS(k.value)}</div>
-            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {view === 'overview' && (
-        <div className="space-y-4">
-          <TrendChart data={trendData} onMonthClick={setMonth} />
-          <CategoryBars data={categoryBreakdown} month={month} />
-        </div>
-      )}
-
-      {view === 'monthly' && (
-        <div className="grid md:grid-cols-2 gap-4">
-          <CatTable
-            type="income" title="הכנסות" color="emerald" categories={categoriesFor('income')}
-            monthEntries={monthEntries} sumBy={sumBy}
-            setAmount={setAmount} commitAmount={commitAmount} renameCategory={renameCategory}
-            deleteCategory={deleteCategory} addCategory={addCategory} renameBefore={renameBefore}
-          />
-          <CatTable
-            type="expense" title="הוצאות מהחשבון (הוראות קבע וכו')" color="rose" categories={categoriesFor('expense')}
-            monthEntries={monthEntries} sumBy={sumBy}
-            setAmount={setAmount} commitAmount={commitAmount} renameCategory={renameCategory}
-            deleteCategory={deleteCategory} addCategory={addCategory} renameBefore={renameBefore}
-          />
-        </div>
-      )}
-
-      {view === 'cards' && (
-        <>
-          <div className="card p-5 space-y-3 border-t-[3px] border-violet-200">
-            <h4 className="font-bold text-slate-700 text-sm">הוספה מהירה — הקלדה או הקראה</h4>
-            <p className="text-xs text-slate-500">
-              אפשר להקליד או ללחוץ על המיקרופון ולומר, למשל: <b>"כרטיס ישראכרט זהב, דלק, 250 שקל"</b> או <b>"ביטוח רכב 300 שקל, 3 תשלומים"</b>.
-              שם הכרטיס, הקטגוריה, הסכום והתשלומים מזוהים אוטומטית — ואפשר לתקן אחר כך בטבלה.
-              אם לא מציינים שם כרטיס, נשמר תחת הכרטיס האחרון שצוין (רשום כרגע כאן: <b>{quickCardName || 'כללי'}</b>).
-              אפשר להקריא כמה עסקאות ברצף — פשוט אומרים <b>"שורה חדשה"</b> בין אחת לשנייה.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <input value={quickCardName} onChange={e => setQuickCardName(e.target.value)} placeholder="שם הכרטיס" className="w-28 px-2 py-2 rounded-lg border border-slate-200 outline-none text-sm" />
-              <input
-                value={quickText} onChange={e => setQuickText(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') addQuickExpense(); }}
-                placeholder='לדוגמה: כרטיס ישראכרט זהב, דלק, 250 שקל'
-                className="flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
-              />
-              <button
-                onClick={startQuickDictation} title="הקראה"
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${quickListening ? 'text-white animate-pulse' : 'bg-violet-100 text-violet-700 hover:bg-violet-200'}`}
-                style={quickListening ? { backgroundColor: '#f43f5e' } : undefined}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-              </button>
-              <button onClick={addQuickExpense} className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold text-sm">הוספה</button>
-            </div>
-            {quickListening && <p className="text-xs text-rose-500 animate-pulse">🎙️ מקשיבה — אפשר להמשיך לדבר, כולל "שורה חדשה" בין עסקאות. לחצי שוב על המיקרופון לסיום.</p>}
-          </div>
-
-          {Object.keys(cardsByName).length === 0 && (
-            <div className="card p-8 text-center text-sm text-slate-400">אין עדיין נתונים לחודש הזה — השתמשי בהוספה המהירה למעלה או הוסיפי שורה ידנית.</div>
-          )}
-
-          {Object.entries(cardsByName).map(([cardName, rows]) => (
-            <div key={cardName} className="card overflow-hidden">
-              <div className="bg-slate-700 px-4 py-2 flex items-center justify-between">
-                <span className="text-white font-bold text-sm">{cardName}</span>
-                <span className="text-white font-bold text-sm">{fmtILS(rows.reduce((s, r) => s + (Number(r.monthly_amount) || 0), 0))}</span>
-              </div>
-              <div className="grid grid-cols-[1fr_110px_100px_90px_90px_100px_28px] gap-2 px-4 py-2 bg-slate-100 text-[11px] font-bold text-slate-500">
-                <span>תיאור</span><span>תחום</span><span>תשלום</span><span>תשלומים שנותרו</span><span>סה"כ תשלומים</span><span>סכום מלא</span><span></span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {rows.map(row => (
-                  <div key={row.id} className="grid grid-cols-[1fr_110px_100px_90px_90px_100px_28px] gap-2 items-center px-4 py-2">
-                    <input value={row.description} onChange={e => updateCardRow(row.id, { description: e.target.value })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                    <select value={row.category || 'שונות'} onChange={e => { updateCardRow(row.id, { category: e.target.value }); pushRow('finance_credit_cards', { ...row, category: e.target.value }); }} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm bg-white">
-                      {CREDIT_CARD_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <input type="number" value={row.monthly_amount || ''} onChange={e => updateCardRow(row.id, { monthly_amount: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <input type="number" value={row.installments_remaining || ''} onChange={e => updateCardRow(row.id, { installments_remaining: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <input type="number" value={row.installments_total || ''} onChange={e => updateCardRow(row.id, { installments_total: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <input type="number" value={row.full_amount || ''} onChange={e => updateCardRow(row.id, { full_amount: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <button onClick={() => removeCardRow(row.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-          <button onClick={addCardRowManually} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all card">+ הוספת שורה ידנית</button>
-
-          {Object.keys(cardsByName).length > 0 && (
-            <div className="card p-5 flex items-center justify-between border-t-[3px] border-slate-300">
-              <span className="font-bold text-slate-700 text-sm">סה"כ כל כרטיסי האשראי ({monthLabel(month)})</span>
-              <span className="text-xl font-extrabold text-rose-600">{fmtILS(totalCardsMonth)}</span>
-            </div>
-          )}
-        </>
-      )}
-
-      {view === 'loans' && (
-        <div className="card overflow-hidden">
-          <div className="grid grid-cols-[1fr_110px_110px_110px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-            <span>שם ההלוואה / משכנתא</span><span>סכום כולל</span><span>תשלום חודשי</span><span>יתרה לסילוק</span><span></span>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {loans.map(l => (
-              <div key={l.id} className="grid grid-cols-[1fr_110px_110px_110px_28px] gap-2 items-center px-4 py-2">
-                <input value={l.loan_name} onChange={e => updateLoan(l.id, { loan_name: e.target.value })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                <input type="number" value={l.total_amount || ''} placeholder="0" onChange={e => updateLoan(l.id, { total_amount: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <input type="number" value={l.monthly_payment || ''} placeholder="0" onChange={e => updateLoan(l.id, { monthly_payment: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <input type="number" value={l.remaining_balance || ''} placeholder="0" onChange={e => updateLoan(l.id, { remaining_balance: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <button onClick={() => removeLoan(l.id)} className="text-rose-400 hover:text-rose-600">×</button>
-              </div>
-            ))}
-            {loans.length === 0 && <div className="px-4 py-6 text-center text-sm text-slate-400">עוד לא הוספת הלוואות או משכנתא למעקב</div>}
-          </div>
-          <button onClick={addLoan} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת הלוואה / משכנתא</button>
-        </div>
-      )}
-
-      {view === 'funds' && (
-        <>
-          <div className="card p-5 text-center">
-            <div className={`text-2xl font-extrabold ${netWorth >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{fmtILS(netWorth)}</div>
-            <div className="text-sm text-slate-500 mt-1">שווי נקי (סה"כ נכסים פחות סה"כ התחייבויות)</div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* נכסים */}
-            <div className="card overflow-hidden border-t-[3px] border-violet-200">
-              <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: '#8b5cf6' }}>
-                <span className="text-white font-bold text-sm">נכסים</span>
-                <span className="text-white font-bold text-sm">{fmtILS(totalFundsValue)}</span>
-              </div>
-              <div className="grid grid-cols-[1fr_120px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-                <span>נכס</span><span>שווי מוערך</span><span></span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {funds.map(f => (
-                  <div key={f.id} className="grid grid-cols-[1fr_120px_28px] gap-2 items-center px-4 py-2">
-                    <input value={f.fund_name} onChange={e => updateFund(f.id, { fund_name: e.target.value })} onBlur={() => commitFund(f.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                    <input type="number" value={f.current_value || ''} placeholder="0" onChange={e => updateFund(f.id, { current_value: Number(e.target.value) || 0 })} onBlur={() => commitFund(f.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <button onClick={() => removeFund(f.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                  </div>
-                ))}
-              </div>
-              <button onClick={addFund} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת נכס</button>
-            </div>
-
-            {/* התחייבויות */}
-            <div className="card overflow-hidden border-t-[3px] border-rose-200">
-              <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: '#f43f5e' }}>
-                <span className="text-white font-bold text-sm">התחייבויות</span>
-                <span className="text-white font-bold text-sm">{fmtILS(totalLoansRemaining)}</span>
-              </div>
-              <div className="grid grid-cols-[1fr_120px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-                <span>התחייבות</span><span>יתרה לסילוק</span><span></span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {loans.map(l => (
-                  <div key={l.id} className="grid grid-cols-[1fr_120px_28px] gap-2 items-center px-4 py-2">
-                    <input value={l.loan_name} onChange={e => updateLoan(l.id, { loan_name: e.target.value })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                    <input type="number" value={l.remaining_balance || ''} placeholder="0" onChange={e => updateLoan(l.id, { remaining_balance: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <button onClick={() => removeLoan(l.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                  </div>
-                ))}
-              </div>
-              <button onClick={addLoan} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת התחייבות</button>
-              <p className="text-[10px] text-slate-400 px-4 pb-3">לצורך תשלום חודשי מפורט על כל הלוואה — יש טבלה ייעודית ב"הלוואות ומשכנתא".</p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {view === 'goals' && (
-        <FinancialGoals
-          goals={goals} currentMonth={monthKey(new Date())}
-          onCreate={addGoal} onUpdate={updateGoal} onCommit={commitGoal} onDelete={removeGoal}
-        />
-      )}
-
-      {view === 'guide' && (
-        <>
-          <div className="card p-5 text-center">
-            <h4 className="font-bold text-slate-700 text-sm mb-1">מדריך פיננסי</h4>
-            <p className="text-xs text-slate-500">קישורים למקורות מידע רשמיים ואמינים בלבד — בנק ישראל, רשות ניירות ערך, כל-זכות, גורמי ממשל ועמותת פעמונים. לא המלצות מסחריות.</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            {GUIDE_CATEGORIES.map(cat => {
-              const c = {
-                violet: { headHex: '#8b5cf6', bg: 'bg-violet-50', border: 'border-violet-200' },
-                emerald: { headHex: '#10b981', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-                amber: { headHex: '#f59e0b', bg: 'bg-amber-50', border: 'border-amber-200' },
-                rose: { headHex: '#f43f5e', bg: 'bg-rose-50', border: 'border-rose-200' },
-                slate: { headHex: '#64748b', bg: 'bg-slate-50', border: 'border-slate-200' },
-              }[cat.color];
-              return (
-                <div key={cat.title} className={`card overflow-hidden border-t-[3px] ${c.border}`}>
-                  <div className="px-4 py-2" style={{ backgroundColor: c.headHex }}><span className="text-white font-bold text-sm">{cat.title}</span></div>
-                  <div className="divide-y divide-slate-100">
-                    {cat.links.map(link => (
-                      <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer"
-                        className={`flex items-center gap-2 px-4 py-3 text-sm text-slate-700 hover:${c.bg} transition-all`}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span className="flex-1">{link.label}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300 shrink-0"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+      <LiveBankDashboard
+        user={user}
+        incomeCategories={incomeCategories}
+        expenseCategories={expenseCategories}
+        onImported={(newEntry) => setEntries(prev => [...prev, newEntry])}
+        funds={funds} addFund={addFund} updateFund={updateFund} commitFund={commitFund} removeFund={removeFund}
+        goals={goals} addGoal={addGoal} updateGoal={updateGoal} commitGoal={commitGoal} removeGoal={removeGoal}
+      />
     </div>
   );
 }
+

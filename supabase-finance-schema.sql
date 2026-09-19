@@ -34,6 +34,7 @@ create table if not exists finance_funds (
   last_updated timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+alter table finance_funds add column if not exists monthly_income numeric default 0; -- הכנסה חודשית (למשל שכירות) לחישוב תשואה שנתית
 alter table finance_funds enable row level security;
 drop policy if exists "Users manage their own funds" on finance_funds;
 create policy "Users manage their own funds"
@@ -74,11 +75,29 @@ create table if not exists finance_credit_cards (
   created_at timestamptz not null default now()
 );
 alter table finance_credit_cards add column if not exists category text not null default 'שונות';
+alter table finance_credit_cards add column if not exists txn_date date;
 create index if not exists finance_credit_cards_user_month_idx on finance_credit_cards(user_id, month);
 alter table finance_credit_cards enable row level security;
 drop policy if exists "Users manage their own credit card lines" on finance_credit_cards;
 create policy "Users manage their own credit card lines"
   on finance_credit_cards for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- סטטוס כרטיס אשראי (פעיל / לא בשימוש) - עצמאי מחודש, לכרטיסים שממשיכים לרדת מהם תשלומים ישנים בלבד
+create table if not exists finance_card_status (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  card_name text not null,
+  is_active boolean not null default true,
+  updated_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  unique (user_id, card_name)
+);
+alter table finance_card_status enable row level security;
+drop policy if exists "Users manage their own card status" on finance_card_status;
+create policy "Users manage their own card status"
+  on finance_card_status for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 

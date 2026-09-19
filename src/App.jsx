@@ -11,6 +11,7 @@ import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
 import ZenHomePreview from './components/ZenHomePreview.jsx';
 import FinanceTracker from './components/FinanceTracker.jsx';
+import FinancePinGate from './components/FinancePinGate.jsx';
 import NumerologyTab from './components/NumerologyTab.jsx';
 import ClientsTab from './components/ClientsTab.jsx';
 import { supabase } from './lib/supabaseClient.js';
@@ -3698,7 +3699,11 @@ import { supabase } from './lib/supabaseClient.js';
                 )}
 
                 {/* FINANCE TRACKER */}
-                {activeTab === 'finance' && <FinanceTracker user={user} />}
+                {activeTab === 'finance' && (
+                  <FinancePinGate user={user}>
+                    <FinanceTracker user={user} />
+                  </FinancePinGate>
+                )}
                 {activeTab === 'clients' && <ClientsTab clients={crmClients} setClients={setCrmClients} />}
 
                 {/* HELP — חזרה הדרגתית לרוטינה בשיטת הקאיזן, צעד קטן בכל פעם */}
