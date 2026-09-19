@@ -1,12 +1,25 @@
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const OAUTH_URL = 'https://api.open-finance.ai/oauth/token';
 const DATA_BASE = 'https://api.open-finance.ai/v2/data';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+// רשימת מקורות מותרים בלבד - לא '*'. הפונקציה הזו מחזירה נתונים פיננסיים אמיתיים
+// (יתרות, מספרי חשבון, שם בעלים) ואסור שדפדפן מכל אתר אחר יוכל לקרוא לה.
+const ALLOWED_ORIGINS = [
+  'https://my-dashboard-fawn-tau.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+function corsHeadersFor(req: Request) {
+  const origin = req.headers.get('origin') || '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    Vary: 'Origin',
+  };
+}
 
 async function getAccessToken() {
   const clientId = Deno.env.get('FINANCY_CLIENT_ID');
@@ -26,7 +39,28 @@ async function getAccessToken() {
 }
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req);
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+
+  // אימות: חובה session תקף של Supabase, וחובה שהמשתמש יהיה admin (החשבון האישי היחיד
+  // שאמור לראות את נתוני הבנק האלה - הם משותפים לכל מי שקורא לפונקציה, לא מסוננים
+  // לפי משתמש, כך שגישה של "כל מי שמחובר" עדיין הייתה חושפת אותם לכל מי שנרשם לאתר).
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const { data: { user }, error: userErr } = await supabase.auth.getUser();
+  if (userErr || !user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+  if (profile?.role !== 'admin') {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   try {
     const { resource = 'transactions', type, dateFrom, dateTo, sort, nextPage, accountId, includeDuplicates } = await req.json().catch(() => ({}));
     if (resource !== 'transactions' && resource !== 'accounts') {
@@ -54,6 +88,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify(data), { status: upstream.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (err) {
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // לא מחזירים את פרטי השגיאה הפנימיים ללקוח (יכולים לחשוף מבנה פנימי/סודות בטעות) - רק ללוג של הפונקציה.
+    console.error('hyper-handler error:', err);
+    return new Response(JSON.stringify({ error: 'Internal error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
