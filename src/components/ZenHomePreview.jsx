@@ -11,7 +11,6 @@ const fallbackGoals = [
 
 export default function ZenHomePreview({
   tasks = [], goals = [], projects = [], tabs = [], onNavigate,
-  searchQuery = '', onSearchChange, onClearSearch,
   layoutEditMode = false, onToggleLayout, onAddBlock,
   darkMode = false, onToggleTheme,
   onOpenSoundLibrary, activeSoundLabel = 'Quiet',
@@ -25,6 +24,8 @@ export default function ZenHomePreview({
     return () => window.clearInterval(timer);
   }, []);
   const year = today.getFullYear();
+  const weekdayShort = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'][today.getDay()];
+  const compactDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')} ${year}`;
   const daysToEndOf2026 = Math.max(0, Math.ceil((new Date(2026, 11, 31, 23, 59, 59) - today) / 864e5));
   const weeksToEndOf2026 = Math.floor(daysToEndOf2026 / 7);
   const monthName = today.toLocaleDateString('en-US', { month: 'long' });
@@ -77,24 +78,23 @@ export default function ZenHomePreview({
   return (
     <section className="reference-home" aria-label="לוח הבקרה הראשי">
       <div className="reference-utility-row">
-        <button className="reference-live-date" onClick={() => onNavigate?.('gantt')}><Icon name="calendar" size={13}/><span>{today.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · {today.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span></button>
+        <button className="reference-live-date" onClick={() => onNavigate?.('gantt')}><Icon name="calendar" size={13}/><span>יום {weekdayShort}, {compactDate}</span></button>
         <div className="reference-countdown"><span>{weeksToEndOf2026} שבועות</span><b>{daysToEndOf2026} ימים</b><small>עד סוף 2026</small></div>
-        <button className="reference-sounds" onClick={() => setSoundMenuOpen(open => !open)} aria-expanded={soundMenuOpen}><Icon name="volume-2" size={14}/><span>מוזיקת רקע</span><small>{activeSoundLabel}</small><Icon name="chevron-down" size={12}/></button>
+        <button className="reference-sounds" onClick={() => setSoundMenuOpen(open => !open)} aria-expanded={soundMenuOpen} aria-label={`מוזיקה: ${activeSoundLabel}`} title={`מוזיקה: ${activeSoundLabel}`}><Icon name="music-2" size={17}/><Icon name="chevron-down" size={12}/></button>
         {soundMenuOpen && <div className="reference-sound-menu">
           {soundTracks.map(track => <button key={track.id} className={activeSoundId === track.id ? 'is-active' : ''} onClick={() => { onSelectSound?.(track.id); setSoundMenuOpen(false); }}><Icon name="music-2" size={13}/><span><b>{track.label}</b><small>{track.note}</small></span></button>)}
           <button className={!activeSoundId ? 'is-active' : ''} onClick={() => { onSelectSound?.(''); setSoundMenuOpen(false); }}><Icon name="volume-x" size={13}/><span><b>שקט</b><small>ללא מוזיקת רקע</small></span></button>
         </div>}
         <button className="reference-date" onClick={() => onNavigate?.('gantt')}><Icon name="chevron-right" size={12}/><span>יום {today.toLocaleDateString('he-IL', { weekday: 'long' })}, {today.toLocaleDateString('he-IL')}</span><Icon name="chevron-left" size={12}/></button>
-        <button className="reference-icon-button" aria-label={darkMode ? 'מצב יום' : 'מצב לילה'} title={darkMode ? 'מצב יום' : 'מצב לילה'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={15}/></button>
-        <label className="reference-search"><Icon name="search" size={14}/><input value={searchQuery} onChange={event => onSearchChange?.(event.target.value)} placeholder="חיפוש..." aria-label="חיפוש בדשבורד"/>{searchQuery && <button type="button" onClick={onClearSearch} aria-label="ניקוי חיפוש">×</button>}</label>
+        <button className="reference-top-action reference-daily-action" onClick={() => window.dispatchEvent(new CustomEvent('open-daily-message'))}><Icon name="star" size={16}/><b>המסר היומי</b></button>
+        <button className="reference-top-action reference-morning-action" onClick={() => onNavigate?.('morning-ritual')}><Icon name="coffee" size={16}/><b>טקס הבוקר</b></button>
       </div>
       <div className="reference-float-actions">
-        <button onClick={onSave} title="שמור עכשיו" aria-label="שמור עכשיו"><Icon name="save" size={16}/></button>
         <button onClick={onUndo} disabled={!canUndo} title="בטל" aria-label="בטל"><Icon name="undo" size={16}/></button>
+        <button onClick={onSave} title="שמור עכשיו" aria-label="שמור עכשיו"><Icon name="save" size={16}/></button>
+        <button className="reference-icon-button" aria-label={darkMode ? 'מצב יום' : 'מצב לילה'} title={darkMode ? 'מצב יום' : 'מצב לילה'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={16}/></button>
       </div>
       <div className="reference-quick-actions">
-        <button onClick={() => window.dispatchEvent(new CustomEvent('open-daily-message'))}><Icon name="star" size={16}/><b>המסר היומי</b></button>
-        <button onClick={() => onNavigate?.('morning-ritual')}><Icon name="coffee" size={16}/><b>טקס הבוקר</b></button>
         <button onClick={() => onNavigate?.('tasks')}><Icon name="check-square" size={16}/><b>משימה חדשה</b></button>
         <button onClick={() => onNavigate?.('tasks')}><Icon name="folder" size={16}/><b>פרויקט חדש</b></button>
         <button onClick={onNewGoal}><Icon name="target" size={16}/><b>יעד ל-2026</b></button>

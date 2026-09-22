@@ -1041,15 +1041,19 @@ body:has(.reference-home) .home-canvas > div:has(.home-editorial-calendar){displ
    while all visible controls live in the row directly below the masthead. */
 body:has(.reference-home) .reference-utility-row{
   display:grid!important;
-  grid-template-columns:minmax(230px,1.1fr) minmax(160px,.78fr) minmax(300px,2fr) minmax(135px,.72fr) 42px 105px 115px!important;
-  grid-template-areas:"date countdown search sounds theme add edit"!important
+  grid-template-columns:minmax(210px,1.1fr) minmax(160px,.8fr) 48px minmax(145px,.78fr) minmax(145px,.78fr)!important;
+  grid-template-areas:"date countdown sounds daily morning"!important;
+  gap:11px!important;
+  margin-top:12px!important
 }
 body:has(.reference-home) .reference-date{display:none!important}
 body:has(.reference-home) .reference-live-date{grid-area:date;display:flex!important;align-items:center;gap:6px;overflow:hidden;direction:rtl;white-space:nowrap}
 body:has(.reference-home) .reference-live-date span{overflow:hidden;text-overflow:ellipsis;font-weight:800;color:#694b3c}
-body:has(.reference-home) .reference-icon-button{grid-area:theme}
-body:has(.reference-home) .reference-add{grid-area:add}
-body:has(.reference-home) .reference-edit{grid-area:edit}
+body:has(.reference-home) .reference-top-action{display:flex;align-items:center;justify-content:center;gap:8px;color:#49382f;font-size:12px;direction:rtl}
+body:has(.reference-home) .reference-daily-action{grid-area:daily}
+body:has(.reference-home) .reference-morning-action{grid-area:morning}
+body:has(.reference-home) .reference-top-action b{font-weight:400}
+body:has(.reference-home) .reference-top-action svg{color:#8e654e;stroke-width:1.6}
 body:has(.reference-home) .reference-search{grid-area:search;width:100%!important;justify-content:flex-start!important;padding:0 16px!important}
 body:has(.reference-home) .reference-search>span:first-child{flex:0 0 18px!important;width:18px!important;height:18px!important;color:#704532!important}
 body:has(.reference-home) .reference-search input{width:100%!important;height:100%!important;padding:0 4px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:12px!important}
@@ -1060,9 +1064,7 @@ body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;
 body:has(.reference-home) .reference-countdown>span[style]{color:#9a694f}
 body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px;font-weight:400}
 body:has(.reference-home) .reference-countdown small{color:#99897e;font-weight:400}
-body:has(.reference-home) .reference-sounds{grid-area:sounds;direction:rtl}
-body:has(.reference-home) .reference-sounds span{font-weight:400;font-size:11px}
-body:has(.reference-home) .reference-sounds small{max-width:72px;overflow:hidden;color:#99897e;font-size:8px;font-weight:400;text-overflow:ellipsis;white-space:nowrap}
+body:has(.reference-home) .reference-sounds{grid-area:sounds;display:flex;align-items:center;justify-content:center;gap:4px;padding:0!important;color:#805b48;direction:rtl}
 /* Every item in the utility row shares one plain weight/size — only the
    live date/time chip (below) is allowed to stand out from the rest. */
 body:has(.reference-home) .reference-search input{font:400 11px/1.2 Heebo,sans-serif!important}
@@ -1093,11 +1095,12 @@ body:has(.reference-home) .home-command-row>.home-sound-column{width:0!important
 body:has(.reference-home) .home-canvas>.canvas-actions{display:none!important}
 
 /* ---------- New quick-actions row: rounded rectangles, not pills ---------- */
-.reference-float-actions{position:fixed;top:18px;left:calc(2cm + 16px);z-index:70;display:flex;gap:6px}
+.reference-float-actions{position:fixed;top:18px;left:calc(2cm + 16px);z-index:70;display:flex;gap:6px;direction:ltr}
 .reference-float-actions button{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid rgba(92,66,51,.14);border-radius:9px;background:rgba(250,247,240,.92);color:#6d5144;box-shadow:0 6px 16px rgba(69,61,51,.08);transition:.15s ease}
+.reference-float-actions .reference-icon-button{padding:0!important}
 .reference-float-actions button:hover{background:#f3e9df}
 .reference-float-actions button:disabled{opacity:.4;cursor:default}
-.reference-quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:8px}
+.reference-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:12px}
 .reference-nav-expand{max-height:260px;overflow-y:auto}
 .reference-quick-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 10px;border:1px solid rgba(100,71,53,.08);border-radius:12px;background:rgba(255,252,247,.78);color:#49382f;font-size:12px;font-weight:400;box-shadow:0 4px 12px rgba(69,44,31,.035);transition:.15s ease}
 .reference-quick-actions button:hover{background:#f3e9df;transform:translateY(-1px)}
@@ -1113,10 +1116,9 @@ body:has(.reference-home) .home-canvas>.canvas-actions{display:none!important}
   /* The named-area grid only fits a wide desktop row; on mobile it just wraps. */
   html body .reference-utility-row{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
   html body .reference-utility-row>*{flex:1 1 auto;min-width:0}
-  html body .reference-search{flex-basis:100%!important;width:100%!important}
-  html body .reference-live-date,html body .reference-countdown,html body .reference-sounds{flex:1 1 45%}
-  html body .reference-icon-button{flex:0 0 42px}
-  html body .reference-add,html body .reference-edit{flex:1 1 30%}
+  html body .reference-live-date,html body .reference-countdown{flex:1 1 45%}
+  html body .reference-sounds{flex:0 0 48px}
+  html body .reference-top-action{flex:1 1 42%}
   /* The two floating icon buttons overlap the hero text at this width — drop
      them below the (shorter) mobile hero instead of over it. */
   html body .reference-float-actions{top:110px!important;left:8px!important}
