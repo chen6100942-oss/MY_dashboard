@@ -2059,14 +2059,6 @@ import { supabase } from './lib/supabaseClient.js';
                                     {searchQuery && <button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">✕</button>}
                                 </div>
                                 {/* Buttons */}
-                                <button onClick={() => setLayoutEditMode(p=>!p)} className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shadow-sm transition-all ${layoutEditMode ? 'bg-violet-600 text-white' : 'bg-white text-slate-600 hover:bg-violet-50 border border-slate-200'}`}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                                    {layoutEditMode ? 'סיום' : 'ערוך פריסה'}
-                                </button>
-                                <button onClick={() => setShowAddHomeBlock(p=>!p)} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold shadow-sm transition-all bg-white text-emerald-600 hover:bg-emerald-50 border border-slate-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                    הוסף בלוק
-                                </button>
                                 <button
                                     onClick={toggleDarkMode}
                                     className="theme-toggle"
@@ -2137,8 +2129,6 @@ import { supabase } from './lib/supabaseClient.js';
                             <button onClick={saveAllData}><span>💾</span><b>שמור</b></button>
                             <button onClick={undo} disabled={undoStack.length===0}><span>↩️</span><b>בטל</b></button>
                             {[
-                                {icon:'✅',label:'משימה חדשה',tab:'tasks'},
-                                {icon:'📁',label:'פרויקט חדש',tab:'tasks'},
                                 {icon:'📓',label:'רשומה ביומן',tab:'mindset'},
                                 {icon:'🎯',label:'יעד ל-2026',action:()=>setShowAddGoalModal(true)},
                             ].map((item,i)=><button key={i} onClick={()=>item.action ? item.action() : setActiveTab(item.tab)}><span>{item.icon}</span><b>{item.label}</b></button>)}
