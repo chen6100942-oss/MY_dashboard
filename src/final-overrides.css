@@ -1041,17 +1041,16 @@ body:has(.reference-home) .home-canvas > div:has(.home-editorial-calendar){displ
    while all visible controls live in the row directly below the masthead. */
 body:has(.reference-home) .reference-utility-row{
   display:grid!important;
-  grid-template-columns:minmax(210px,1.1fr) minmax(160px,.8fr) 48px minmax(145px,.78fr) minmax(145px,.78fr)!important;
-  grid-template-areas:"date countdown sounds daily morning"!important;
+  grid-template-columns:48px minmax(160px,.8fr) minmax(210px,1.1fr) repeat(3,minmax(135px,.76fr))!important;
   gap:11px!important;
-  margin-top:12px!important
+  margin-top:12px!important;
+  direction:rtl!important
 }
 body:has(.reference-home) .reference-date{display:none!important}
-body:has(.reference-home) .reference-live-date{grid-area:date;display:flex!important;align-items:center;gap:6px;overflow:hidden;direction:rtl;white-space:nowrap}
+body:has(.reference-home) .reference-live-date{grid-area:auto!important;display:flex!important;align-items:center;gap:6px;overflow:hidden;direction:rtl;white-space:nowrap}
 body:has(.reference-home) .reference-live-date span{overflow:hidden;text-overflow:ellipsis;font-weight:800;color:#694b3c}
 body:has(.reference-home) .reference-top-action{display:flex;align-items:center;justify-content:center;gap:8px;color:#49382f;font-size:12px;direction:rtl}
-body:has(.reference-home) .reference-daily-action{grid-area:daily}
-body:has(.reference-home) .reference-morning-action{grid-area:morning}
+body:has(.reference-home) .reference-daily-action,body:has(.reference-home) .reference-morning-action,body:has(.reference-home) .reference-goal-action{grid-area:auto!important}
 body:has(.reference-home) .reference-top-action b{font-weight:400}
 body:has(.reference-home) .reference-top-action svg{color:#8e654e;stroke-width:1.6}
 body:has(.reference-home) .reference-search{grid-area:search;width:100%!important;justify-content:flex-start!important;padding:0 16px!important}
@@ -1059,12 +1058,12 @@ body:has(.reference-home) .reference-search>span:first-child{flex:0 0 18px!impor
 body:has(.reference-home) .reference-search input{width:100%!important;height:100%!important;padding:0 4px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:12px!important}
 body:has(.reference-home) .reference-search input:focus{outline:0!important;border:0!important;box-shadow:none!important}
 body:has(.reference-home) .reference-countdown{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;overflow:hidden;direction:rtl;font-size:11px;font-weight:400;white-space:nowrap}
-body:has(.reference-home) .reference-countdown{grid-area:countdown}
+body:has(.reference-home) .reference-countdown{grid-area:auto!important}
 body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;font-weight:400}
 body:has(.reference-home) .reference-countdown>span[style]{color:#9a694f}
 body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px;font-weight:400}
 body:has(.reference-home) .reference-countdown small{color:#99897e;font-weight:400}
-body:has(.reference-home) .reference-sounds{grid-area:sounds;display:flex;align-items:center;justify-content:center;gap:4px;padding:0!important;color:#805b48;direction:rtl}
+body:has(.reference-home) .reference-sounds{grid-area:auto!important;display:flex;align-items:center;justify-content:center;gap:4px;padding:0!important;color:#805b48;direction:rtl}
 /* Every item in the utility row shares one plain weight/size — only the
    live date/time chip (below) is allowed to stand out from the rest. */
 body:has(.reference-home) .reference-search input{font:400 11px/1.2 Heebo,sans-serif!important}
@@ -1100,13 +1099,13 @@ body:has(.reference-home) .home-canvas>.canvas-actions{display:none!important}
 .reference-float-actions .reference-icon-button{padding:0!important}
 .reference-float-actions button:hover{background:#f3e9df}
 .reference-float-actions button:disabled{opacity:.4;cursor:default}
-.reference-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:12px}
+.reference-quick-actions{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:11px;margin-top:12px;direction:rtl}
 .reference-nav-expand{max-height:260px;overflow-y:auto}
-.reference-quick-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 10px;border:1px solid rgba(100,71,53,.08);border-radius:12px;background:rgba(255,252,247,.78);color:#49382f;font-size:12px;font-weight:400;box-shadow:0 4px 12px rgba(69,44,31,.035);transition:.15s ease}
-.reference-quick-actions button:hover{background:#f3e9df;transform:translateY(-1px)}
-.reference-quick-actions button:disabled{opacity:.45;cursor:default;transform:none}
-.reference-quick-actions button b{font-weight:400;font-size:12px}
-.reference-quick-actions svg{color:#8e654e;stroke-width:1.6}
+.reference-quick-actions>button,.reference-quick-actions>.reference-nav-item>button{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:8px 10px;border:1px solid rgba(100,71,53,.08);border-radius:12px;background:rgba(255,252,247,.78);color:#49382f;font-size:12px;font-weight:400;box-shadow:0 4px 12px rgba(69,44,31,.035);transition:.15s ease}
+.reference-quick-actions>button:hover,.reference-quick-actions>.reference-nav-item>button:hover{background:#f3e9df;transform:translateY(-1px)}
+.reference-quick-actions>button:disabled{opacity:.45;cursor:default;transform:none}
+.reference-quick-actions>button b{font-weight:400;font-size:12px}
+.reference-quick-actions>button svg,.reference-quick-actions>.reference-nav-item>button svg{color:#8e654e;stroke-width:1.6}
 @media(max-width:900px){.reference-quick-actions{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.reference-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
