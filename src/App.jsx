@@ -718,9 +718,15 @@ import { supabase } from './lib/supabaseClient.js';
             if (sl) sl.style.display = 'none';
             if (LOCAL_VISUAL_PREVIEW) return undefined;
 
-            const toUser = session => session?.user
-                ? { displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null }
-                : null;
+            const toUser = session => {
+                if (!session?.user) return null;
+                const email = session.user.email || '';
+                const emailName = email.split('@')[0].split(/[._-]/)[0] || 'משתמשת';
+                const displayName = session.user.user_metadata?.full_name
+                    || session.user.user_metadata?.name
+                    || `${emailName.charAt(0).toUpperCase()}${emailName.slice(1)}`;
+                return { displayName, uid: session.user.id, email, photoURL: null };
+            };
 
             const hasPendingPasswordSetup = () => Boolean(sessionStorage.getItem('auth_password_setup_pending'));
 
@@ -958,6 +964,51 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.crmClients) setCrmClients(d.crmClients);
         };
 
+        // A user without a cloud row must start from a private, empty dashboard.
+        // The original app state contains the owner's example content, so reset
+        // every personal collection explicitly instead of treating it as a template.
+        const resetForNewUser = (currentUser) => {
+            setProfileName(currentUser?.displayName || 'משתמשת');
+            setProjects([]);
+            setTasks([]);
+            setResources([]);
+            setMorningRitual([]);
+            setGameChangers([]);
+            setDailySchedule([]);
+            setIdeas([]);
+            setDomainGoals([]);
+            setSuccessMetrics([]);
+            setArchive([]);
+            setPermanentArchive([]);
+            setMindsetEntries([]);
+            setMindsetListItems([]);
+            setFutureSelfEntries([]);
+            setFutureSelfFiles([]);
+            setDayScheduleTasks({});
+            setWeekSchedule({});
+            setCustomTabData({});
+            setAffirmations([]);
+            setHomeCustomBlocks([]);
+            setBuiltinTabBlocks({});
+            setBuiltinTabBlockWidths({});
+            setBuiltinTabBlockOrder({});
+            setBuiltinTabHiddenBlocks({});
+            setMonthNotes({});
+            setQuarterlyGoals({});
+            setWorldVisited([]);
+            setWorldUpcoming([]);
+            setWorldBlocked([]);
+            setWorldNotes({});
+            setVisionBoardItems([]);
+            setManifestations([]);
+            setManifestDailyDone({});
+            setCrmClients([]);
+            setBucketLists({ age40: [], age50: [], age60: [] });
+            setHelpTips([]);
+            setCurrentWeight('');
+            setVisionText('');
+        };
+
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
         useEffect(() => {
             setDataHydrated(false);
@@ -995,6 +1046,9 @@ import { supabase } from './lib/supabaseClient.js';
                             applyDataToState(row.data);
                             localStorage.setItem(storageKey, JSON.stringify(row.data));
                         }
+                    } else {
+                        localStorage.removeItem(storageKey);
+                        resetForNewUser(user);
                     }
                 } catch (e) { console.error('Cloud load error:', e); }
 
@@ -1048,6 +1102,17 @@ import { supabase } from './lib/supabaseClient.js';
         }
 
         if (!user) { return <LoginScreen />; }
+
+        if (!dataHydrated) {
+            return (
+                <div className="min-h-screen soft-bg flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 animate-pulse"></div>
+                        <p className="text-slate-500 font-medium">טוען את החשבון שלך...</p>
+                    </div>
+                </div>
+            );
+        }
 
         if (!mfaCheckDone) {
             return (
@@ -1728,7 +1793,7 @@ import { supabase } from './lib/supabaseClient.js';
                 {/* SIDEBAR */}
                 <aside style={{width:'240px',flexShrink:0,...(darkMode?{backdropFilter:'blur(24px)',WebkitBackdropFilter:'blur(24px)',boxShadow:'-4px 0 40px rgba(0,0,0,0.7),0 0 1px rgba(139,92,246,0.3)'}:{boxShadow:'0 0 10px rgba(0,0,0,0.08)'})}} className="primary-sidebar bg-white fixed right-0 top-0 h-screen flex flex-col z-30 border-l border-slate-100">
                     <div className="sidebar-greeting">
-                        <LifeOperatingSystem mode="greeting" greetingText="בוקר טוב" userName={profileName || 'חן זרח'} />
+                        <LifeOperatingSystem mode="greeting" greetingText="בוקר טוב" userName={profileName || user?.displayName || 'משתמשת'} />
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
@@ -2093,7 +2158,7 @@ import { supabase } from './lib/supabaseClient.js';
                             <div className="home-toolbar flex items-center gap-2 flex-wrap">
                                 {/* Greeting */}
                                 <div className="home-greeting">
-                                    <div className="home-greeting-copy"><b>היי חן</b><small>יצירת את החיים שאת אוהבת</small></div>
+                                    <div className="home-greeting-copy"><b>היי {profileName || user?.displayName || 'משתמשת'}</b><small>יצירת את החיים שאת אוהבת</small></div>
                                     <span className="home-greeting-avatar"><Icon name="user" size={17}/></span>
                                 </div>
                                 {/* Search */}
