@@ -40,20 +40,27 @@ export default async function handler(req, res) {
         return;
     }
 
-    // Verify caller is admin using their JWT + anon key (RLS enforced)
+    // Verify the token first, then check the role for that exact authenticated user.
     const callerClient = createClient(SUPABASE_URL, ANON_KEY, {
         auth: { autoRefreshToken: false, persistSession: false },
         global: { headers: { Authorization: `Bearer ${callerJwt}` } },
         realtime: { transport: WebSocket },
     });
 
-    const { data: profiles, error: profileError } = await callerClient
+    const { data: callerData, error: callerError } = await callerClient.auth.getUser();
+    if (callerError || !callerData?.user) {
+        res.status(401).json({ error: 'Unauthorized — invalid token' });
+        return;
+    }
+
+    const { data: profile, error: profileError } = await callerClient
         .from('profiles')
         .select('role')
-        .limit(1);
+        .eq('id', callerData.user.id)
+        .single();
 
-    if (profileError || !profiles || !profiles[0] || profiles[0].role !== 'admin') {
-        console.log('Admin check failed:', profileError?.message, profiles);
+    if (profileError || profile?.role !== 'admin') {
+        console.log('Admin check failed:', profileError?.message, callerData.user.id);
         res.status(403).json({ error: 'Admin access required' });
         return;
     }

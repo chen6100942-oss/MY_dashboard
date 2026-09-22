@@ -623,6 +623,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [inviteEmail, setInviteEmail] = useState('');
         const [inviteLoading, setInviteLoading] = useState(false);
         const [inviteResult, setInviteResult] = useState(null);
+        const [dataHydrated, setDataHydrated] = useState(LOCAL_VISUAL_PREVIEW);
 
         const dragItem = useRef(null);
         const dragOverItem = useRef(null);
@@ -721,10 +722,19 @@ import { supabase } from './lib/supabaseClient.js';
                 ? { displayName: session.user.email, uid: session.user.id, email: session.user.email, photoURL: null }
                 : null;
 
+            const hasPendingPasswordSetup = () => Boolean(sessionStorage.getItem('auth_password_setup_pending'));
+
+            const prepareBrowserForUser = (nextUser) => {
+                if (!nextUser?.uid) return;
+                const previousUserId = localStorage.getItem('dashboard_last_user_id');
+                if (previousUserId && previousUserId !== nextUser.uid) localStorage.clear();
+                localStorage.setItem('dashboard_last_user_id', nextUser.uid);
+            };
+
             (async () => {
                 try {
                     const { data: { session } } = await supabase.auth.getSession();
-                    let resolvedUser = toUser(session);
+                    let resolvedUser = hasPendingPasswordSetup() ? null : toUser(session);
                     // DEV-ONLY convenience: skip the login screen locally when there's no real
                     // session, so the app can be previewed without email/password/Google.
                     // import.meta.env.DEV is false in the production build, so this can never
@@ -732,6 +742,7 @@ import { supabase } from './lib/supabaseClient.js';
                     if (!resolvedUser && import.meta.env.DEV) {
                         resolvedUser = { displayName: 'תצוגה מקדימה מקומית', uid: 'preview', email: 'preview@local', photoURL: null };
                     }
+                    prepareBrowserForUser(resolvedUser);
                     setUser(resolvedUser);
                 } catch (e) { console.warn('Auth session check error:', e.message); setUser(null); }
                 setLoading(false);
@@ -743,7 +754,10 @@ import { supabase } from './lib/supabaseClient.js';
                 // חדשה" ב-LoginScreen לעולם לא נראה. משאירים את זה שם עד שהיא
                 // באמת מעדכנת סיסמה (updateUser משדר event 'USER_UPDATED').
                 if (_event === 'PASSWORD_RECOVERY') return;
-                setUser(toUser(session));
+                if (hasPendingPasswordSetup()) return;
+                const nextUser = toUser(session);
+                prepareBrowserForUser(nextUser);
+                setUser(nextUser);
             });
             return () => subscription.unsubscribe();
         }, []);
@@ -946,14 +960,22 @@ import { supabase } from './lib/supabaseClient.js';
 
         // ── LOAD DATA: localStorage (fast) → Supabase cloud (truth) ──
         useEffect(() => {
-            // שלב 1: טעינה מהירה מ-localStorage (offline-first)
+            setDataHydrated(false);
+            if (!user?.uid) return;
+
+            const storageKey = `dashboard_data:${user.uid}`;
+
+            // שלב 1: טעינה מהירה מהמטמון הפרטי של המשתמש הנוכחי בלבד
             try {
-                const saved = localStorage.getItem('dashboard_data');
+                const saved = localStorage.getItem(storageKey);
                 if (saved) applyDataToState(JSON.parse(saved));
             } catch (e) { console.error('localStorage load error:', e); }
 
             // שלב 2: אם מחוברת — טוען מהענן (הענן גובר)
-            if (!supabase || !user || !user.uid || user.uid === 'preview' || user.uid === 'local') return;
+            if (!supabase || user.uid === 'preview' || user.uid === 'local') {
+                setDataHydrated(true);
+                return;
+            }
             (async () => {
                 try {
                     const { data: row, error } = await supabase
@@ -963,27 +985,15 @@ import { supabase } from './lib/supabaseClient.js';
                         .single();
                     if (error && error.code !== 'PGRST116') {
                         console.warn('Supabase load error:', error.message);
+                        setDataHydrated(true);
                         return;
                     }
                     if (row?.data) {
                         // הענן גובר על localStorage אם עדכני יותר
-                        const localTs = (() => { try { return JSON.parse(localStorage.getItem('dashboard_data') || '{}').timestamp || ''; } catch(e) { return ''; } })();
+                        const localTs = (() => { try { return JSON.parse(localStorage.getItem(storageKey) || '{}').timestamp || ''; } catch(e) { return ''; } })();
                         if (!localTs || row.data.timestamp > localTs) {
                             applyDataToState(row.data);
-                            localStorage.setItem('dashboard_data', JSON.stringify(row.data));
-                        }
-                    } else {
-                        // No cloud row yet — migrate localStorage to cloud (first login)
-                        const saved = localStorage.getItem('dashboard_data');
-                        if (saved && user?.uid) {
-                            try {
-                                const localData = JSON.parse(saved);
-                                await supabase.from('dashboard_data').upsert(
-                                    { user_id: user.uid, data: localData, updated_at: new Date().toISOString() },
-                                    { onConflict: 'user_id' }
-                                );
-                                console.log('✅ Migrated localStorage data to Supabase cloud');
-                            } catch (migErr) { console.warn('Migration error:', migErr); }
+                            localStorage.setItem(storageKey, JSON.stringify(row.data));
                         }
                     }
                 } catch (e) { console.error('Cloud load error:', e); }
@@ -997,25 +1007,28 @@ import { supabase } from './lib/supabaseClient.js';
                         .single();
                     if (profileData) setUserProfile(profileData);
                 } catch (e) { console.warn('Profile load error:', e); }
+                setDataHydrated(true);
             })();
         }, [user]);
 
         // Auto-save everything to localStorage on any change (debounced 1s)
         useEffect(() => {
+            if (!dataHydrated) return;
             if (isFirstRender.current) { isFirstRender.current = false; return; }
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
                     const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
-                    localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
+                    if (!u?.uid) return;
+                    localStorage.setItem(`dashboard_data:${u.uid}`, JSON.stringify(data));
                     if (supabase && u?.uid && u.uid !== 'local' && u.uid !== 'preview') {
                         supabase.from('dashboard_data').upsert({ user_id: u.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
                             .then(({ error: err }) => { if (err) console.warn('Cloud auto-save error:', err.message); });
                     }
                 } catch(e) {}
             }, 1000);
-        }, [visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
+        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
 
 
         // lucide icons handled per-component
@@ -1131,7 +1144,7 @@ import { supabase } from './lib/supabaseClient.js';
         const saveAllData = async () => {
             try {
                 const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
-                localStorage.setItem('dashboard_data', JSON.stringify(data));
+                localStorage.setItem(`dashboard_data:${user.uid}`, JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local' && user.uid !== 'preview') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
                     if (err) console.warn('Cloud save error:', err.message);
@@ -1142,7 +1155,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const loadAllData = () => {
             try {
-                const saved = localStorage.getItem('dashboard_data');
+                const saved = user?.uid ? localStorage.getItem(`dashboard_data:${user.uid}`) : null;
                 if (saved) {
                     const d = JSON.parse(saved);
                     if (d.visionText) setVisionText(d.visionText);
@@ -2667,7 +2680,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 <div className="card p-6 space-y-3 border-t-[3px] border-emerald-300">
                                     <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">🔐 חשבון</h3>
                                     <p className="text-sm text-slate-600">מחוברת עם: <b>{user?.email}</b></p>
-                                    <button onClick={() => supabase.auth.signOut()}
+                                    <button onClick={async () => { await supabase.auth.signOut(); localStorage.clear(); window.location.reload(); }}
                                         className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold transition-all">
                                         🚪 התנתקות
                                     </button>
@@ -3245,7 +3258,7 @@ import { supabase } from './lib/supabaseClient.js';
                                         <p className="text-xs font-bold text-slate-500 mb-1">⏱️ מידע שמירה</p>
                                         <p className="text-xs text-slate-400">הנתונים נשמרים אוטומטית ב-localStorage של הדפדפן.</p>
                                         <p className="text-xs text-slate-400 mt-1">מומלץ לייצא גיבוי JSON אחת לשבוע.</p>
-                                        <button onClick={() => { localStorage.removeItem('dashboard_data'); window.location.reload(); }}
+                                        <button onClick={() => { if (user?.uid) localStorage.removeItem(`dashboard_data:${user.uid}`); window.location.reload(); }}
                                             className="mt-3 w-full py-2 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-xl text-xs font-bold transition-all">
                                             ⚠️ איפוס מלא של הדשבורד
                                         </button>

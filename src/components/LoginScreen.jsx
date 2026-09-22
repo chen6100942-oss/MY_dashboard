@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 
 const LoginScreen = () => {
-    const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'forgot' | 'recovery'
+    const pendingPasswordSetup = sessionStorage.getItem('auth_password_setup_pending');
+    const [mode, setMode] = useState(pendingPasswordSetup ? 'recovery' : 'login'); // 'login' | 'forgot' | 'recovery'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -35,15 +36,6 @@ const LoginScreen = () => {
         setLoading(false);
     };
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
-        setLoading(true); setError(''); setMessage('');
-        const { error: err } = await supabase.auth.signUp({ email, password });
-        if (err) setError(err.message);
-        else setMessage('נרשמת בהצלחה! אם נדרש אישור מייל — בדקי את תיבת הדואר, אחרת אפשר להתחבר עכשיו.');
-        setLoading(false);
-    };
-
     const handleForgot = async (e) => {
         e.preventDefault();
         setLoading(true); setError('');
@@ -60,7 +52,12 @@ const LoginScreen = () => {
         setLoading(true); setError('');
         const { error: err } = await supabase.auth.updateUser({ password: newPassword });
         if (err) setError(err.message);
-        else setMessage('הסיסמה עודכנה בהצלחה! מתחברת...');
+        else {
+            sessionStorage.removeItem('auth_password_setup_pending');
+            setMessage('הסיסמה עודכנה בהצלחה! מתחברת...');
+            window.location.replace(window.location.origin);
+            return;
+        }
         setLoading(false);
     };
 
@@ -71,7 +68,7 @@ const LoginScreen = () => {
             <div className="card max-w-md w-full p-8 text-center animate-slide-in-up">
                 <div className="login-brand-lockup" aria-label="Design Your Life" />
 
-                {(mode === 'login' || mode === 'signup') && (
+                {mode === 'login' && (
                     <div className="mt-6 space-y-3">
                         <button type="button" onClick={handleGoogleLogin} disabled={loading}
                             className="w-full py-3 flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 rounded-xl font-semibold text-sm text-slate-700 transition-all disabled:opacity-50">
@@ -133,31 +130,8 @@ const LoginScreen = () => {
                                 className="text-slate-400 hover:text-violet-500 text-sm transition-all">
                                 שכחתי סיסמה
                             </button>
-                            <button type="button" onClick={() => { setMode('signup'); setError(''); setMessage(''); }}
-                                className="text-slate-400 hover:text-violet-500 text-sm transition-all">
-                                יצירת חשבון חדש
-                            </button>
+                            <span className="text-slate-400 text-xs">חשבון חדש נפתח באמצעות הזמנה</span>
                         </div>
-                    </form>
-                )}
-
-                {mode === 'signup' && (
-                    <form onSubmit={handleSignup} className="space-y-4 mt-6 text-right">
-                        <p className="text-slate-500 text-sm mb-2">יצירת חשבון חדש</p>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                            placeholder="כתובת מייל" required className={inputClass} dir="ltr" />
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                            placeholder="סיסמה (לפחות 6 תווים)" required minLength={6} className={inputClass} dir="ltr" />
-                        {error && <p className="text-rose-500 text-sm font-semibold">{error}</p>}
-                        {message && <p className="text-emerald-600 text-sm font-semibold">{message}</p>}
-                        <button type="submit" disabled={loading}
-                            className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg disabled:opacity-50">
-                            {loading ? 'יוצרת חשבון...' : 'יצירת חשבון ✨'}
-                        </button>
-                        <button type="button" onClick={() => { setMode('login'); setError(''); setMessage(''); }}
-                            className="w-full py-2 text-slate-400 hover:text-violet-500 text-sm transition-all">
-                            ← חזרה להתחברות
-                        </button>
                     </form>
                 )}
 
