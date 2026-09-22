@@ -2216,20 +2216,6 @@ import { supabase } from './lib/supabaseClient.js';
                         </div>
                         </div>
 
-                        {/* Quick shortcuts to frequently used areas */}
-                        <div className="home-quick-nav">
-                            {[
-                                {tab:'ikigai', label:'רווחה והתפתחות', icon:'heart'},
-                                {tab:'book-wisdom', label:'למידה ותוכן', icon:'book-open'},
-                                {tab:'morning-ritual', label:'בריאות וכושר', icon:'dumbbell'},
-                                {tab:'gantt', label:'תכנון ונופש', icon:'plane'},
-                            ].map(item => (
-                                <button key={item.tab} className={`home-quick-nav-pill ${activeTab==='home' && item.tab==='home' ? 'active' : ''}`} onClick={()=>setActiveTab(item.tab)}>
-                                    <Icon name={item.icon} size={15}/><span>{item.label}</span>
-                                </button>
-                            ))}
-                        </div>
-
                         {/* Quick actions moved from the left rail onto the canvas */}
                         {/* This row now also renders inside ZenHomePreview's reference-utility area
                             (moved up per request); kept mounted here for saved-layout compatibility

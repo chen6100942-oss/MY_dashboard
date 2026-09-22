@@ -47,12 +47,6 @@ export default function ZenHomePreview({
       { id: 'goals', label: 'להוסיף את הטיסה כיעד', icon: 'target' },
     ] },
     { id: 'goals', label: 'בריאות וכושר', icon: 'dumbbell' },
-    { id: 'featured-projects', label: 'פרויקטים', icon: 'folder', children: projects.length
-      ? [...projects.map(project => ({ id: 'tasks', label: project.title, icon: 'folder' })), { id: 'tasks', label: 'הצג הכל', icon: 'chevron-left' }]
-      : [{ id: 'tasks', label: 'אין עדיין פרויקטים — לפתיחת הכרטיסייה', icon: 'folder' }] },
-    { id: 'tasks-list', label: 'משימות', icon: 'check-square', children: openTasks.length
-      ? [...openTasks.slice(0, 8).map(task => ({ id: 'tasks', label: task.text || task.title, icon: 'check-square' })), { id: 'tasks', label: 'הצג הכל', icon: 'chevron-left' }]
-      : [{ id: 'tasks', label: 'אין משימות פתוחות — לפתיחת הכרטיסייה', icon: 'check-square' }] },
     { id: 'book-wisdom', label: 'התפתחות אישית', icon: 'book-open', children: [
       { id: 'inspiration', label: 'מוטיבציה והשראה', icon: 'sparkles' },
       { id: 'book-wisdom', label: 'סיכומי ספרים', icon: 'book-open' },
@@ -92,8 +86,6 @@ export default function ZenHomePreview({
         </div>}
         <button className="reference-date" onClick={() => onNavigate?.('gantt')}><Icon name="chevron-right" size={12}/><span>יום {today.toLocaleDateString('he-IL', { weekday: 'long' })}, {today.toLocaleDateString('he-IL')}</span><Icon name="chevron-left" size={12}/></button>
         <button className="reference-icon-button" aria-label={darkMode ? 'מצב יום' : 'מצב לילה'} title={darkMode ? 'מצב יום' : 'מצב לילה'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={15}/></button>
-        <button className="reference-add" onClick={onAddBlock}><Icon name="plus" size={13}/> הוסף בלוק</button>
-        <button className={`reference-edit ${layoutEditMode ? 'is-active' : ''}`} onClick={onToggleLayout}><Icon name="layout-grid" size={13}/> {layoutEditMode ? 'סיום עריכה' : 'ערוך פריסה'}</button>
         <label className="reference-search"><Icon name="search" size={14}/><input value={searchQuery} onChange={event => onSearchChange?.(event.target.value)} placeholder="חיפוש..." aria-label="חיפוש בדשבורד"/>{searchQuery && <button type="button" onClick={onClearSearch} aria-label="ניקוי חיפוש">×</button>}</label>
       </div>
       <div className="reference-float-actions">
