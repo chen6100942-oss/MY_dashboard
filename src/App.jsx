@@ -12,6 +12,8 @@ import VacationMode from './components/VacationMode.jsx';
 import ZenHomePreview from './components/ZenHomePreview.jsx';
 import FinanceTracker from './components/FinanceTracker.jsx';
 import FinancePinGate from './components/FinancePinGate.jsx';
+import MfaChallenge from './components/MfaChallenge.jsx';
+import SecuritySettings from './components/SecuritySettings.jsx';
 import NumerologyTab from './components/NumerologyTab.jsx';
 import ClientsTab from './components/ClientsTab.jsx';
 import { supabase } from './lib/supabaseClient.js';
@@ -27,6 +29,8 @@ import { supabase } from './lib/supabaseClient.js';
         // ============================================================
         const [user, setUser] = useState(LOCAL_VISUAL_PREVIEW ? { id:'visual-preview', user_metadata:{ full_name:'Chen' } } : null);
         const [loading, setLoading] = useState(!LOCAL_VISUAL_PREVIEW);
+        const [mfaSatisfied, setMfaSatisfied] = useState(true);
+        const [mfaCheckDone, setMfaCheckDone] = useState(false);
         const [activeTab, setActiveTab] = useState('home');
         const [focusedDomainGoalId, setFocusedDomainGoalId] = useState(null);
         const [showConfetti, setShowConfetti] = useState(false);
@@ -744,6 +748,21 @@ import { supabase } from './lib/supabaseClient.js';
             return () => subscription.unsubscribe();
         }, []);
 
+        // ── 2FA gate: after a real login, check whether this session still needs an MFA
+        // challenge (aal1 -> aal2) before the dashboard is allowed to render ──
+        useEffect(() => {
+            if (!user || LOCAL_VISUAL_PREVIEW) { setMfaSatisfied(true); setMfaCheckDone(true); return; }
+            (async () => {
+                setMfaCheckDone(false);
+                try {
+                    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+                    if (error) { setMfaSatisfied(true); }
+                    else { setMfaSatisfied(!(data.nextLevel === 'aal2' && data.currentLevel !== 'aal2')); }
+                } catch { setMfaSatisfied(true); }
+                setMfaCheckDone(true);
+            })();
+        }, [user]);
+
         // ── HELPER: ensure built-in tabs (added after a user's last save) always exist ──────────────
         const ensureBuiltinTabs = (tabsArr) => {
             let deletedIds = [];
@@ -1016,6 +1035,18 @@ import { supabase } from './lib/supabaseClient.js';
         }
 
         if (!user) { return <LoginScreen />; }
+
+        if (!mfaCheckDone) {
+            return (
+                <div className="min-h-screen soft-bg flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 animate-pulse"></div>
+                        <p className="text-slate-500 font-medium">טוען...</p>
+                    </div>
+                </div>
+            );
+        }
+        if (!mfaSatisfied) { return <MfaChallenge onVerified={() => setMfaSatisfied(true)} />; }
 
         // ============================================================
         // HELPER FUNCTIONS (no hooks below)
@@ -2597,6 +2628,7 @@ import { supabase } from './lib/supabaseClient.js';
                         <div className="flex gap-2 flex-wrap">
                             {[
                                 {id:'profile', icon:'👤', label:'פרופיל'},
+                                {id:'security',icon:'🔐', label:'אבטחה'},
                                 {id:'design',  icon:'🎨', label:'עיצוב'},
                                 {id:'layout',  icon:'🧩', label:'פריסת בית'},
                                 {id:'tabs',    icon:'📑', label:'כרטיסיות'},
@@ -2695,6 +2727,11 @@ import { supabase } from './lib/supabaseClient.js';
                                     </div>
                                 </div>
                             </div>
+                        )}
+
+                        {/* ── SECURITY ── */}
+                        {settingsSection === 'security' && (
+                            <SecuritySettings user={user} />
                         )}
 
                         {/* ── DESIGN ── */}
