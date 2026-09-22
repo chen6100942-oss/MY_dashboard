@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import EmojiPicker from './components/EmojiPicker.jsx';
 import Icon from './components/Icon.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
-import WorldMap from './components/WorldMap.jsx';
+import TravelHub from './components/TravelHub.jsx';
 import MorningRitualJourney from './components/MorningRitualJourney.jsx';
 import WeeklyLifePlanner from './components/WeeklyLifePlanner.jsx';
 import LifeOperatingSystem from './components/LifeOperatingSystem.jsx';
@@ -27,7 +27,7 @@ import { supabase } from './lib/supabaseClient.js';
         // THE FIX: ALL useState/useEffect HOOKS BEFORE ANY EARLY RETURN
         // This was the cause of React error #310
         // ============================================================
-        const [user, setUser] = useState(LOCAL_VISUAL_PREVIEW ? { id:'visual-preview', user_metadata:{ full_name:'Chen' } } : null);
+        const [user, setUser] = useState(LOCAL_VISUAL_PREVIEW ? { uid:'preview', displayName:'תצוגה מקדימה', email:'preview@local' } : null);
         const [loading, setLoading] = useState(!LOCAL_VISUAL_PREVIEW);
         const [mfaSatisfied, setMfaSatisfied] = useState(true);
         const [mfaCheckDone, setMfaCheckDone] = useState(false);
@@ -584,6 +584,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
         const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
         const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
+        const [travelPlanner, setTravelPlanner] = useState({ destination: '', travelers: 1, quotes: [] });
         const [worldSearch, setWorldSearch] = useState('');
         const [selectedWorldCountry, setSelectedWorldCountry] = useState('');
         const [collapsedHomeBlocks, setCollapsedHomeBlocks] = useState({morning: false, affirmations: false, gamechangers: false});
@@ -956,6 +957,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
             if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
             if (d.worldNotes) setWorldNotes(d.worldNotes);
+            if (d.travelPlanner) setTravelPlanner(d.travelPlanner);
             if (d.profileName) setProfileName(d.profileName);
             if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
             if (d.vbBg) setVbBg(d.vbBg);
@@ -999,6 +1001,7 @@ import { supabase } from './lib/supabaseClient.js';
             setWorldUpcoming([]);
             setWorldBlocked([]);
             setWorldNotes({});
+            setTravelPlanner({ destination: '', travelers: 1, quotes: [] });
             setVisionBoardItems([]);
             setManifestations([]);
             setManifestDailyDone({});
@@ -1072,7 +1075,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                     const u = userRef.current;
                     if (!u?.uid) return;
                     localStorage.setItem(`dashboard_data:${u.uid}`, JSON.stringify(data));
@@ -1082,7 +1085,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
+        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
 
 
         // lucide icons handled per-component
@@ -1208,7 +1211,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                 localStorage.setItem(`dashboard_data:${user.uid}`, JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local' && user.uid !== 'preview') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -1253,6 +1256,7 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
                     if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
                     if (d.worldNotes) setWorldNotes(d.worldNotes);
+                    if (d.travelPlanner) setTravelPlanner(d.travelPlanner);
                     if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
                     if (d.vbBg) setVbBg(d.vbBg);
                     if (d.manifestations) setManifestations(d.manifestations);
@@ -3288,6 +3292,7 @@ import { supabase } from './lib/supabaseClient.js';
                                                         if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
                                                         if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
                                                         if (d.worldNotes) setWorldNotes(d.worldNotes);
+                                                        if (d.travelPlanner) setTravelPlanner(d.travelPlanner);
                                                         if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
                                                         if (d.vbBg) setVbBg(d.vbBg);
                                                         if (d.homeBlockOrder) setHomeBlockOrder(d.homeBlockOrder);
@@ -4911,6 +4916,8 @@ import { supabase } from './lib/supabaseClient.js';
                                 </div>
                             </div>
 
+                            <TravelHub data={travelPlanner} onChange={setTravelPlanner} />
+
                             {/* Country notebook and search */}
                             <div className="card p-5 world-notes-search">
                                 <div className="flex flex-col md:flex-row gap-3">
@@ -4972,19 +4979,7 @@ import { supabase } from './lib/supabaseClient.js';
                                 <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-amber-400 inline-block"/><span className="text-slate-600">תכף אהיה 🟡</span></span>
                                 <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-red-600 inline-block"/><span className="text-slate-600">לא ניתן לבקר (מצב פוליטי) 🔴</span></span>
                                 <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-slate-200 inline-block"/><span className="text-slate-600">עדיין לא 🔵</span></span>
-                                <span className="text-slate-400 text-[11px]">· לחצי על מדינה במפה לסימון (לחיצות חוזרות עוברות בין הקטגוריות)</span>
-                            </div>
-
-                            {/* Map */}
-                            <div className="card p-3">
-                                <WorldMap
-                                    worldVisited={worldVisited}
-                                    worldUpcoming={worldUpcoming}
-                                    worldBlocked={worldBlocked}
-                                    setWorldVisited={setWorldVisited}
-                                    setWorldUpcoming={setWorldUpcoming}
-                                    setWorldBlocked={setWorldBlocked}
-                                />
+                                <span className="text-slate-400 text-[11px]">· אפשר לעדכן את סטטוס המדינות ברשימה שבהמשך</span>
                             </div>
 
                             {/* Split table */}
