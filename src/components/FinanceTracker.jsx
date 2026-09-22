@@ -317,6 +317,8 @@ export default function FinanceTracker({ user }) {
   const [advisorInput, setAdvisorInput] = useState('');
   const [advisorLoading, setAdvisorLoading] = useState(false);
   const [advisorError, setAdvisorError] = useState(null);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [bankMonthlySummary, setBankMonthlySummary] = useState([]);
 
   // ── טעינה ראשונית ──
   useEffect(() => {
@@ -471,7 +473,7 @@ export default function FinanceTracker({ user }) {
       const response = await fetch('/api/finance-advisor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token || ''}` },
-        body: JSON.stringify({ messages: newMessages, entries, cards, loans, funds, goals }),
+        body: JSON.stringify({ messages: newMessages, entries, cards, loans, funds, goals, bankAccounts, bankMonthlySummary }),
       });
       const data = await response.json();
       if (response.ok) setAdvisorMessages(prev => [...prev, { role: 'assistant', content: data.answer || '' }]);
@@ -894,6 +896,7 @@ export default function FinanceTracker({ user }) {
         onImported={(newEntry) => setEntries(prev => [...prev, newEntry])}
         funds={funds} addFund={addFund} updateFund={updateFund} commitFund={commitFund} removeFund={removeFund}
         goals={goals} addGoal={addGoal} updateGoal={updateGoal} commitGoal={commitGoal} removeGoal={removeGoal}
+        onData={({ accounts, monthlySummary }) => { setBankAccounts(accounts); setBankMonthlySummary(monthlySummary); }}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import RealCashflowDashboard from './RealCashflowDashboard.jsx';
 import RealLoansDashboard from './RealLoansDashboard.jsx';
 import RealAssetsDashboard from './RealAssetsDashboard.jsx';
 import RealGoalsDashboard from './RealGoalsDashboard.jsx';
-import { unwrapAmount, accountBalance, isLiability } from '../lib/realCreditData.js';
+import { unwrapAmount, accountBalance, isLiability, categoryLabel } from '../lib/realCreditData.js';
 
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
@@ -27,7 +27,7 @@ const shiftMonth = (key, delta) => { const [y, m] = key.split('-').map(Number); 
 // financy-proxy Supabase Edge Function (see supabase/functions/financy-proxy),
 // and lets each real transaction be filed straight into the "תזרים חודשי"
 // (monthly cash flow) table (finance_entries) with one click.
-export default function LiveBankDashboard({ user, incomeCategories = [], expenseCategories = [], onImported, funds, addFund, updateFund, commitFund, removeFund, goals, addGoal, updateGoal, commitGoal, removeGoal }) {
+export default function LiveBankDashboard({ user, incomeCategories = [], expenseCategories = [], onImported, funds, addFund, updateFund, commitFund, removeFund, goals, addGoal, updateGoal, commitGoal, removeGoal, onData }) {
   const [accounts, setAccounts] = useState(null);
   const [transactions, setTransactions] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,6 +64,30 @@ export default function LiveBankDashboard({ user, incomeCategories = [], expense
       const dateOf = (t) => t.date?.valueDate || t.date?.bookingDate || t.date?.transactionDate || '';
       merged.sort((a, b) => dateOf(b).localeCompare(dateOf(a)));
       setTransactions(merged);
+
+      // תמצית קומפקטית לצריכה חיצונית (היועץ הפיננסי) — לא שולחים אלפי שורות עסקה
+      // גולמיות (יקר וממלא הקשר לחינם); רק יתרות חשבון + הכנסה/הוצאה חודשית לפי קטגוריה.
+      if (onData) {
+        const accountsSummary = (accountsRes.data?.items || []).map(a => ({
+          name: a.accountName || a.providerId || a.accountType,
+          type: a.accountType,
+          balance: accountBalance(a),
+          isLiability: isLiability(a),
+        }));
+        const byMonth = {};
+        merged.forEach(tx => {
+          const d = tx.date?.valueDate || tx.date?.bookingDate || tx.date?.transactionDate;
+          const m = (typeof d === 'string' && d.length >= 7) ? d.slice(0, 7) : null;
+          if (!m) return;
+          const amt = unwrapAmount(tx.amount?.chargedAmount ?? tx.amount?.originalAmount ?? 0);
+          const cat = categoryLabel(tx.category);
+          if (!byMonth[m]) byMonth[m] = { month: m, income: 0, expense: 0, byCategory: {} };
+          if (amt >= 0) byMonth[m].income += amt;
+          else { byMonth[m].expense += Math.abs(amt); byMonth[m].byCategory[cat] = (byMonth[m].byCategory[cat] || 0) + Math.abs(amt); }
+        });
+        const monthlySummary = Object.values(byMonth).sort((a, b) => b.month.localeCompare(a.month)).slice(0, 6);
+        onData({ accounts: accountsSummary, monthlySummary });
+      }
     } catch (err) {
       // Supabase's client-side error message is generic ("non-2xx status
       // code") — the real detail from our function (and from Financy) is in
