@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Icon from './Icon.jsx';
 import MarketTicker from './MarketTicker.jsx';
-import FinancialGoals from './FinancialGoals.jsx';
+import LiveBankDashboard from './LiveBankDashboard.jsx';
 import { supabase } from '../lib/supabaseClient.js';
 
 // ── קטגוריות ברירת מחדל (ניתנות לעריכה מלאה בתוך הטבלה) ──
@@ -70,7 +70,6 @@ const monthLabel = key => { const [y, m] = key.split('-').map(Number); return `$
 const shiftMonth = (key, delta) => { const [y, m] = key.split('-').map(Number); const d = new Date(y, m - 1 + delta, 1); return monthKey(d); };
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 const todayISO = () => new Date().toISOString().slice(0, 10);
-const fmtDateHe = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); return `${d}.${m}.${String(y).slice(2)}`; };
 const fmtILS = n => (Number(n) || 0).toLocaleString('he-IL', { style: 'currency', currency: 'ILS', maximumFractionDigits: 0 });
 // שמות כרטיסים נפוצים בישראל — מזוהים גם בלי המילה "כרטיס" לפניהם
 const CARD_BRAND_KEYWORDS = ['ישראכרט', 'כאל', 'מקס', 'לאומי קארד', 'ויזה כאל', 'ויזה', 'מאסטרקארד', 'אמריקן אקספרס', 'דיינרס', 'הפועלים', 'פועלים', 'דיסקונט', 'מזרחי'];
@@ -210,7 +209,7 @@ function CatTable({ type, title, color, categories, monthEntries, sumBy, setAmou
   );
 }
 
-function TrendChart({ data, onMonthClick }) {
+export function TrendChart({ data, onMonthClick }) {
   const W = 640, H = 220;
   const padL = 46, padR = 16, padT = 16, padB = 34;
   const plotW = W - padL - padR, plotH = H - padT - padB;
@@ -267,7 +266,7 @@ function TrendChart({ data, onMonthClick }) {
   );
 }
 
-function CategoryBars({ data, month }) {
+export function CategoryBars({ data, month }) {
   const max = Math.max(1, ...data.map(d => d.value));
   return (
     <div className="card p-5">
@@ -759,18 +758,6 @@ export default function FinanceTracker({ user }) {
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        <button onClick={() => setView('overview')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'overview' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>סקירה כללית</button>
-        <button onClick={() => setView('monthly')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'monthly' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>תזרים חודשי</button>
-        <button onClick={() => setView('cards')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'cards' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>כרטיסי אשראי</button>
-        <button onClick={() => setView('loans')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'loans' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הלוואות ומשכנתא</button>
-        <button onClick={() => setView('funds')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'funds' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>נכסים ושווי נקי</button>
-        <button onClick={() => setView('pension')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'pension' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>👵 הפנסיה שלי</button>
-        <button onClick={() => setView('advisor')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'advisor' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>🧑‍💼 היועץ הפיננסי שלי</button>
-        <button onClick={() => setView('goals')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'goals' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>🎯 יעד פיננסי</button>
-        <button onClick={() => setView('guide')} className={`px-5 py-2 rounded-xl font-semibold text-sm transition-all ${view === 'guide' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>מדריך</button>
-      </div>
-
       <div className="card p-4 space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-lg">❓</span>
@@ -786,234 +773,12 @@ export default function FinanceTracker({ user }) {
         {askAnswer && <div className="p-3 bg-violet-50 border border-violet-100 rounded-xl text-sm text-slate-700 whitespace-pre-line">{askAnswer}</div>}
       </div>
 
-      {(view === 'overview' || view === 'monthly' || view === 'cards') && (
-        <div className="card p-4 flex items-center justify-between">
-          <button onClick={() => setMonth(m => shiftMonth(m, -1))} className="px-4 py-2 bg-violet-100 hover:bg-violet-200 rounded-xl font-semibold text-sm text-violet-700 transition-all">→ חודש קודם</button>
-          <h3 className="text-lg font-bold text-slate-800">{monthLabel(month)}</h3>
-          <button onClick={() => setMonth(m => shiftMonth(m, 1))} className="px-4 py-2 bg-violet-100 hover:bg-violet-200 rounded-xl font-semibold text-sm text-violet-700 transition-all">חודש הבא ←</button>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {kpis.map(k => (
-          <div key={k.label} className="card p-4 text-center">
-            <div className={`text-xl font-extrabold ${k.cls}`}>{fmtILS(k.value)}</div>
-            <div className="text-xs text-slate-500 mt-1">{k.label}</div>
-          </div>
-        ))}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button onClick={() => setView(v => v === 'pension' ? 'overview' : 'pension')} className={`px-4 py-1.5 rounded-lg font-semibold text-xs transition-all ${view === 'pension' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>👵 הפנסיה שלי</button>
+        <button onClick={() => setView(v => v === 'advisor' ? 'overview' : 'advisor')} className={`px-4 py-1.5 rounded-lg font-semibold text-xs transition-all ${view === 'advisor' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>🧑‍💼 היועץ הפיננסי שלי</button>
+        <button onClick={() => setView(v => v === 'guide' ? 'overview' : 'guide')} className={`px-4 py-1.5 rounded-lg font-semibold text-xs transition-all ${view === 'guide' ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>📖 מדריך</button>
       </div>
 
-      {view === 'overview' && (
-        <div className="space-y-4">
-          <TrendChart data={trendData} onMonthClick={setMonth} />
-          <CategoryBars data={categoryBreakdown} month={month} />
-        </div>
-      )}
-
-      {view === 'monthly' && (
-        <div className="grid md:grid-cols-2 gap-4">
-          <CatTable
-            type="income" title="הכנסות" color="emerald" categories={categoriesFor('income')}
-            monthEntries={monthEntries} sumBy={sumBy}
-            setAmount={setAmount} commitAmount={commitAmount} renameCategory={renameCategory}
-            deleteCategory={deleteCategory} addCategory={addCategory} renameBefore={renameBefore}
-          />
-          <CatTable
-            type="expense" title="הוצאות מהחשבון (הוראות קבע וכו')" color="rose" categories={categoriesFor('expense')}
-            monthEntries={monthEntries} sumBy={sumBy}
-            setAmount={setAmount} commitAmount={commitAmount} renameCategory={renameCategory}
-            deleteCategory={deleteCategory} addCategory={addCategory} renameBefore={renameBefore}
-          />
-        </div>
-      )}
-
-      {view === 'cards' && (
-        <>
-          <div className="card p-5 space-y-3 border-t-[3px] border-violet-200">
-            <h4 className="font-bold text-slate-700 text-sm">הוספה מהירה — הקלדה או הקראה</h4>
-            <p className="text-xs text-slate-500">
-              אפשר להקליד או ללחוץ על המיקרופון ולומר, למשל: <b>"כרטיס ישראכרט זהב, דלק, 250 שקל"</b> או <b>"ביטוח רכב 300 שקל, 3 תשלומים"</b>.
-              שם הכרטיס, הקטגוריה, הסכום והתשלומים מזוהים אוטומטית — ואפשר לתקן אחר כך בטבלה.
-              אם לא מציינים שם כרטיס, נשמר תחת הכרטיס האחרון שצוין (רשום כרגע כאן: <b>{quickCardName || 'כללי'}</b>).
-              אפשר להקריא כמה עסקאות ברצף — פשוט אומרים <b>"שורה חדשה"</b> בין אחת לשנייה.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <input value={quickCardName} onChange={e => setQuickCardName(e.target.value)} placeholder="שם הכרטיס" className="w-28 px-2 py-2 rounded-lg border border-slate-200 outline-none text-sm" />
-              <input
-                value={quickText} onChange={e => setQuickText(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') addQuickExpense(); }}
-                placeholder='לדוגמה: כרטיס ישראכרט זהב, דלק, 250 שקל'
-                className="flex-1 min-w-[180px] px-3 py-2 rounded-lg border border-slate-200 outline-none text-sm"
-              />
-              <button
-                onClick={startQuickDictation} title="הקראה"
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${quickListening ? 'text-white animate-pulse' : 'bg-violet-100 text-violet-700 hover:bg-violet-200'}`}
-                style={quickListening ? { backgroundColor: '#f43f5e' } : undefined}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-              </button>
-              <button onClick={addQuickExpense} className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold text-sm">הוספה</button>
-            </div>
-            {quickListening && <p className="text-xs text-rose-500 animate-pulse">🎙️ מקשיבה — אפשר להמשיך לדבר, כולל "שורה חדשה" בין עסקאות. לחצי שוב על המיקרופון לסיום.</p>}
-          </div>
-
-          {Object.keys(cardsByName).length === 0 && (
-            <div className="card p-8 text-center text-sm text-slate-400">אין עדיין נתונים לחודש הזה — השתמשי בהוספה המהירה למעלה או הוסיפי שורה ידנית.</div>
-          )}
-
-          {Object.entries(cardsByName).map(([cardName, rows]) => {
-            const active = isCardActive(cardName);
-            const cardTotal = rows.reduce((s, r) => s + (Number(r.monthly_amount) || 0), 0);
-            const breakdown = percentBreakdown(rows);
-            return (
-              <div key={cardName} className="card overflow-hidden">
-                <div className="bg-slate-700 px-4 py-2 flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-bold text-sm">{cardName}</span>
-                    <button
-                      onClick={() => toggleCardActive(cardName)}
-                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full transition-all ${active ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-400 text-white hover:bg-slate-500'}`}
-                      title="לחצי כדי לשנות סטטוס"
-                    >
-                      {active ? '🟢 פעיל' : '⚪ לא בשימוש'}
-                    </button>
-                  </div>
-                  <span className="text-white font-bold text-sm">{fmtILS(cardTotal)}</span>
-                </div>
-                <div className="grid grid-cols-[95px_1fr_100px_85px_130px_28px] gap-2 px-4 py-2 bg-slate-100 text-[11px] font-bold text-slate-500">
-                  <span>תאריך</span><span>תיאור</span><span>תחום</span><span>סכום</span><span>תשלומים</span><span></span>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {rows.map(row => {
-                    const inst = installmentLabel(row);
-                    return (
-                      <div key={row.id} className="grid grid-cols-[95px_1fr_100px_85px_130px_28px] gap-2 items-center px-4 py-2">
-                        <input type="date" value={row.txn_date || ''} onChange={e => updateCardRow(row.id, { txn_date: e.target.value })} onBlur={() => commitCardRow(row.id)} className="px-1 py-1 rounded-lg border border-slate-200 outline-none text-xs" dir="ltr" />
-                        <input value={row.description} onChange={e => updateCardRow(row.id, { description: e.target.value })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                        <select value={row.category || 'שונות'} onChange={e => { updateCardRow(row.id, { category: e.target.value }); pushRow('finance_credit_cards', { ...row, category: e.target.value }); }} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm bg-white">
-                          {CREDIT_CARD_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                        </select>
-                        <input type="number" value={row.monthly_amount || ''} onChange={e => updateCardRow(row.id, { monthly_amount: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-1">
-                            <input type="number" value={row.installments_remaining || ''} title="תשלומים שנותרו" onChange={e => updateCardRow(row.id, { installments_remaining: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="w-10 px-1 py-1 rounded-lg border border-slate-200 outline-none text-xs" dir="ltr" />
-                            <span className="text-slate-300 text-xs">/</span>
-                            <input type="number" value={row.installments_total || ''} title={'סה"כ תשלומים'} onChange={e => updateCardRow(row.id, { installments_total: Number(e.target.value) || 0 })} onBlur={() => commitCardRow(row.id)} className="w-10 px-1 py-1 rounded-lg border border-slate-200 outline-none text-xs" dir="ltr" />
-                          </div>
-                          {inst && <span className={`text-[10px] font-semibold whitespace-nowrap ${inst.last ? 'text-amber-600' : 'text-slate-400'}`}>{inst.text}</span>}
-                        </div>
-                        <button onClick={() => removeCardRow(row.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex items-center justify-between gap-3 px-4 py-2 bg-slate-50 flex-wrap">
-                  <span className="text-xs font-bold text-slate-600">סה"כ מ-{cardName}: {fmtILS(cardTotal)}</span>
-                  {breakdown.length > 0 && (
-                    <span className="text-[11px] text-slate-500">
-                      {breakdown.map((b, i) => (
-                        <span key={b.category}>{i > 0 && ' · '}{b.category} {b.pct}%</span>
-                      ))}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          <button onClick={addCardRowManually} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all card">+ הוספת שורה ידנית</button>
-
-          {allCardsPercentBreakdown.length > 0 && (
-            <div className="card p-5 border-t-[3px] border-violet-200">
-              <h4 className="font-bold text-slate-700 text-sm mb-2">פילוח כל הכרטיסים יחד ({monthLabel(month)})</h4>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
-                {allCardsPercentBreakdown.map(b => <span key={b.category}>{b.category} <b className="text-violet-700">{b.pct}%</b></span>)}
-              </div>
-            </div>
-          )}
-
-          {Object.keys(cardsByName).length > 0 && (
-            <div className="card p-5 flex items-center justify-between border-t-[3px] border-slate-300">
-              <span className="font-bold text-slate-700 text-sm">סה"כ כל כרטיסי האשראי ({monthLabel(month)})</span>
-              <span className="text-xl font-extrabold text-rose-600">{fmtILS(totalCardsMonth)}</span>
-            </div>
-          )}
-        </>
-      )}
-
-      {view === 'loans' && (
-        <div className="card overflow-hidden">
-          <div className="grid grid-cols-[1fr_110px_110px_110px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-            <span>שם ההלוואה / משכנתא</span><span>סכום כולל</span><span>תשלום חודשי</span><span>יתרה לסילוק</span><span></span>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {loans.map(l => (
-              <div key={l.id} className="grid grid-cols-[1fr_110px_110px_110px_28px] gap-2 items-center px-4 py-2">
-                <input value={l.loan_name} onChange={e => updateLoan(l.id, { loan_name: e.target.value })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                <input type="number" value={l.total_amount || ''} placeholder="0" onChange={e => updateLoan(l.id, { total_amount: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <input type="number" value={l.monthly_payment || ''} placeholder="0" onChange={e => updateLoan(l.id, { monthly_payment: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <input type="number" value={l.remaining_balance || ''} placeholder="0" onChange={e => updateLoan(l.id, { remaining_balance: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                <button onClick={() => removeLoan(l.id)} className="text-rose-400 hover:text-rose-600">×</button>
-              </div>
-            ))}
-            {loans.length === 0 && <div className="px-4 py-6 text-center text-sm text-slate-400">עוד לא הוספת הלוואות או משכנתא למעקב</div>}
-          </div>
-          <button onClick={addLoan} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת הלוואה / משכנתא</button>
-        </div>
-      )}
-
-      {view === 'funds' && (
-        <>
-          <div className="card p-5 text-center">
-            <div className={`text-2xl font-extrabold ${netWorth >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{fmtILS(netWorth)}</div>
-            <div className="text-sm text-slate-500 mt-1">שווי נקי (סה"כ נכסים פחות סה"כ התחייבויות)</div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* נכסים */}
-            <div className="card overflow-hidden border-t-[3px] border-violet-200">
-              <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: '#8b5cf6' }}>
-                <span className="text-white font-bold text-sm">נכסים</span>
-                <span className="text-white font-bold text-sm">{fmtILS(totalFundsValue)}</span>
-              </div>
-              <div className="grid grid-cols-[1fr_120px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-                <span>נכס</span><span>שווי מוערך</span><span></span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {funds.map(f => (
-                  <div key={f.id} className="grid grid-cols-[1fr_120px_28px] gap-2 items-center px-4 py-2">
-                    <input value={f.fund_name} onChange={e => updateFund(f.id, { fund_name: e.target.value })} onBlur={() => commitFund(f.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                    <input type="number" value={f.current_value || ''} placeholder="0" onChange={e => updateFund(f.id, { current_value: Number(e.target.value) || 0 })} onBlur={() => commitFund(f.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <button onClick={() => removeFund(f.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                  </div>
-                ))}
-              </div>
-              <button onClick={addFund} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת נכס</button>
-            </div>
-
-            {/* התחייבויות */}
-            <div className="card overflow-hidden border-t-[3px] border-rose-200">
-              <div className="px-4 py-2 flex items-center justify-between" style={{ backgroundColor: '#f43f5e' }}>
-                <span className="text-white font-bold text-sm">התחייבויות</span>
-                <span className="text-white font-bold text-sm">{fmtILS(totalLoansRemaining)}</span>
-              </div>
-              <div className="grid grid-cols-[1fr_120px_28px] gap-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500">
-                <span>התחייבות</span><span>יתרה לסילוק</span><span></span>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {loans.map(l => (
-                  <div key={l.id} className="grid grid-cols-[1fr_120px_28px] gap-2 items-center px-4 py-2">
-                    <input value={l.loan_name} onChange={e => updateLoan(l.id, { loan_name: e.target.value })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" />
-                    <input type="number" value={l.remaining_balance || ''} placeholder="0" onChange={e => updateLoan(l.id, { remaining_balance: Number(e.target.value) || 0 })} onBlur={() => commitLoan(l.id)} className="px-2 py-1 rounded-lg border border-slate-200 outline-none text-sm" dir="ltr" />
-                    <button onClick={() => removeLoan(l.id)} className="text-rose-400 hover:text-rose-600">×</button>
-                  </div>
-                ))}
-              </div>
-              <button onClick={addLoan} className="w-full py-2 text-xs text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-all">+ הוספת התחייבות</button>
-              <p className="text-[10px] text-slate-400 px-4 pb-3">לצורך תשלום חודשי מפורט על כל הלוואה — יש טבלה ייעודית ב"הלוואות ומשכנתא".</p>
-            </div>
-          </div>
-        </>
-      )}
 
       {view === 'pension' && (() => {
         const pensionFunds = funds.filter(f => isPensionFund(f.fund_name));
@@ -1087,13 +852,6 @@ export default function FinanceTracker({ user }) {
         </div>
       )}
 
-      {view === 'goals' && (
-        <FinancialGoals
-          goals={goals} currentMonth={monthKey(new Date())}
-          onCreate={addGoal} onUpdate={updateGoal} onCommit={commitGoal} onDelete={removeGoal}
-        />
-      )}
-
       {view === 'guide' && (
         <>
           <div className="card p-5 text-center">
@@ -1128,6 +886,16 @@ export default function FinanceTracker({ user }) {
           </div>
         </>
       )}
+
+      <LiveBankDashboard
+        user={user}
+        incomeCategories={incomeCategories}
+        expenseCategories={expenseCategories}
+        onImported={(newEntry) => setEntries(prev => [...prev, newEntry])}
+        funds={funds} addFund={addFund} updateFund={updateFund} commitFund={commitFund} removeFund={removeFund}
+        goals={goals} addGoal={addGoal} updateGoal={updateGoal} commitGoal={commitGoal} removeGoal={removeGoal}
+      />
     </div>
   );
 }
+

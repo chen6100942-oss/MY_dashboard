@@ -15,7 +15,7 @@ const messages = {
   none: 'מנוחה היא לא עצירה מהדרך. היא חלק מהדרך.',
 };
 
-export default function VacationMode() {
+export default function VacationMode({ portal = false, hideTrigger = false } = {}) {
   const [open, setOpen] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
   const [returning, setReturning] = useState(false);
@@ -26,6 +26,12 @@ export default function VacationMode() {
     document.documentElement.classList.toggle('vacation-mode-active', active);
     return () => document.documentElement.classList.remove('vacation-mode-active');
   }, [active]);
+
+  useEffect(() => {
+    const listener = () => { setOpen(true); setCelebrating(false); setReturning(false); };
+    window.addEventListener('open-vacation-mode', listener);
+    return () => window.removeEventListener('open-vacation-mode', listener);
+  }, []);
 
   const activate = () => {
     localStorage.setItem('vacationModeActive', 'true');
@@ -40,10 +46,14 @@ export default function VacationMode() {
     setActive(false); setCelebrating(false); setReturning(true);
   };
 
-  return <>
+  const trigger = (
     <button className={`vacation-side-button ${active ? 'is-active' : ''}`} onClick={() => { setOpen(true); setCelebrating(false); setReturning(false); }} aria-label="מצב חופשה">
       <b>מצב חופשה</b><span className="vacation-toggle" aria-hidden="true"><i /></span>
     </button>
+  );
+
+  return <>
+    {hideTrigger ? null : (portal ? createPortal(trigger, document.body) : trigger)}
     {active && !open && createPortal(
       <div className="vacation-ambient">
         <button className="vacation-exit-fixed" onClick={finish} aria-label="סיום מצב החופשה">

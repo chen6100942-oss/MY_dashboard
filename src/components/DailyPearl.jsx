@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const pearls = [
@@ -24,6 +24,11 @@ export default function DailyPearl(){
   const finish = () => { setDone(true); setOpen(false); };
   const count = (()=>{try{return JSON.parse(localStorage.getItem('insideout-pearl-collection')||'[]').length;}catch{return 0;}})();
   const openPearl = () => { setSeen(true); window.dispatchEvent(new CustomEvent('play-daily-gong')); setOpen(true); };
+  useEffect(() => {
+    const listener = () => openPearl();
+    window.addEventListener('open-daily-message', listener);
+    return () => window.removeEventListener('open-daily-message', listener);
+  }, []);
 
   return <>
     {createPortal(

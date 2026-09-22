@@ -34,6 +34,7 @@ create table if not exists finance_funds (
   last_updated timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+alter table finance_funds add column if not exists monthly_income numeric default 0; -- הכנסה חודשית (למשל שכירות) לחישוב תשואה שנתית
 alter table finance_funds enable row level security;
 drop policy if exists "Users manage their own funds" on finance_funds;
 create policy "Users manage their own funds"
@@ -118,3 +119,27 @@ create policy "Users manage their own financial goals"
   on finance_goals for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- אבטחה: מונע ממשתמש רגיל לשנות את עמודת profiles.role של עצמו (למשל ל-'admin')
+-- דרך קריאה רגילה מהדפדפן — רק גישת שרת (service_role) יכולה לשנות אותה.
+-- בלי זה, כל משתמש מחובר יכול היה להעניק לעצמו הרשאת admin ולראות נתונים
+-- שאמורים להיות חסומים ל-hyper-handler (ר' supabase/functions/hyper-handler).
+create or replace function public.lock_profiles_role()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role is distinct from old.role and auth.role() <> 'service_role' then
+    new.role := old.role;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists lock_profiles_role_trigger on public.profiles;
+create trigger lock_profiles_role_trigger
+before update on public.profiles
+for each row
+execute function public.lock_profiles_role();
