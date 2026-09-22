@@ -174,7 +174,9 @@ ${JSON.stringify(goals || [], null, 2)}`;
             body: JSON.stringify({
                 model: 'claude-sonnet-5',
                 max_tokens: 4096,
-                system: CFO_SYSTEM_PROMPT,
+                system: [
+                    { type: 'text', text: CFO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
+                ],
                 messages: anthropicMessages,
             }),
         });
