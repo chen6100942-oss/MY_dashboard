@@ -512,6 +512,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [selectedItem, setSelectedItem] = useState(null);
         const [typeFilter, setTypeFilter] = useState('all');
         const [addingType, setAddingType] = useState('task');
+        const [showTaskComposer, setShowTaskComposer] = useState(false);
         const [inspirationSearch, setInspirationSearch] = useState('');
         const [bookWisdomSearch, setBookWisdomSearch] = useState('');
         const [inspirationDraft, setInspirationDraft] = useState({title:'',person:'',type:'סיפור הצלחה',lesson:'',action:'',url:''});
@@ -2113,10 +2114,10 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* SEARCH — only on non-home tabs */}
                 {activeTab !== 'home' && (
-                <div className="max-w-2xl mx-auto mb-6">
+                <div className="max-w-md mx-auto mb-4">
                     <div className="relative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); performSearch(e.target.value); }} placeholder="חיפוש במשימות, פרויקטים, רעיונות ועוד..." className="w-full pr-12 pl-4 py-3 bg-white border-2 border-slate-200 rounded-2xl outline-none text-sm focus:border-violet-400 transition-all shadow-sm" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); performSearch(e.target.value); }} placeholder="חיפוש..." className="w-full pr-10 pl-4 py-2 bg-white/90 border border-slate-200 rounded-xl outline-none text-xs focus:border-violet-400 transition-all shadow-sm" />
                         {searchQuery && <button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
                     </div>
                     {searchResults.length > 0 && (<div className="mt-2 card p-4 max-h-96 overflow-y-auto"><div className="flex items-center justify-between mb-3"><h3 className="text-sm font-bold text-slate-700">תוצאות ({searchResults.length})</h3><button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="text-xs text-slate-500 hover:text-slate-700">סגור</button></div><div className="space-y-2">{searchResults.map((result, idx) => (<div key={idx} onClick={() => { setActiveTab(result.tab); setSearchQuery(''); setSearchResults([]); }} className="p-3 bg-slate-50 hover:bg-violet-50 rounded-lg cursor-pointer transition-all"><p className="text-sm font-medium text-slate-700">{result.item.text || result.item.title}</p><p className="text-xs text-slate-500 mt-1">{result.type === 'task' ? '✅ משימה' : result.type === 'project' ? '📂 פרויקט' : result.type === 'idea' ? '💡 רעיון' : result.type === 'mindset' ? '🧠 מיינדסט' : result.type === 'future-self' ? '✨ אני עתידית' : '🔗 משאב'}</p></div>))}</div></div>)}
@@ -3359,17 +3360,26 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* TASKS */}
                 {activeTab === 'tasks' && (
-                    <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-6">
+                    <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-4">
 
-                        {/* כותרת */}
-                        <div className="card p-5 flex items-center gap-3 justify-center text-center">
-                            <span className="text-3xl">✅</span>
-                            <h2 className="text-xl font-bold text-slate-800">משימות ופרויקטים</h2>
+                        {/* כותרת ופעולות */}
+                        <div className="card px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                            <div className="flex items-center gap-2.5">
+                                <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-lg">✓</span>
+                                <div>
+                                    <h2 className="text-base font-bold text-slate-800">משימות ופרויקטים</h2>
+                                    <p className="text-[11px] text-slate-400 mt-0.5">{tasks.filter(t => !t.completed).length} משימות פעילות · {projects.length} פרויקטים</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => { setAddingType('task'); setShowTaskComposer(true); }} className="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm">+ משימה חדשה</button>
+                                <button onClick={() => { setAddingType('project'); setShowTaskComposer(true); }} className="px-3.5 py-2 rounded-xl text-xs font-bold bg-violet-500 hover:bg-violet-600 text-white transition-all shadow-sm">+ פרויקט חדש</button>
+                            </div>
                         </div>
 
                         {/* סינונים - שורה אחת */}
-                        <div className="card p-3">
-                            <div className="flex items-center gap-3 flex-wrap">
+                        <div className="card px-3 py-2.5 overflow-x-auto">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-bold text-slate-500">סוג:</span>
                                 {[
                                     {v:'all', label:`הכל (${tasks.length + projects.length})`},
@@ -3402,11 +3412,12 @@ import { supabase } from './lib/supabaseClient.js';
                             </div>
                         </div>
 
-                        {/* טופס הוספה */}
-                        <div className="card p-4 border-t-[3px] border-blue-400 space-y-3">
+                        {/* טופס הוספה — נפתח רק לפי בקשה */}
+                        {showTaskComposer && <div className="card p-4 border-t-[3px] border-blue-400 space-y-3">
                             <div className="flex gap-2 mb-1">
                                 <button onClick={() => setAddingType('task')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='task' ? 'bg-blue-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-blue-300'}`}>✅ משימה חדשה</button>
                                 <button onClick={() => setAddingType('project')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='project' ? 'bg-violet-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-violet-300'}`}>📂 פרויקט חדש</button>
+                                <button onClick={() => setShowTaskComposer(false)} className="w-9 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all" title="סגירה" aria-label="סגירת טופס">×</button>
                             </div>
                             {!speechRecognitionSupported && <p className="voice-support-note">הכתבה קולית אינה נתמכת בדפדפן הפנימי. כדי להשתמש במיקרופון, פתחי את גרסת ה־LOCAL ב־Chrome או Edge.</p>}
                             {addingType === 'task' ? (
@@ -3431,10 +3442,10 @@ import { supabase } from './lib/supabaseClient.js';
                                     <button onClick={addNewProject} className="w-full bg-violet-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-violet-600 transition-all">+ הוסף פרויקט</button>
                                 </div>
                             )}
-                        </div>
+                        </div>}
 
                         {/* רשימה מאוחדת + חלון פרטים */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className={`grid grid-cols-1 ${selectedItem ? 'md:grid-cols-2' : ''} gap-4`}>
                             {/* רשימה */}
                             <div className="space-y-2">
                                 {(() => {
@@ -3584,13 +3595,8 @@ import { supabase } from './lib/supabaseClient.js';
                             </div>
 
                             {/* חלון פרטים */}
-                            <div>
-                                {!selectedItem ? (
-                                    <div className="card p-10 text-center text-slate-400 flex flex-col items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-slate-200" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 9 5 12 1.774-5.226L21 14 9 9z"/><path d="m16.071 16.071 4.243 4.243"/><path d="m7.188 2.239.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656-2.12 2.122"/></svg>
-                                        <p className="text-sm font-medium">לחצי על פריט ברשימה<br/>כדי לראות פרטים</p>
-                                    </div>
-                                ) : selectedItem.type === 'task' ? (() => {
+                            {selectedItem && <div>
+                                {selectedItem.type === 'task' ? (() => {
                                     const task = tasks.find(t => t.id === selectedItem.id);
                                     if (!task) return null;
                                     const priorityConfig = { urgent:{label:'🔴 דחוף', pill:'bg-red-100 text-red-600'}, medium:{label:'🟡 בינוני', pill:'bg-amber-100 text-amber-600'}, normal:{label:'🟢 רגיל', pill:'bg-emerald-100 text-emerald-600'} };
@@ -3718,7 +3724,7 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                     );
                                 })()}
-                            </div>
+                            </div>}
                         </div>
 
                         {/* ניהול תחומים */}
