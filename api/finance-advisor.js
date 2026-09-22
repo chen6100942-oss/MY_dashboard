@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Personal CFO / financial-advisor chat. Unlike finance-ask.js (which is scoped to one
 // category for privacy), this endpoint is deliberately given the caller's FULL financial
@@ -94,7 +94,7 @@ const CFO_SYSTEM_PROMPT = `אתה משמש עבורי כ־CFO אישי, יועץ
 
 חשוב: הנתונים הפיננסיים שסופקו לך למטה הם כל מה שיש כרגע בדשבורד — אין לך גישה לחשבונות בנק, לביצוע פעולות, או למידע שלא הוצג לך במפורש. אל תתייחסי לנתון שלא קיבלת כאילו הוא קיים.`;
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 

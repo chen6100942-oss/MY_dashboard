@@ -1,10 +1,10 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Answers a free-text question about the caller's own financial data, scoped to
 // categories the client already matched against the question — the client sends
 // only the relevant slice, not the full financial history. The caller must be a
 // logged-in Supabase user (verified via their JWT) so this can't be hit anonymously.
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 

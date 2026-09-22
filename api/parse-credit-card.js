@@ -1,10 +1,10 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 // Reads a credit-card statement PDF and returns a structured breakdown per
 // card: description, monthly installment amount, installments remaining out
 // of total, and the full charge amount. The caller must be a logged-in
 // Supabase user (verified via their JWT) so this can't be hit anonymously.
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Content-Type', 'application/json');
 
