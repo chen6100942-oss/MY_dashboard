@@ -874,6 +874,13 @@ html body .dashboard-main .max-w-2xl,
 html body .dashboard-main .max-w-xl,
 html body .dashboard-main .max-w-lg{max-width:none!important}
 
+/* Tasks stay in a calm, focused reading column instead of stretching edge to edge. */
+html body .dashboard-main .tasks-focus-column{
+  width:min(720px,100%)!important;
+  max-width:720px!important;
+  margin-inline:auto!important;
+}
+
 /* Every plain white/slate input, select and textarea across the whole app —
    not just home — gets the same warm, rounded field style. */
 html:not(.dark-mode) input[class*="border-slate-2"],

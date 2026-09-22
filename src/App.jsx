@@ -2114,7 +2114,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* SEARCH — only on non-home tabs */}
                 {activeTab !== 'home' && (
-                <div className="max-w-md mx-auto mb-4">
+                <div className="max-w-sm mx-auto mb-4">
                     <div className="relative">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); performSearch(e.target.value); }} placeholder="חיפוש..." className="w-full pr-10 pl-4 py-2 bg-white/90 border border-slate-200 rounded-xl outline-none text-xs focus:border-violet-400 transition-all shadow-sm" />
@@ -3360,7 +3360,7 @@ import { supabase } from './lib/supabaseClient.js';
 
                 {/* TASKS */}
                 {activeTab === 'tasks' && (
-                    <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-4">
+                    <div className="tasks-focus-column max-w-3xl mx-auto animate-slide-in-up pb-16 space-y-4">
 
                         {/* כותרת ופעולות */}
                         <div className="card px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
