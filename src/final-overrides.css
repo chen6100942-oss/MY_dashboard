@@ -731,10 +731,10 @@ html:not(.dark-mode) .brand-page-footer .footer-hen-signature{color:#9a7f6b!impo
 /* כותרת הבית "Design Your Life" — הגדרה אחת וסופית (הוחלפו כל שכבות ה-CSS הסותרות שהיו כאן וב-index.css).
    font-size בכוונה שמרני (לא ה-vw הגדול שהיה קודם) כדי שהמילה לא תיחתך בקצוות הכרטיס בשום רוחב מסך. */
 .inside-out-lockup{max-width:100%}
-.inside-out-lockup .inside-out-flowing{direction:ltr!important;font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:700!important;font-optical-sizing:auto!important;font-size:clamp(1.8rem,4.6vw,3.6rem)!important;letter-spacing:.03em!important;line-height:1.05!important;text-shadow:none!important;display:inline-flex!important;align-items:baseline!important;justify-content:center!important;flex-wrap:wrap!important;gap:.22em!important;max-width:92vw!important;white-space:normal!important}
+.inside-out-lockup .inside-out-flowing{direction:ltr!important;font-family:'Bodoni Moda','Didot','Bodoni MT',serif!important;font-weight:400!important;font-optical-sizing:auto!important;font-size:clamp(1.8rem,4.6vw,3.6rem)!important;letter-spacing:.06em!important;text-transform:uppercase!important;line-height:1.05!important;text-shadow:none!important;display:inline-flex!important;align-items:baseline!important;justify-content:center!important;flex-wrap:wrap!important;gap:.28em!important;max-width:92vw!important;white-space:normal!important}
 .inside-out-lockup .hero-title-dark{color:#3d2b22!important}
 .inside-out-lockup .hero-title-rust{color:#a2472f!important}
-.inside-out-lockup .hero-tagline{margin-top:6px;color:#8a6a56;font-size:clamp(.6rem,1vw,.75rem);font-weight:700;letter-spacing:.32em;text-transform:uppercase}
+.inside-out-lockup .hero-tagline{margin-top:6px;color:#8a6a56;font-family:'Bodoni Moda','Didot','Bodoni MT',serif;font-size:clamp(.6rem,1vw,.75rem);font-weight:600;letter-spacing:.32em;text-transform:uppercase}
 
 .hero-caption{color:#8a6a56;font-size:9px;font-weight:700;letter-spacing:.18em;line-height:1.9;text-transform:uppercase;white-space:nowrap}
 .hero-caption-right{margin-bottom:10px}
@@ -829,3 +829,108 @@ body:has(.zen-preview-home) .daily-message-floating-root{display:none!important}
 
 /* בפס הניווט הצף במובייל מציגים רק את הכרטיסיות - מנצח את הכלל הישן שמכריח flex תמיד */
 @media(max-width:767px){html body .primary-sidebar>.language-switcher{display:none!important}}
+
+/* ============================================================
+   HOME PAGE — Japandi reskin (warm cream / rust / olive)
+   Visual restyle only: no existing block, button or data field
+   was removed — colors, shapes and type match the design brief.
+   ============================================================ */
+:root{
+  --home-paper:#faf5ec;
+  --home-card:#fffdf8;
+  --home-ink:#3d2b22;
+  --home-muted:#8a6a56;
+  --home-rust:#a2472f;
+  --home-rust-deep:#71412d;
+  --home-olive:#8da17f;
+  --home-line:rgba(83,66,58,.14);
+}
+
+/* ---------- Greeting + avatar ---------- */
+.home-greeting{display:flex;align-items:center;gap:8px;padding:2px 4px 2px 2px;margin-left:4px}
+.home-greeting-copy{display:flex;flex-direction:column;line-height:1.3;text-align:right}
+.home-greeting-copy b{font-size:12.5px;font-weight:800;color:var(--home-ink)}
+.home-greeting-copy small{font-size:10px;font-weight:600;color:var(--home-muted)}
+.home-greeting-avatar{display:flex;align-items:center;justify-content:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;color:#fff;background:linear-gradient(145deg,var(--home-rust),var(--home-rust-deep));box-shadow:0 6px 14px rgba(113,65,45,.25)}
+
+/* ---------- Date chip ---------- */
+.home-date-chip{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;color:var(--home-ink);background:var(--home-card);border:1px solid var(--home-line);font-size:11px;font-weight:700;box-shadow:0 2px 8px rgba(83,66,58,.05)}
+.home-date-chip svg{color:var(--home-muted)}
+
+/* ---------- Toolbar row: pill/cream reskin (functionality untouched) ---------- */
+.home-toolbar{padding:6px;border-radius:20px;background:transparent}
+.home-toolbar input[type="text"]{background:var(--home-card)!important;border-color:var(--home-line)!important;border-radius:999px!important;color:var(--home-ink)!important}
+.home-toolbar input[type="text"]:focus{border-color:var(--home-rust)!important}
+.home-toolbar input[type="text"]::placeholder{color:var(--home-muted)!important}
+.home-toolbar > div.relative > svg{color:var(--home-muted)!important}
+.home-toolbar > button:not(.theme-toggle){border-radius:999px!important;background:var(--home-card)!important;border-color:var(--home-line)!important;color:var(--home-ink)!important;box-shadow:0 2px 8px rgba(83,66,58,.05)!important}
+.home-toolbar > button:not(.theme-toggle):hover{background:#f4ece2!important}
+.home-toolbar > button.bg-violet-600{background:var(--home-rust)!important;color:#fffaf5!important;border-color:var(--home-rust)!important}
+.home-toolbar > .theme-toggle{border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--home-card);border:1px solid var(--home-line);box-shadow:0 2px 8px rgba(83,66,58,.05)}
+.home-toolbar > div.flex.items-center.gap-1\.5{background:var(--home-card)!important;border-color:var(--home-line)!important}
+.home-toolbar > div.flex.items-center.gap-1\.5 span.text-violet-500,
+.home-toolbar > div.flex.items-center.gap-1\.5 span.text-violet-600{color:var(--home-rust)!important}
+
+/* ---------- Quick-nav pill row ---------- */
+.home-quick-nav{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:2px 4px}
+.home-quick-nav-pill{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:999px;border:1px solid var(--home-line);background:var(--home-card);color:var(--home-ink);font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(83,66,58,.05);transition:.18s ease;cursor:pointer}
+.home-quick-nav-pill:hover{transform:translateY(-1px);background:#f4ece2}
+.home-quick-nav-pill svg{color:var(--home-muted)}
+.home-quick-nav-pill.active{background:linear-gradient(145deg,#f3ded3,#eccdbd);border-color:rgba(162,71,47,.35);color:var(--home-rust-deep)}
+.home-quick-nav-pill.active svg{color:var(--home-rust-deep)}
+
+/* ---------- Goals strip ---------- */
+.goals-strip-title{display:flex!important;align-items:center;justify-content:center;gap:14px;color:var(--home-ink)!important;font:400 22px/1.2 'Bodoni Moda','Bodoni MT','Didot',serif!important}
+.goals-strip-title::before,.goals-strip-title::after{content:'';flex:1 1 auto;max-width:120px;height:1px;background:var(--home-line)}
+.goals-add-row button{background:var(--home-card)!important;color:var(--home-rust)!important;border:1px solid var(--home-line)!important}
+.goal-mini-card{background:var(--home-card)!important;border-color:var(--home-line)!important;box-shadow:0 8px 22px rgba(83,66,58,.07)!important}
+.goal-mini-card:nth-child(4n+1),.goal-mini-card:nth-child(4n+2),.goal-mini-card:nth-child(4n+3),.goal-mini-card:nth-child(4n){background:var(--home-card)!important}
+.goal-mini-card > span.text-lg{display:flex!important;align-items:center;justify-content:center;width:34px;height:34px;margin:0 auto 6px!important;border-radius:50%;font-size:16px!important;background:#f3ded3}
+.goal-mini-card:nth-child(4n+2) > span.text-lg{background:#e7ebdc}
+.goal-mini-card:nth-child(4n+3) > span.text-lg{background:#f1e3d6}
+.goal-mini-card:nth-child(4n) > span.text-lg{background:#ece2e0}
+.goal-mini-card h3{color:var(--home-ink)!important}
+.goal-mini-card .gradient-text{-webkit-text-fill-color:initial!important;background:none!important;color:var(--home-rust)!important}
+.goal-mini-card .bg-slate-100{background:rgba(83,66,58,.1)!important}
+.goal-mini-card [class*="bg-gradient-to-r"].rounded-full.h-full{background:linear-gradient(90deg,var(--home-rust),#c97456)!important}
+
+/* ---------- Monthly calendar card ---------- */
+.home-editorial-calendar{background:var(--home-card)!important;border-color:var(--home-line)!important}
+.home-editorial-calendar h3{color:var(--home-ink)!important}
+.home-editorial-calendar h3 svg{color:var(--home-muted)!important}
+.home-calendar-nav{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;color:var(--home-muted);background:transparent;transition:.15s ease}
+.home-calendar-nav:hover{background:rgba(83,66,58,.08);color:var(--home-ink)}
+.home-editorial-calendar .text-slate-400{color:var(--home-muted)!important}
+.home-editorial-calendar .text-slate-600{color:var(--home-ink)!important}
+.home-editorial-calendar .hover\:bg-violet-50:hover{background:rgba(162,71,47,.08)!important}
+.home-editorial-calendar .bg-violet-600{background:var(--home-rust)!important}
+.home-editorial-calendar .bg-pink-400{background:var(--home-rust)!important;opacity:.55}
+.home-calendar-caption{margin:10px 0 0;text-align:center;font-size:9px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:var(--home-muted)}
+
+/* ---------- Today's tasks card ---------- */
+.today-tasks-card{background:var(--home-card)!important;border-color:var(--home-line)!important}
+.today-tasks-card h3{color:var(--home-ink)!important}
+.today-tasks-card h3 svg{color:var(--home-muted)!important}
+.today-tasks-see-all{margin-right:auto;font-size:10px;font-weight:800;color:var(--home-rust);background:transparent;border:0;cursor:pointer}
+.today-tasks-see-all:hover{text-decoration:underline}
+.today-tasks-card .bg-violet-100{background:#f3ded3!important;color:var(--home-rust-deep)!important}
+.today-tasks-card .bg-violet-50{background:#f8f4ee!important}
+.today-tasks-card .border-violet-300{border-color:rgba(162,71,47,.4)!important}
+.today-tasks-card .hover\:bg-violet-500:hover,.today-tasks-card .hover\:border-violet-500:hover{background:var(--home-rust)!important;border-color:var(--home-rust)!important}
+.today-tasks-empty{color:var(--home-olive)!important}
+.today-tasks-empty p{color:var(--home-ink)!important;font-weight:700!important}
+.today-tasks-empty small{color:var(--home-muted);font-size:10px}
+
+/* ---------- Hero: enso brush ring behind the title ---------- */
+.brand-title-line{position:relative}
+.hero-enso{position:absolute;top:42%;left:38%;transform:translate(-50%,-50%);width:min(190px,50vw);height:min(190px,50vw);color:#a2472f;opacity:.5;pointer-events:none;z-index:0}
+.hero-enso-main,.hero-enso-upper,.hero-enso-dry{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.hero-enso-main{stroke-width:9.5}
+.hero-enso-upper{stroke-width:4;opacity:.86}
+.hero-enso-dry{stroke-width:2;opacity:.5}
+.inside-out-flowing{position:relative;z-index:1}
+
+/* ---------- Hero: left/right captions (olive branch + script caption) ---------- */
+.hero-logo-column{justify-content:flex-start!important}
+.hero-branch-mark{color:#8a9b6e!important}
+.hero-script-caption{margin-top:6px;font-family:'Mrs Saint Delafield',cursive;font-weight:400;font-size:clamp(1rem,1.6vw,1.35rem);letter-spacing:0;text-transform:none;color:#a2472f;line-height:1.35;white-space:nowrap}

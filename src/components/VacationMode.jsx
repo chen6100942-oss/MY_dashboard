@@ -65,7 +65,7 @@ export default function VacationMode() {
             <p>מקווה שנהנית בחופשה וצברת אנרגיות חדשות למסע שלך!</p>
             <button onClick={() => { setReturning(false); setOpen(false); }}>לחזור למסע שלי</button>
           </div> : !celebrating ? <>
-            <div className="vacation-kicker">INSIDE OUT · VACATION MODE</div><div className="vacation-sun">☼</div>
+            <div className="vacation-kicker">DESIGN YOUR LIFE · VACATION MODE</div><div className="vacation-sun">☼</div>
             <h2 id="vacation-title">מה חשוב לך שיהיה פעיל<br/>במצב החופשה שלך?</h2>
             <p>בחרי את רמת החיבור שמתאימה לך עכשיו. תמיד אפשר לשנות.</p>
             <div className="vacation-choices">{choices.map(choice => <button key={choice.id} className={selection === choice.id ? 'selected' : ''} onClick={() => setSelection(choice.id)}>

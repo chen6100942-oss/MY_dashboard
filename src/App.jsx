@@ -32,7 +32,7 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'tasks', name: 'משימות ופרויקטים', icon: 'list-todo', color: 'blue', emoji: '✅' },
             { id: 'goals', name: 'יעדים לפי תחומים', icon: 'target', color: 'purple', emoji: '🎯' },
             { id: 'gantt', name: 'לוח שנה', icon: 'calendar', color: 'cyan', emoji: '🗓️' },
-            { id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' },
+            { id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' },
             { id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' },
             { id: 'morning-ritual', name: 'טקס בוקר', icon: 'coffee', color: 'amber', emoji: '☕' },
             { id: 'manifesting', name: 'Manifesting', icon: 'sparkles', color: 'pink', emoji: '✨' },
@@ -328,9 +328,9 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'm5', domain: 'תוכן', daily: '✓ תוכן יומי', weekly: 'עוקבים חדשים', monthly: '1K+ עוקבים חדשים' },
         ]);
         const [domainGoals, setDomainGoals] = useState([
-            { id: 'dg1', title: 'הוצאת הספר לאור', emoji: '📚', color: 'from-blue-500 to-cyan-500', points: [{ id: 'p1', label: 'יעד קרוב', text: 'סיום עריכה ל-120,000 מילים' }, { id: 'p2', label: 'יעד בינוני', text: 'שליחה לעורכת מקצועית' }, { id: 'p3', label: 'יעד רחוק', text: 'פרסום הספר - יוני 2027' }] },
-            { id: 'dg2', title: 'פרויקט גמר באדריכלות', emoji: '🎓', color: 'from-violet-500 to-purple-500', points: [{ id: 'p1', label: 'יעד קרוב', text: 'שיחה עם נדב + תוכנית עבודה' }, { id: 'p2', label: 'יעד בינוני', text: 'השלמת 50% - מרץ 2026' }, { id: 'p3', label: 'יעד רחוק', text: 'הגשה וקבלת רישיון - אפריל-מאי 2026' }] },
-            { id: 'dg4', title: 'יוצרת תוכן ברשתות', emoji: '📱', color: 'from-pink-500 to-rose-500', current: '160 עוקבים', points: [{ id: 'p1', label: 'יעד קרוב', text: '500 עוקבים (פברואר)' }, { id: 'p2', label: 'יעד בינוני', text: '5,000 עוקבים (יוני)' }, { id: 'p3', label: 'יעד רחוק', text: '500,000 עוקבים' }] },
+            { id: 'dg1', title: 'הוצאת הספר לאור', emoji: '📚', color: 'from-blue-500 to-cyan-500', year: 2026, achieved: false, points: [{ id: 'p1', label: 'יעד קרוב', text: 'סיום עריכה ל-120,000 מילים' }, { id: 'p2', label: 'יעד בינוני', text: 'שליחה לעורכת מקצועית' }, { id: 'p3', label: 'יעד רחוק', text: 'פרסום הספר - יוני 2027' }] },
+            { id: 'dg2', title: 'פרויקט גמר באדריכלות', emoji: '🎓', color: 'from-violet-500 to-purple-500', year: 2026, achieved: false, points: [{ id: 'p1', label: 'יעד קרוב', text: 'שיחה עם נדב + תוכנית עבודה' }, { id: 'p2', label: 'יעד בינוני', text: 'השלמת 50% - מרץ 2026' }, { id: 'p3', label: 'יעד רחוק', text: 'הגשה וקבלת רישיון - אפריל-מאי 2026' }] },
+            { id: 'dg4', title: 'יוצרת תוכן ברשתות', emoji: '📱', color: 'from-pink-500 to-rose-500', current: '160 עוקבים', year: 2026, achieved: false, points: [{ id: 'p1', label: 'יעד קרוב', text: '500 עוקבים (פברואר)' }, { id: 'p2', label: 'יעד בינוני', text: '5,000 עוקבים (יוני)' }, { id: 'p3', label: 'יעד רחוק', text: '500,000 עוקבים' }] },
         ]);
         const [newTaskText, setNewTaskText] = useState('');
         const [newTaskEmoji, setNewTaskEmoji] = useState('✅');
@@ -406,6 +406,9 @@ import { supabase } from './lib/supabaseClient.js';
         const [newGoalTitle, setNewGoalTitle] = useState('');
         const [newGoalEmoji, setNewGoalEmoji] = useState('🎯');
         const [newGoalColor, setNewGoalColor] = useState('from-violet-500 to-purple-500');
+        const [newGoalYear, setNewGoalYear] = useState(new Date().getFullYear());
+        const [homeGoalsYear, setHomeGoalsYear] = useState(new Date().getFullYear());
+        const [showHomeGoalsYearMenu, setShowHomeGoalsYearMenu] = useState(false);
         const [ideas, setIdeas] = useState([]);
         const [newIdeaText, setNewIdeaText] = useState('');
         const [newIdeaEmoji, setNewIdeaEmoji] = useState('💡');
@@ -484,6 +487,9 @@ import { supabase } from './lib/supabaseClient.js';
         });
         useEffect(()=>localStorage.setItem('inspirationLibrary',JSON.stringify(inspirationItems)),[inspirationItems]);
         useEffect(()=>localStorage.setItem('bookWisdomLibrary',JSON.stringify(bookWisdomItems)),[bookWisdomItems]);
+
+        // ── HOME · MONTHLY CALENDAR NAVIGATION ──────────────────────
+        const [homeCalendarMonthOffset, setHomeCalendarMonthOffset] = useState(0);
 
         // ── DRAG & DROP / LAYOUT EDIT ────────────────────────────────
         const [layoutEditMode, setLayoutEditMode] = useState(false);
@@ -634,12 +640,15 @@ import { supabase } from './lib/supabaseClient.js';
             setHomeCustomBlocks(prev => prev.map(b => b.id === id ? {...b, data: {...b.data, [key]: val}} : b));
         };
 
+        const currentRealYear = new Date().getFullYear();
+
         const HOME_BLOCK_LABELS = {
             countdown: { label: 'ספירה לאחור', emoji: '⏳' },
             goals: { label: 'יעדים לשנת 2026', emoji: '🏆' },
             morning: { label: 'טקס בוקר', emoji: '☀️' },
             affirmations: { label: 'אפורמציות', emoji: '💗' },
             gamechangers: { label: 'Game Changers', emoji: '⚡' },
+            'today-tasks': { label: 'לוח שנה ומשימות היום', emoji: '🗓️' },
         };
 
         // width class helper for grid layout (grid has 6 cols: full=6, half=3, third=2)
@@ -663,7 +672,15 @@ import { supabase } from './lib/supabaseClient.js';
             (async () => {
                 try {
                     const { data: { session } } = await supabase.auth.getSession();
-                    setUser(toUser(session));
+                    let resolvedUser = toUser(session);
+                    // DEV-ONLY convenience: skip the login screen locally when there's no real
+                    // session, so the app can be previewed without email/password/Google.
+                    // import.meta.env.DEV is false in the production build, so this can never
+                    // run on the live site — real login stays fully required there.
+                    if (!resolvedUser && import.meta.env.DEV) {
+                        resolvedUser = { displayName: 'תצוגה מקדימה מקומית', uid: 'preview', email: 'preview@local', photoURL: null };
+                    }
+                    setUser(resolvedUser);
                 } catch (e) { console.warn('Auth session check error:', e.message); setUser(null); }
                 setLoading(false);
             })();
@@ -708,7 +725,7 @@ import { supabase } from './lib/supabaseClient.js';
                 result.push({ id:'book-wisdom', name:'סיכומי ספרים', icon:'book-open', color:'indigo', emoji:'◈' });
             }
             if (!deleted.has('finance') && !result.some(t => t.id === 'finance')) {
-                result.push({ id: 'finance', name: 'מעקב פיננסי', icon: 'trending-up', color: 'emerald', emoji: '💰' });
+                result.push({ id: 'finance', name: 'פיננסים', icon: 'trending-up', color: 'emerald', emoji: '💰' });
             }
             if (!deleted.has('numerology') && !result.some(t => t.id === 'numerology')) {
                 result.push({ id: 'numerology', name: 'נומורולוגיה', icon: 'sparkles', color: 'amber', emoji: '🔮' });
@@ -725,7 +742,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.bannerImg) setBannerImg(d.bannerImg);
             if (d.headerTitle) setHeaderTitle(d.headerTitle);
             setHeaderAffirmation('');
-            if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t)));
+            if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t.id === 'finance' ? {...t, name: 'פיננסים'} : t)));
             if (d.projects) setProjects(d.projects);
             if (d.tasks) setTasks(d.tasks);
             if (d.resources) setResources(d.resources);
@@ -854,7 +871,7 @@ import { supabase } from './lib/supabaseClient.js';
                     const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, timestamp: new Date().toISOString() };
                     localStorage.setItem('dashboard_data', JSON.stringify(data));
                     const u = userRef.current;
-                    if (supabase && u?.uid && u.uid !== 'local') {
+                    if (supabase && u?.uid && u.uid !== 'local' && u.uid !== 'preview') {
                         supabase.from('dashboard_data').upsert({ user_id: u.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
                             .then(({ error: err }) => { if (err) console.warn('Cloud auto-save error:', err.message); });
                     }
@@ -940,7 +957,7 @@ import { supabase } from './lib/supabaseClient.js';
             setInviteResult(null);
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const response = await fetch('/.netlify/functions/invite-user', {
+                const response = await fetch('/api/invite-user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -965,7 +982,7 @@ import { supabase } from './lib/supabaseClient.js';
             try {
                 const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, timestamp: new Date().toISOString() };
                 localStorage.setItem('dashboard_data', JSON.stringify(data));
-                if (supabase && user?.uid && user.uid !== 'local') {
+                if (supabase && user?.uid && user.uid !== 'local' && user.uid !== 'preview') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
                     if (err) console.warn('Cloud save error:', err.message);
                 }
@@ -982,7 +999,7 @@ import { supabase } from './lib/supabaseClient.js';
                     if (d.bannerImg) setBannerImg(d.bannerImg);
                     if (d.headerTitle) setHeaderTitle(d.headerTitle);
                     if (d.headerAffirmation !== undefined) setHeaderAffirmation(d.headerAffirmation);
-                    if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t))); if (d.projects) setProjects(d.projects); if (d.tasks) setTasks(d.tasks);
+                    if (d.tabs) setTabs(ensureBuiltinTabs(d.tabs.map(t => t.id === 'resources' ? {...t, name: 'כלים'} : t.id === 'finance' ? {...t, name: 'פיננסים'} : t))); if (d.projects) setProjects(d.projects); if (d.tasks) setTasks(d.tasks);
                     if (d.resources) setResources(d.resources); if (d.morningRitual) setMorningRitual(d.morningRitual);
                     if (d.gameChangers) setGameChangers(d.gameChangers); if (d.dailySchedule) setDailySchedule(d.dailySchedule);
                     if (d.ideas) setIdeas(d.ideas); if (d.domains) setDomains(d.domains); if (d.domainGoals) setDomainGoals(d.domainGoals);
@@ -1177,7 +1194,7 @@ import { supabase } from './lib/supabaseClient.js';
             const today = new Date();
             const pad = n => String(n).padStart(2,'0');
             const dateStr = `${today.getFullYear()}${pad(today.getMonth()+1)}${pad(today.getDate())}`;
-            let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//My Dashboard//HE\r\nCALNAME:לוז מרכז הבקרה\r\n';
+            let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//My Dashboard//HE\r\nCALNAME:לוז Design Your Life\r\n';
             dailySchedule.forEach((slot, i) => {
                 const timeStr = slot.time ? slot.time.split('–')[0].replace(':','').trim() : '0800';
                 const cleanTime = timeStr.replace(/[^0-9]/g,'').padEnd(4,'0').slice(0,4);
@@ -1204,21 +1221,13 @@ import { supabase } from './lib/supabaseClient.js';
         const addGoalPoint = (gid) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:[...g.points,{id:`p${Date.now()}`,label:`יעד ${g.points.length+1}`,text:''}]}:g));
         const removeGoalPoint = (gid, pid) => setDomainGoals(p => p.map(g => g.id===gid?{...g,points:g.points.filter(pt => pt.id!==pid)}:g));
         const removeGoal = (gid) => { saveSnapshot(); setDomainGoals(p => p.filter(g => g.id !== gid)); };
-        const addNewGoal = () => { if (!newGoalTitle.trim()) return; saveSnapshot(); setDomainGoals(prev => [...prev, { id: `dg${Date.now()}`, title: newGoalTitle, emoji: newGoalEmoji, color: newGoalColor, points: [{id:'p1',label:'יעד קרוב',text:''},{id:'p2',label:'יעד בינוני',text:''},{id:'p3',label:'יעד רחוק',text:''}] }]); setNewGoalTitle(''); setNewGoalEmoji('🎯'); setNewGoalColor('from-violet-500 to-purple-500'); };
-        const openDetailedGoal = (sourceGoal) => {
-            const compact = value => String(value || '').replace(/[^\u0590-\u05ffa-z0-9]/gi, '').toLowerCase();
-            const sourceTitle = compact(sourceGoal?.title);
-            const fixedGoalLinks = { p1: 'dg2', p2: 'dg1', p3: 'dg4' };
-            const match = domainGoals.find(goal => goal.id === fixedGoalLinks[sourceGoal?.id])
-                || domainGoals.find(goal => goal.emoji && goal.emoji === sourceGoal?.emoji)
-                || domainGoals.find(goal => {
-                    const targetTitle = compact(goal.title);
-                    return targetTitle && sourceTitle && (targetTitle.includes(sourceTitle) || sourceTitle.includes(targetTitle));
-                });
-            setFocusedDomainGoalId(match?.id || null);
+        const addNewGoal = () => { if (!newGoalTitle.trim()) return; saveSnapshot(); setDomainGoals(prev => [...prev, { id: `dg${Date.now()}`, title: newGoalTitle, emoji: newGoalEmoji, color: newGoalColor, year: newGoalYear, achieved: false, achievedAt: null, points: [{id:'p1',label:'יעד קרוב',text:''},{id:'p2',label:'יעד בינוני',text:''},{id:'p3',label:'יעד רחוק',text:''}] }]); setNewGoalTitle(''); setNewGoalEmoji('🎯'); setNewGoalColor('from-violet-500 to-purple-500'); };
+        const toggleGoalAchieved = (gid) => { saveSnapshot(); setDomainGoals(prev => prev.map(g => g.id===gid ? {...g, achieved: !g.achieved, achievedAt: !g.achieved ? Date.now() : null} : g)); };
+        const openDetailedGoal = (goal) => {
+            setFocusedDomainGoalId(goal?.id || null);
             setActiveTab('goals');
             window.setTimeout(() => {
-                const target = match ? document.getElementById(`domain-goal-${match.id}`) : document.getElementById('domain-goals-heading');
+                const target = goal?.id ? document.getElementById(`domain-goal-${goal.id}`) : document.getElementById('domain-goals-heading');
                 target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 120);
         };
@@ -1710,8 +1719,8 @@ import { supabase } from './lib/supabaseClient.js';
                     <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"start",gap:"12px"}}>
 
 
-                        {/* תאריך - עמודה ימנית */}
-                        <div className="header-date-column text-right hidden md:block pt-1" style={{gridColumn:"1"}}>
+                        {/* תאריך - עמודה שמאלית (בתמונת היעד: "A CLEAR MIND" בצד שמאל) */}
+                        <div className="header-date-column text-right hidden md:block pt-1" style={{gridColumn:"3"}}>
                             <p className="hero-caption hero-caption-right">A CLEAR MIND<br/>A BRIGHTER YOU<br/>A MORE INTENTIONAL TOMORROW</p>
                             <div className="header-vacation-slot"><VacationMode /></div>
                             {(() => {
@@ -1726,6 +1735,11 @@ import { supabase } from './lib/supabaseClient.js';
                             {/* Brand lockup */}
                             <div className="inside-out-lockup">
                                 <div className="brand-title-line">
+                                    <svg className="hero-enso" viewBox="0 0 100 100" aria-hidden="true">
+                                        <path className="hero-enso-main" d="M64 58 C51 75 27 73 12 57 C-1 42 5 19 25 10"/>
+                                        <path className="hero-enso-upper" d="M23 11 C38 3 57 6 68 20"/>
+                                        <path className="hero-enso-dry" d="M67 52 C55 69 34 72 17 59 C2 47 5 26 21 14 C36 3 57 8 67 25"/>
+                                    </svg>
                                     <h1 className="inside-out-flowing" aria-label="Design Your Life">
                                         <span className="hero-title-dark">Design</span> <span className="hero-title-rust">Your Life</span>
                                     </h1>
@@ -1766,18 +1780,9 @@ import { supabase } from './lib/supabaseClient.js';
                             {saveNotification && <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold shadow-lg animate-bounce-in"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>הנתונים נשמרו בהצלחה! ✨</div>}
                         </div>
 
-                        <div className="hero-logo-column hidden md:flex" style={{gridColumn:"3"}}>
-                            <svg className="hero-logo-mark" viewBox="0 0 100 100" aria-hidden="true">
-                                <path d="M85 90 A75 75 0 0 0 18 14" />
-                                <path d="M10 90 L85 90" />
-                                <path d="M10 90 L82 70" />
-                                <path d="M10 90 L74 52" />
-                                <path d="M10 90 L60 36" />
-                                <path d="M10 90 L40 24" />
-                                <path d="M10 90 L18 14" />
-                                <circle cx="60" cy="36" r="3" fill="currentColor" stroke="none" />
-                            </svg>
-                            <p className="hero-caption hero-caption-left">MORE<br/>THAN A PLAN<br/>A LIFE YOU LOVE</p>
+                        <div className="hero-logo-column hidden md:flex" style={{gridColumn:"1"}}>
+                            <Icon name="leaf" size={34} className="hero-branch-mark" />
+                            <p className="hero-caption hero-script-caption">More than a plan<br/>A life you love</p>
                         </div>
 
                     </div>
@@ -1900,6 +1905,11 @@ import { supabase } from './lib/supabaseClient.js';
                             const w2026 = Math.floor(d2026/7);
                             return (
                             <div className="home-toolbar flex items-center gap-2 flex-wrap">
+                                {/* Greeting */}
+                                <div className="home-greeting">
+                                    <div className="home-greeting-copy"><b>היי חן</b><small>יצירת את החיים שאת אוהבת</small></div>
+                                    <span className="home-greeting-avatar"><Icon name="user" size={17}/></span>
+                                </div>
                                 {/* Search */}
                                 <div className="relative flex-1 min-w-48">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1931,6 +1941,11 @@ import { supabase } from './lib/supabaseClient.js';
                                     <span>{d2026}</span>
                                     <span className="text-slate-400 font-normal">ימים — עד סוף שנת 2026</span>
                                 </div>
+                                {/* Date */}
+                                <div className="home-date-chip">
+                                    <span>{now.toLocaleDateString('he-IL', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</span>
+                                    <Icon name="chevron-down" size={13}/>
+                                </div>
                             </div>
                             );
                         })()}
@@ -1956,6 +1971,20 @@ import { supabase } from './lib/supabaseClient.js';
                             </div>}
                         </section>
                         </div>
+                        </div>
+
+                        {/* Quick shortcuts to frequently used areas */}
+                        <div className="home-quick-nav">
+                            {[
+                                {tab:'ikigai', label:'רווחה והתפתחות', icon:'heart'},
+                                {tab:'book-wisdom', label:'למידה ותוכן', icon:'book-open'},
+                                {tab:'morning-ritual', label:'בריאות וכושר', icon:'dumbbell'},
+                                {tab:'gantt', label:'תכנון ונופש', icon:'plane'},
+                            ].map(item => (
+                                <button key={item.tab} className={`home-quick-nav-pill ${activeTab==='home' && item.tab==='home' ? 'active' : ''}`} onClick={()=>setActiveTab(item.tab)}>
+                                    <Icon name={item.icon} size={15}/><span>{item.label}</span>
+                                </button>
+                            ))}
                         </div>
 
                         {/* Quick actions moved from the left rail onto the canvas */}
@@ -2109,24 +2138,36 @@ import { supabase } from './lib/supabaseClient.js';
                                         <div key={blockId} className={`${cs} home-block home-block-goals`} {...dragAttrs} style={editStyle}>
                                         {DragHint}
                                         <section className="goals-strip">
-                                            <h2 className="goals-strip-title">יעדים לשנת 2026</h2>
+                                            <div className="flex items-center justify-center gap-1.5 relative">
+                                                <h2 className="goals-strip-title">יעדים לשנת {homeGoalsYear}</h2>
+                                                <button onClick={()=>setShowHomeGoalsYearMenu(p=>!p)} className="w-5 h-5 rounded-full bg-slate-100 hover:bg-violet-100 text-slate-400 hover:text-violet-600 flex items-center justify-center transition-all shrink-0" title="בחרי שנה">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                                </button>
+                                                {showHomeGoalsYearMenu && (
+                                                    <div className="absolute top-full mt-1 z-10 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 flex flex-col gap-0.5" style={{minWidth:'110px'}}>
+                                                        {Array.from({length:5},(_,i)=>currentRealYear+i).map(yr => (
+                                                            <button key={yr} onClick={()=>{setHomeGoalsYear(yr);setShowHomeGoalsYearMenu(false);}} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${homeGoalsYear===yr?'bg-violet-600 text-white':'text-slate-600 hover:bg-violet-50'}`}>יעד ל-{yr}</button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                             <div className="goals-add-row">
-                                                <button onClick={() => setShowAddGoalModal(true)} className="w-9 h-9 bg-violet-100 hover:bg-violet-200 rounded-xl flex items-center justify-center text-violet-600 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                                                <button onClick={() => { setNewGoalYear(homeGoalsYear); setShowAddGoalModal(true); }} className="w-9 h-9 bg-violet-100 hover:bg-violet-200 rounded-xl flex items-center justify-center text-violet-600 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                                             </div>
                                             <div className="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
-                                                {projects.filter(p=>p.showOnHome).map(project => { const progress = calculateProgress(project.id); return (
-                                                <div key={project.id} role="button" tabIndex="0" aria-label={`פתיחת פירוט היעד ${project.title}`} onClick={event=>{if(!event.target.closest('button,input,textarea,select'))openDetailedGoal(project);}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailedGoal(project);}}} className="goal-mini-card home-goal-link card text-center group relative overflow-visible flex-shrink-0">
+                                                {domainGoals.filter(g => !g.achieved && ((g.year||currentRealYear)===homeGoalsYear || (homeGoalsYear===currentRealYear && (g.year||currentRealYear)<currentRealYear))).map(goal => { const carriedOver = (goal.year||currentRealYear) !== homeGoalsYear; return (
+                                                <div key={goal.id} role="button" tabIndex="0" aria-label={`פתיחת פירוט היעד ${goal.title}`} onClick={event=>{if(!event.target.closest('button,input,textarea,select'))openDetailedGoal(goal);}} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();openDetailedGoal(goal);}}} className="goal-mini-card home-goal-link card text-center group relative overflow-visible flex-shrink-0">
                                                     <div className="flex justify-end gap-0.5 mb-1 h-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onClick={() => { setEditingHomeGoal(project.id); setEditingHomeGoalTitle(project.title); setEditingHomeGoalEmoji(project.emoji); }} className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center text-blue-600" style={{fontSize:'9px'}}>✏️</button>
-                                                        <button onClick={() => { saveSnapshot(); addToArchive(project.title,'project'); setProjects(prev => prev.map(p => p.id===project.id?{...p,showOnHome:false}:p));}} className="w-4 h-4 bg-rose-100 rounded flex items-center justify-center text-rose-500" style={{fontSize:'9px'}}>🗑️</button>
+                                                        <button onClick={() => toggleGoalAchieved(goal.id)} className="w-4 h-4 bg-emerald-100 rounded flex items-center justify-center text-emerald-600" style={{fontSize:'9px'}} title="סמני כהושג">✓</button>
+                                                        <button onClick={() => { setEditingHomeGoal(goal.id); setEditingHomeGoalTitle(goal.title); setEditingHomeGoalEmoji(goal.emoji); }} className="w-4 h-4 bg-blue-100 rounded flex items-center justify-center text-blue-600" style={{fontSize:'9px'}}>✏️</button>
+                                                        <button onClick={() => { addToArchive(goal.title,'project'); removeGoal(goal.id); }} className="w-4 h-4 bg-rose-100 rounded flex items-center justify-center text-rose-500" style={{fontSize:'9px'}}>🗑️</button>
                                                     </div>
-                                                    {editingHomeGoal === project.id ? (
-                                                        <div className="space-y-1"><div className="flex justify-center"><EmojiPicker value={editingHomeGoalEmoji} onChange={setEditingHomeGoalEmoji} size="sm" /></div><input value={editingHomeGoalTitle} onChange={e=>setEditingHomeGoalTitle(e.target.value)} className="w-full text-center text-[10px] font-bold border-b border-violet-300 outline-none bg-transparent py-0.5"/><div className="flex gap-1 justify-center mt-1"><button onClick={()=>{setProjects(prev=>prev.map(p=>p.id===project.id?{...p,title:editingHomeGoalTitle,emoji:editingHomeGoalEmoji}:p));setEditingHomeGoal(null);}} className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[9px] font-semibold">שמור</button><button onClick={()=>setEditingHomeGoal(null)} className="px-2 py-0.5 bg-slate-100 rounded text-[9px]">ביטול</button></div></div>
+                                                    {editingHomeGoal === goal.id ? (
+                                                        <div className="space-y-1"><div className="flex justify-center"><EmojiPicker value={editingHomeGoalEmoji} onChange={setEditingHomeGoalEmoji} size="sm" /></div><input value={editingHomeGoalTitle} onChange={e=>setEditingHomeGoalTitle(e.target.value)} className="w-full text-center text-[10px] font-bold border-b border-violet-300 outline-none bg-transparent py-0.5"/><div className="flex gap-1 justify-center mt-1"><button onClick={()=>{setDomainGoals(prev=>prev.map(g=>g.id===goal.id?{...g,title:editingHomeGoalTitle,emoji:editingHomeGoalEmoji}:g));setEditingHomeGoal(null);}} className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[9px] font-semibold">שמור</button><button onClick={()=>setEditingHomeGoal(null)} className="px-2 py-0.5 bg-slate-100 rounded text-[9px]">ביטול</button></div></div>
                                                     ):(<>
-                                                        <span className="text-lg mb-0.5 block">{project.emoji}</span>
-                                                        <h3 className="font-bold text-slate-700 mb-0.5 leading-tight text-[10px]">{project.title}</h3>
-                                                        <span className={`font-extrabold bg-gradient-to-r ${project.gradient} gradient-text text-sm`}>{progress}%</span>
-                                                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden mt-1"><div className={`h-full bg-gradient-to-r ${project.gradient} rounded-full`} style={{width:`${progress}%`}}></div></div>
+                                                        <span className="text-lg mb-0.5 block">{goal.emoji}</span>
+                                                        <h3 className="font-bold text-slate-700 mb-0.5 leading-tight text-[10px]">{goal.title}</h3>
+                                                        {carriedOver && <span className="text-[8px] font-bold text-amber-500">מ-{goal.year||currentRealYear} · עדיין פתוח</span>}
                                                     </>)}
                                                 </div>);})}
                                                 {showWeightCard && (
@@ -2208,15 +2249,17 @@ import { supabase } from './lib/supabaseClient.js';
                                     /* ── CALENDAR + TODAY TASKS ── */
                                     if(blockId==='today-tasks') {
                                         const now = new Date();
-                                        const year = now.getFullYear();
-                                        const month = now.getMonth();
                                         const todayDate = now.getDate();
                                         const todayStr = now.toISOString().split('T')[0];
                                         const todayTasks = tasks.filter(t => !t.completed && t.dueDate === todayStr);
 
+                                        const shown = new Date(now.getFullYear(), now.getMonth() + homeCalendarMonthOffset, 1);
+                                        const year = shown.getFullYear();
+                                        const month = shown.getMonth();
+
                                         const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
                                         const daysInMonth = new Date(year, month + 1, 0).getDate();
-                                        const monthName = now.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+                                        const monthName = shown.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
 
                                         const dayLabels = ['א','ב','ג','ד','ה','ו','ש'];
                                         const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
@@ -2237,9 +2280,10 @@ import { supabase } from './lib/supabaseClient.js';
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {/* Monthly Calendar */}
                                                 <div className="card p-4 editorial-calendar home-editorial-calendar">
-                                                    <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center gap-2">
-                                                        <Icon name="calendar" size={15} className="text-violet-500" />
-                                                        {monthName}
+                                                    <h3 className="font-bold text-slate-700 text-sm mb-3 flex items-center justify-between gap-2">
+                                                        <button type="button" aria-label="החודש הבא" className="home-calendar-nav" onClick={()=>setHomeCalendarMonthOffset(o=>o+1)}><Icon name="chevron-right" size={15}/></button>
+                                                        <span className="flex items-center gap-2"><Icon name="calendar" size={15} className="text-violet-500" />{monthName}</span>
+                                                        <button type="button" aria-label="החודש הקודם" className="home-calendar-nav" onClick={()=>setHomeCalendarMonthOffset(o=>o-1)}><Icon name="chevron-left" size={15}/></button>
                                                     </h3>
                                                     <div className="grid grid-cols-7 mb-1">
                                                         {dayLabels.map(d => (
@@ -2251,13 +2295,14 @@ import { supabase } from './lib/supabaseClient.js';
                                                             <div key={i} className="relative flex flex-col items-center py-0.5">
                                                                 {d ? (
                                                                     <>
-                                                                        <span className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold cursor-default transition-all ${d === todayDate ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-600 hover:bg-violet-50'}`}>{d}</span>
+                                                                        <span className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-semibold cursor-default transition-all ${(d === todayDate && homeCalendarMonthOffset === 0) ? 'bg-violet-600 text-white shadow-sm' : 'text-slate-600 hover:bg-violet-50'}`}>{d}</span>
                                                                         {tasksByDate[d] && <span className="w-1 h-1 rounded-full bg-pink-400 mt-0.5 absolute bottom-0.5" />}
                                                                     </>
                                                                 ) : <span />}
                                                             </div>
                                                         ))}
                                                     </div>
+                                                    <p className="home-calendar-caption">A NEW DAY · A BRIGHTER YOU</p>
                                                 </div>
 
                                                 {/* Today's Tasks */}
@@ -2266,11 +2311,13 @@ import { supabase } from './lib/supabaseClient.js';
                                                         <Icon name="check-square" size={15} className="text-violet-500" />
                                                         משימות להיום
                                                         {todayTasks.length > 0 && <span className="bg-violet-100 text-violet-700 text-[10px] font-black px-1.5 py-0.5 rounded-full">{todayTasks.length}</span>}
+                                                        <button type="button" className="today-tasks-see-all" onClick={()=>setActiveTab('tasks')}>הצג הכל</button>
                                                     </h3>
                                                     {todayTasks.length === 0 ? (
-                                                        <div className="flex flex-col items-center justify-center h-32 text-slate-300">
-                                                            <Icon name="check-circle" size={32} />
-                                                            <p className="text-xs mt-2 font-medium">אין משימות להיום 🎉</p>
+                                                        <div className="flex flex-col items-center justify-center h-32 text-slate-300 today-tasks-empty">
+                                                            <Icon name="leaf" size={30} />
+                                                            <p className="text-xs mt-2 font-medium">אין משימות להיום</p>
+                                                            <small>פעמים קטנים יוצרים חיים גדולים</small>
                                                         </div>
                                                     ) : (
                                                         <div className="space-y-2 overflow-y-auto max-h-48">
@@ -2416,6 +2463,7 @@ import { supabase } from './lib/supabaseClient.js';
                             {[
                                 {id:'profile', icon:'👤', label:'פרופיל'},
                                 {id:'design',  icon:'🎨', label:'עיצוב'},
+                                {id:'layout',  icon:'🧩', label:'פריסת בית'},
                                 {id:'tabs',    icon:'📑', label:'כרטיסיות'},
                                 {id:'domains', icon:'🏷️', label:'תחומים'},
                                 {id:'content', icon:'✏️', label:'תוכן'},
@@ -2562,6 +2610,117 @@ import { supabase } from './lib/supabaseClient.js';
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* ── HOME LAYOUT ── */}
+                        {settingsSection === 'layout' && (
+                            <div className="space-y-4">
+                                <div className="card p-6 space-y-4">
+                                    <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2">🧩 פריסת דף הבית</h3>
+                                    <p className="text-xs text-slate-400">נהלי מכאן את סדר הבלוקים בדף הבית, הוסיפי בלוק חדש או ערכי את הפריסה הקיימת — בלי לצאת מהגדרות.</p>
+                                    <div className="flex gap-2 flex-wrap">
+                                        <button onClick={() => setLayoutEditMode(p=>!p)} className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all ${layoutEditMode ? 'bg-violet-600 text-white' : 'bg-white text-slate-600 hover:bg-violet-50 border border-slate-200'}`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                            {layoutEditMode ? 'סיום' : 'ערוך פריסה'}
+                                        </button>
+                                        <button onClick={() => setShowAddHomeBlock(p=>!p)} className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all bg-white text-emerald-600 hover:bg-emerald-50 border border-slate-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                            הוסף בלוק
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* תצוגה מקדימה של דף הבית */}
+                                <div className="card p-5 space-y-3">
+                                    <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">👁️ תצוגה מקדימה של דף הבית</h3>
+                                    <p className="text-[11px] text-slate-400">ככה ייראה סדר הבלוקים בדף הבית לפי השינויים שנעשו כאן — מתעדכן מיד עם כל שינוי.</p>
+                                    <div className="grid grid-cols-6 gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                        {(() => {
+                                            const previewColSpanOf = (id) => {
+                                                const w = homeBlockWidths[id] || 'full';
+                                                if (w==='third') return 'col-span-6 md:col-span-2';
+                                                if (w==='half') return 'col-span-6 md:col-span-3';
+                                                return 'col-span-6';
+                                            };
+                                            return homeBlockOrder.map(id => {
+                                                const info = HOME_BLOCK_LABELS[id] || { label: homeCustomBlocks.find(b=>b.id===id)?.title||id, emoji:'🧩' };
+                                                const hidden = hiddenHomeBlocks.includes(id);
+                                                return (
+                                                    <div key={id} className={`${previewColSpanOf(id)} rounded-xl border-2 flex items-center justify-center gap-1.5 py-3 px-2 text-[11px] font-semibold transition-all ${hidden?'border-dashed border-slate-200 bg-white text-slate-300':'border-violet-200 bg-white text-slate-600'}`}>
+                                                        <span>{info.emoji}</span><span className="truncate">{info.label}</span>{hidden && <span className="text-[9px]">(מוסתר)</span>}
+                                                    </div>
+                                                );
+                                            });
+                                        })()}
+                                    </div>
+                                </div>
+
+                                {/* פאנל הוספת בלוק */}
+                                {showAddHomeBlock && (
+                                    <div className="card p-5 border-2 border-emerald-200 bg-emerald-50/40">
+                                        <h3 className="text-sm font-bold text-emerald-700 mb-3">➕ בלוק חדש לדף הבית</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <input value={newHomeBlockTitle} onChange={e=>setNewHomeBlockTitle(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addHomeCustomBlock()} placeholder="שם הבלוק..." className="p-2.5 bg-white border border-emerald-200 rounded-xl outline-none text-sm md:col-span-2"/>
+                                            <select value={newHomeBlockType} onChange={e=>setNewHomeBlockType(e.target.value)} className="p-2.5 bg-white border border-emerald-200 rounded-xl outline-none text-sm cursor-pointer">
+                                                <option value="writing">📝 כתיבה חופשית</option>
+                                                <option value="list">📋 צ'קליסט</option>
+                                                <option value="notes">🗒 פתקיות</option>
+                                                <option value="links">🔗 קישורים</option>
+                                                <option value="counter">🔢 מונה</option>
+                                                <option value="quote">💬 ציטוט</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex gap-2 mt-3">
+                                            <button onClick={addHomeCustomBlock} className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition-all">הוסף</button>
+                                            <button onClick={()=>setShowAddHomeBlock(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-all">ביטול</button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* פאנל עריכת פריסה */}
+                                {layoutEditMode && (
+                                    <div className="card p-5 border-2 border-dashed border-violet-300 bg-violet-50/50 space-y-3">
+                                        <p className="text-xs font-bold text-violet-700 text-center">⠿ גרור לשינוי סדר &nbsp;·&nbsp; ½ חצי / ⬛ מלא &nbsp;·&nbsp; Aא גודל טקסט &nbsp;·&nbsp; 👁 הסתר/הצג</p>
+                                        <div className="flex flex-wrap gap-2 justify-center">
+                                            {homeBlockOrder.map(id => {
+                                                const info = HOME_BLOCK_LABELS[id] || { label: homeCustomBlocks.find(b=>b.id===id)?.title||id, emoji:'🧩' };
+                                                const hidden = hiddenHomeBlocks.includes(id);
+                                                const w = homeBlockWidths[id] || 'full';
+                                                return (
+                                                    <div key={id} draggable
+                                                        onDragStart={e=>handleDragStart(e,id)} onDragEnd={handleDragEnd}
+                                                        onDragOver={e=>handleDragOver(e,id)} onDrop={e=>handleDrop(e,homeBlockOrder,setHomeBlockOrder)}
+                                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 cursor-grab select-none transition-all ${hidden?'border-slate-200 bg-white opacity-50':'border-violet-300 bg-white shadow-sm'}`}>
+                                                        <span className="text-slate-400 text-sm select-none">⠿</span>
+                                                        <span className="text-xs font-semibold text-slate-700">{info.emoji} {info.label}</span>
+                                                        <div className="flex gap-0 border border-slate-200 rounded-lg overflow-hidden mx-1">
+                                                            {[['third','⅓'],['half','½'],['full','⬛']].map(([val,lbl])=>(
+                                                                <button key={val} onClick={()=>{saveSnapshot();setHomeBlockWidths(prev=>({...prev,[id]:val}));}}
+                                                                    className={`px-2 py-0.5 text-[10px] font-bold transition-all ${(w===val)?'bg-violet-500 text-white':'bg-white text-slate-400 hover:bg-slate-100'}`}>{lbl}</button>
+                                                            ))}
+                                                        </div>
+                                                        <div className="flex gap-0.5 mr-1">
+                                                            <button onClick={()=>{saveSnapshot();setHomeBlockTextSize(prev=>({...prev,[id]:Math.max(0,(prev[id]??1)-1)}));}} className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center">A-</button>
+                                                            <button onClick={()=>{saveSnapshot();setHomeBlockTextSize(prev=>({...prev,[id]:Math.min(4,(prev[id]??1)+1)}));}} className="w-5 h-5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center">A+</button>
+                                                        </div>
+                                                        <button onClick={()=>{saveSnapshot();toggleHideHomeBlock(id);}}
+                                                            className={`w-5 h-5 rounded flex items-center justify-center text-xs transition-all ${hidden?'bg-slate-200 text-slate-400':'bg-violet-100 text-violet-600 hover:bg-violet-200'}`}>
+                                                            {hidden?'🙈':'👁'}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {(homeBlockWidths['countdown-2026']==='hidden' || homeBlockWidths['countdown-80']==='hidden') && (
+                                            <div className="flex gap-2 justify-center mt-2 pt-2 border-t border-violet-100">
+                                                <span className="text-[10px] text-violet-500 font-bold self-center">שחזור:</span>
+                                                {homeBlockWidths['countdown-2026']==='hidden' && <button onClick={()=>setHomeBlockWidths(prev=>({...prev,'countdown-2026':undefined}))} className="px-3 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-[10px] font-bold transition-all">+ עד סוף 2026</button>}
+                                                {homeBlockWidths['countdown-80']==='hidden' && <button onClick={()=>setHomeBlockWidths(prev=>({...prev,'countdown-80':undefined}))} className="px-3 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-lg text-[10px] font-bold transition-all">+ עד גיל 80</button>}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -3353,14 +3512,85 @@ import { supabase } from './lib/supabaseClient.js';
                 )}
 
                 {/* GOALS */}
-                {activeTab === 'goals' && (
+                {activeTab === 'goals' && (() => {
+                    const currentYearGoals = domainGoals.filter(g => !g.achieved && (g.year||currentRealYear) === currentRealYear);
+                    const overdueGoals = domainGoals.filter(g => !g.achieved && (g.year||currentRealYear) < currentRealYear);
+                    const futureGoals = domainGoals.filter(g => !g.achieved && (g.year||currentRealYear) > currentRealYear)
+                        .sort((a,b) => (a.year||currentRealYear) - (b.year||currentRealYear));
+                    const archivedGoals = domainGoals.filter(g => g.achieved)
+                        .sort((a,b) => (b.achievedAt||0) - (a.achievedAt||0));
+
+                    const renderGoalCard = (goal, { showYear = false } = {}) => (
+                        <div id={`domain-goal-${goal.id}`} key={goal.id} className={`card domain-goal-card overflow-hidden flex flex-col group/goal ${focusedDomainGoalId===goal.id?'is-focused':''} ${goal.achieved?'opacity-70':''}`}>
+                            {focusedDomainGoalId===goal.id && <span className="selected-goal-label">✓ היעד שבחרת</span>}
+                            <div className={`h-1 bg-gradient-to-r ${goal.color}`}></div>
+                            <div className="p-4 pb-2 flex items-center gap-2.5">
+                                <EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" />
+                                <input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" />
+                                {showYear && <span className="text-[9px] font-bold text-slate-400 bg-slate-100 rounded-full px-2 py-0.5 shrink-0">{goal.year||currentRealYear}</span>}
+                                <button onClick={() => toggleGoalAchieved(goal.id)} className={`shrink-0 transition-all ${goal.achieved?'text-emerald-500':'opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-emerald-500'}`} title={goal.achieved?'החזרת לפעיל':'סמני כהושג'}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+                                </button>
+                                <button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                            </div>
+                            <div className="px-4 pb-4 space-y-3 flex-1">
+                                {goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}
+                                <div className="space-y-2.5">
+                                    {(goal.points||[]).map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}
+                                    <button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button>
+                                </div>
+                            </div>
+                        </div>
+                    );
+
+                    return (
                     <div className="max-w-5xl mx-auto space-y-6 animate-slide-in-up pb-16">
                         <div className="card p-5 flex items-center gap-3 justify-center text-center"><h2 id="domain-goals-heading" className="text-xl font-bold text-slate-800">🎯 יעדים אסטרטגיים לפי תחומים</h2></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{domainGoals.map(goal => (<div id={`domain-goal-${goal.id}`} key={goal.id} className={`card domain-goal-card overflow-hidden flex flex-col group/goal ${focusedDomainGoalId===goal.id?'is-focused':''}`}>{focusedDomainGoalId===goal.id&&<span className="selected-goal-label">✓ היעד שבחרת</span>}<div className={`h-1 bg-gradient-to-r ${goal.color}`}></div><div className="p-4 pb-2 flex items-center gap-2.5"><EmojiPicker value={goal.emoji||'🎯'} onChange={v=>updateGoalEmoji(goal.id,v)} size="sm" /><input value={goal.title} onChange={e => updateGoalTitle(goal.id, e.target.value)} className="text-sm font-bold text-slate-800 bg-transparent border-none outline-none flex-1" /><button onClick={() => removeGoal(goal.id)} className="opacity-0 group-hover/goal:opacity-100 text-slate-300 hover:text-rose-500 transition-all shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><div className="px-4 pb-4 space-y-3 flex-1">{goal.current && (<div className="p-2.5 bg-violet-50 rounded-lg border border-violet-100"><label className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">מצב נוכחי</label><input value={goal.current} onChange={e => updateGoalCurrent(goal.id, e.target.value)} className="text-xs font-bold text-violet-600 bg-transparent border-none outline-none w-full" /></div>)}<div className="space-y-2.5">{goal.points.map((point, pi) => (<div key={point.id} className="relative pr-4 border-r-2 border-slate-100 group/point hover:border-pink-300 transition-colors"><div className={`absolute right-[-5px] top-1 w-2 h-2 rounded-full ${pi%3===0?'bg-blue-400':pi%3===1?'bg-violet-400':'bg-emerald-400'}`}></div><div className="flex justify-between items-start mb-0.5"><label className="text-[8px] font-bold text-slate-400 uppercase">{point.label}</label><button onClick={() => removeGoalPoint(goal.id, point.id)} className="opacity-0 group-hover/point:opacity-100 text-slate-300 hover:text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div><textarea value={point.text} onChange={e => updateGoalPoint(goal.id, point.id, e.target.value)} className="text-xs font-medium text-slate-600 bg-transparent border-none outline-none w-full resize-none leading-relaxed" rows={2} /></div>))}<button onClick={() => addGoalPoint(goal.id)} className="w-full py-2 border border-dashed border-slate-200 rounded-lg text-[9px] font-bold text-slate-400 uppercase hover:border-pink-300 hover:text-pink-500 transition-all flex items-center justify-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> הוספת יעד נוסף</button></div></div></div>))}</div>
-                        <div className="card p-5 border-t-[3px] border-pink-400"><div className="space-y-2.5"><input type="text" value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} placeholder="שם היעד..." className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><div className="flex items-center gap-2"><EmojiPicker value={newGoalEmoji} onChange={setNewGoalEmoji} /><span className="text-xs text-slate-400">בחרי אימוג'י ליעד</span></div><select value={newGoalColor} onChange={e => setNewGoalColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select><button onClick={addNewGoal} className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-pink-600 transition-all">הוסף יעד</button></div></div>
+
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold text-slate-500 px-1">✨ יעדי {currentRealYear}</h3>
+                            {currentYearGoals.length>0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{currentYearGoals.map(goal => renderGoalCard(goal))}</div>
+                            ) : (
+                                <p className="text-xs text-slate-400 px-1">עוד לא נוספו יעדים לשנת {currentRealYear}.</p>
+                            )}
+                        </div>
+
+                        {overdueGoals.length>0 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-bold text-amber-600 px-1">⏳ יעדים שלא הושגו משנים קודמות</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{overdueGoals.map(goal => renderGoalCard(goal, {showYear:true}))}</div>
+                            </div>
+                        )}
+
+                        {futureGoals.length>0 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-bold text-blue-500 px-1">🔭 יעדי עתיד</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{futureGoals.map(goal => renderGoalCard(goal, {showYear:true}))}</div>
+                            </div>
+                        )}
+
+                        <div className="card p-5 border-t-[3px] border-pink-400"><div className="space-y-2.5">
+                            <input type="text" value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} placeholder="שם היעד..." className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" />
+                            <div className="flex items-center gap-2"><EmojiPicker value={newGoalEmoji} onChange={setNewGoalEmoji} /><span className="text-xs text-slate-400">בחרי אימוג'י ליעד</span></div>
+                            <select value={newGoalColor} onChange={e => setNewGoalColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select>
+                            <select value={newGoalYear} onChange={e => setNewGoalYear(Number(e.target.value))} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer">
+                                {Array.from({length:5},(_,i)=>currentRealYear+i).map(yr => (<option key={yr} value={yr}>יעד ל-{yr}</option>))}
+                            </select>
+                            <button onClick={addNewGoal} className="w-full bg-pink-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-pink-600 transition-all">הוסף יעד</button>
+                        </div></div>
+
+                        {archivedGoals.length>0 && (
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-bold text-emerald-600 px-1">🏆 ארכיון יעדים שהושגו</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">{archivedGoals.map(goal => renderGoalCard(goal, {showYear:true}))}</div>
+                            </div>
+                        )}
+
                         {renderBuiltinExtra('goals')}
                     </div>
-                )}
+                    );
+                })()}
 
                 {/* CALENDAR */}
                 {activeTab === 'morning-ritual' && (
@@ -4862,8 +5092,14 @@ import { supabase } from './lib/supabaseClient.js';
                                     <EmojiPicker value={newGoalEmoji} onChange={setNewGoalEmoji} size="lg" />
                                     <input value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none" placeholder="שם היעד..." />
                                 </div>
+                                <div>
+                                    <p className="text-xs font-bold text-slate-500 mb-1">לאיזו שנה?</p>
+                                    <select value={newGoalYear} onChange={e => setNewGoalYear(Number(e.target.value))} className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none cursor-pointer">
+                                        {Array.from({length:5},(_,i)=>currentRealYear+i).map(yr => (<option key={yr} value={yr}>יעד ל-{yr}</option>))}
+                                    </select>
+                                </div>
                                 <div className="flex gap-2">
-                                    <button onClick={() => { if (!newGoalTitle.trim()) return; setProjects(prev => [...prev, { id:"p"+Date.now(), title: newGoalTitle, emoji: newGoalEmoji, gradient: "from-violet-500 to-purple-600", color: "from-violet-500 to-purple-600", startMonth: new Date().getMonth()+1, endMonth: 12, showOnHome: true }]); setNewGoalTitle(""); setNewGoalEmoji(""); setShowAddGoalModal(false); }} className="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all">הוסף</button>
+                                    <button onClick={() => { if (!newGoalTitle.trim()) return; saveSnapshot(); setDomainGoals(prev => [...prev, { id:`dg${Date.now()}`, title: newGoalTitle, emoji: newGoalEmoji, color: "from-violet-500 to-purple-600", year: newGoalYear, achieved: false, achievedAt: null, points: [] }]); setNewGoalTitle(""); setNewGoalEmoji(""); setShowAddGoalModal(false); }} className="flex-1 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all">הוסף</button>
                                     <button onClick={() => setShowAddGoalModal(false)} className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-bold transition-all">ביטול</button>
                                 </div>
                             </div>

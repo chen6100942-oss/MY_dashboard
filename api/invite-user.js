@@ -1,18 +1,17 @@
 const { createClient } = require('@supabase/supabase-js');
 const WebSocket = require('ws');
 
-exports.handler = async (event) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-    };
+module.exports = async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'application/json');
 
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 200, headers, body: '' };
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
     }
-
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+    if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method Not Allowed' });
+        return;
     }
 
     const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -20,25 +19,25 @@ exports.handler = async (event) => {
     const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!SERVICE_ROLE_KEY || !SUPABASE_URL || !ANON_KEY) {
-        return { statusCode: 500, headers, body: JSON.stringify({ error: 'Server misconfiguration — missing env vars' }) };
+        res.status(500).json({ error: 'Server misconfiguration — missing env vars' });
+        return;
     }
 
-    const authHeader = event.headers['authorization'] || event.headers['Authorization'] || '';
+    const authHeader = req.headers['authorization'] || req.headers['Authorization'] || '';
     const callerJwt = authHeader.replace(/^Bearer\s+/i, '');
-
     if (!callerJwt) {
-        return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized — no token' }) };
+        res.status(401).json({ error: 'Unauthorized — no token' });
+        return;
     }
 
-    let email;
-    try {
-        ({ email } = JSON.parse(event.body || '{}'));
-    } catch {
-        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON body' }) };
+    let body = req.body;
+    if (typeof body === 'string') {
+        try { body = JSON.parse(body || '{}'); } catch { res.status(400).json({ error: 'Invalid JSON body' }); return; }
     }
-
+    const { email } = body || {};
     if (!email || !email.includes('@')) {
-        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid email address' }) };
+        res.status(400).json({ error: 'Invalid email address' });
+        return;
     }
 
     // Verify caller is admin using their JWT + anon key (RLS enforced)
@@ -55,7 +54,8 @@ exports.handler = async (event) => {
 
     if (profileError || !profiles || !profiles[0] || profiles[0].role !== 'admin') {
         console.log('Admin check failed:', profileError?.message, profiles);
-        return { statusCode: 403, headers, body: JSON.stringify({ error: 'Admin access required' }) };
+        res.status(403).json({ error: 'Admin access required' });
+        return;
     }
 
     // Send invite using Supabase admin client with service role key
@@ -65,17 +65,14 @@ exports.handler = async (event) => {
     });
 
     const { error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-        redirectTo: 'https://inside-out-byhenzerah.netlify.app',
+        redirectTo: 'https://my-dashboard-fawn-tau.vercel.app',
     });
 
     if (inviteError) {
         console.log('Invite error:', inviteError.message);
-        return { statusCode: 400, headers, body: JSON.stringify({ error: inviteError.message }) };
+        res.status(400).json({ error: inviteError.message });
+        return;
     }
 
-    return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ success: true, message: `הזמנה נשלחה ל-${email} ✉️` }),
-    };
+    res.status(200).json({ success: true, message: `הזמנה נשלחה ל-${email} ✉️` });
 };
