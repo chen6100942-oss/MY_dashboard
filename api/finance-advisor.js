@@ -181,6 +181,7 @@ ${JSON.stringify(goals || [], null, 2)}`;
             body: JSON.stringify({
                 model: 'claude-sonnet-5',
                 max_tokens: 4096,
+                thinking: { type: 'disabled' },
                 system: [
                     { type: 'text', text: CFO_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
                 ],

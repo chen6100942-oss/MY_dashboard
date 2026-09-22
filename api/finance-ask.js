@@ -78,6 +78,7 @@ ${JSON.stringify(cards || [], null, 2)}
             body: JSON.stringify({
                 model: 'claude-sonnet-5',
                 max_tokens: 1024,
+                thinking: { type: 'disabled' },
                 messages: [{ role: 'user', content: prompt }],
             }),
         });
