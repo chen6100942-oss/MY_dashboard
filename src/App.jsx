@@ -3364,17 +3364,17 @@ import { supabase } from './lib/supabaseClient.js';
 
                         {/* כותרת כמו בשאר הכרטיסיות */}
                         <div className="card p-5 flex items-center gap-3 justify-center text-center">
-                            <Icon name="list-todo" size={25} className="text-slate-700" />
+                            <Icon name="list-todo" size={25} className="text-[#80685d]" />
                             <h2 className="text-xl font-bold text-slate-800">משימות ופרויקטים</h2>
                         </div>
 
                         {/* פעולות ראשיות — משימה מימין, פרויקט משמאל */}
                         <div className="grid grid-cols-2 gap-2">
-                            <button onClick={() => { setAddingType('task'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-white transition-all">
-                                <Icon name="check-square" size={17} /> משימה חדשה
+                            <button onClick={() => { setAddingType('task'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-[#6f5548] border border-[#80685d]/20 hover:border-[#80685d]/45 hover:bg-white transition-all">
+                                <Icon name="check-square" size={17} className="text-[#80685d]" /> משימה חדשה
                             </button>
-                            <button onClick={() => { setAddingType('project'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-white transition-all">
-                                <Icon name="folder" size={17} /> פרויקט חדש
+                            <button onClick={() => { setAddingType('project'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-[#6f5548] border border-[#80685d]/20 hover:border-[#80685d]/45 hover:bg-white transition-all">
+                                <Icon name="folder" size={17} className="text-[#80685d]" /> פרויקט חדש
                             </button>
                         </div>
 
@@ -3383,22 +3383,22 @@ import { supabase } from './lib/supabaseClient.js';
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-bold text-slate-500">סוג:</span>
                                 {[
-                                    {v:'all', label:`הכל (${tasks.length + projects.length})`},
-                                    {v:'task', label:`משימות (${tasks.length})`},
-                                    {v:'project', label:`פרויקטים (${projects.length})`},
+                                    {v:'all', icon:'list-todo', label:`הכל (${tasks.length + projects.length})`},
+                                    {v:'task', icon:'check-square', label:`משימות (${tasks.length})`},
+                                    {v:'project', icon:'folder', label:`פרויקטים (${projects.length})`},
                                 ].map(f => (
-                                    <button key={f.v} onClick={() => setTypeFilter(f.v)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${typeFilter===f.v ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{f.label}</button>
+                                    <button key={f.v} onClick={() => setTypeFilter(f.v)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 ${typeFilter===f.v ? 'bg-[#8b6c5d] text-white' : 'bg-[#80685d]/[0.07] text-[#6f5548] hover:bg-[#80685d]/[0.12]'}`}><Icon name={f.icon} size={13} />{f.label}</button>
                                 ))}
                                 <span className="text-slate-200 font-light mx-1">|</span>
                                 <span className="text-xs font-bold text-slate-500">תחום:</span>
-                                <button onClick={() => setTaskDomainFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter==='all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הכל</button>
+                                <button onClick={() => setTaskDomainFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter==='all' ? 'bg-[#8b6c5d] text-white' : 'bg-[#80685d]/[0.07] text-[#6f5548] hover:bg-[#80685d]/[0.12]'}`}>הכל</button>
                                 {domains.map(d => {
                                     const tCount = tasks.filter(t => t.domain === d.value || t.projectId === d.value).length;
                                     const pCount = projects.filter(p => p.domain === d.value).length;
                                     const count = tCount + pCount;
                                     if (!count) return null;
                                     return (
-                                        <button key={d.id} onClick={() => setTaskDomainFilter(d.value)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter===d.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                                        <button key={d.id} onClick={() => setTaskDomainFilter(d.value)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter===d.value ? 'bg-[#8b6c5d] text-white' : 'bg-[#80685d]/[0.07] text-[#6f5548] hover:bg-[#80685d]/[0.12]'}`}>
                                             {d.label} ({count})
                                         </button>
                                     );
@@ -3407,7 +3407,7 @@ import { supabase } from './lib/supabaseClient.js';
                                     <span className="text-slate-200 font-light mx-1">|</span>
                                     <span className="text-xs font-bold text-slate-500">קיבוץ:</span>
                                     {[{v:'domain',label:'לפי תחום'},{v:'date',label:'לפי תאריך'},{v:'priority',label:'לפי עדיפות'}].map(g => (
-                                        <button key={g.v} onClick={() => setTaskGroupBy(g.v)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${taskGroupBy===g.v ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}>{g.label}</button>
+                                        <button key={g.v} onClick={() => setTaskGroupBy(g.v)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${taskGroupBy===g.v ? 'bg-[#8b6c5d] text-white border-[#8b6c5d]' : 'bg-white text-[#80685d] border-[#80685d]/20 hover:border-[#80685d]/45'}`}>{g.label}</button>
                                     ))}
                                 </>)}
                             </div>
