@@ -3362,19 +3362,20 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'tasks' && (
                     <div className="tasks-focus-column max-w-3xl mx-auto animate-slide-in-up pb-16 space-y-4">
 
-                        {/* כותרת ופעולות */}
-                        <div className="card px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
-                            <div className="flex items-center gap-2.5">
-                                <span className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-lg">✓</span>
-                                <div>
-                                    <h2 className="text-base font-bold text-slate-800">משימות ופרויקטים</h2>
-                                    <p className="text-[11px] text-slate-400 mt-0.5">{tasks.filter(t => !t.completed).length} משימות פעילות · {projects.length} פרויקטים</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => { setAddingType('task'); setShowTaskComposer(true); }} className="px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-500 hover:bg-blue-600 text-white transition-all shadow-sm">+ משימה חדשה</button>
-                                <button onClick={() => { setAddingType('project'); setShowTaskComposer(true); }} className="px-3.5 py-2 rounded-xl text-xs font-bold bg-violet-500 hover:bg-violet-600 text-white transition-all shadow-sm">+ פרויקט חדש</button>
-                            </div>
+                        {/* כותרת כמו בשאר הכרטיסיות */}
+                        <div className="card p-5 flex items-center gap-3 justify-center text-center">
+                            <Icon name="list-todo" size={25} className="text-slate-700" />
+                            <h2 className="text-xl font-bold text-slate-800">משימות ופרויקטים</h2>
+                        </div>
+
+                        {/* פעולות ראשיות — משימה מימין, פרויקט משמאל */}
+                        <div className="grid grid-cols-2 gap-2">
+                            <button onClick={() => { setAddingType('task'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-white transition-all">
+                                <Icon name="check-square" size={17} /> משימה חדשה
+                            </button>
+                            <button onClick={() => { setAddingType('project'); setShowTaskComposer(true); }} className="card px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold text-slate-700 border border-slate-200 hover:border-slate-400 hover:bg-white transition-all">
+                                <Icon name="folder" size={17} /> פרויקט חדש
+                            </button>
                         </div>
 
                         {/* סינונים - שורה אחת */}
@@ -3383,22 +3384,22 @@ import { supabase } from './lib/supabaseClient.js';
                                 <span className="text-xs font-bold text-slate-500">סוג:</span>
                                 {[
                                     {v:'all', label:`הכל (${tasks.length + projects.length})`},
-                                    {v:'task', label:`✅ משימות (${tasks.length})`},
-                                    {v:'project', label:`📂 פרויקטים (${projects.length})`},
+                                    {v:'task', label:`משימות (${tasks.length})`},
+                                    {v:'project', label:`פרויקטים (${projects.length})`},
                                 ].map(f => (
-                                    <button key={f.v} onClick={() => setTypeFilter(f.v)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${typeFilter===f.v ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{f.label}</button>
+                                    <button key={f.v} onClick={() => setTypeFilter(f.v)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${typeFilter===f.v ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{f.label}</button>
                                 ))}
                                 <span className="text-slate-200 font-light mx-1">|</span>
                                 <span className="text-xs font-bold text-slate-500">תחום:</span>
-                                <button onClick={() => setTaskDomainFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter==='all' ? 'bg-violet-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הכל</button>
+                                <button onClick={() => setTaskDomainFilter('all')} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter==='all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>הכל</button>
                                 {domains.map(d => {
                                     const tCount = tasks.filter(t => t.domain === d.value || t.projectId === d.value).length;
                                     const pCount = projects.filter(p => p.domain === d.value).length;
                                     const count = tCount + pCount;
                                     if (!count) return null;
                                     return (
-                                        <button key={d.id} onClick={() => setTaskDomainFilter(d.value)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter===d.value ? 'bg-violet-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                                            {d.emoji} {d.label} ({count})
+                                        <button key={d.id} onClick={() => setTaskDomainFilter(d.value)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${taskDomainFilter===d.value ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                                            {d.label} ({count})
                                         </button>
                                     );
                                 })}
@@ -3406,17 +3407,17 @@ import { supabase } from './lib/supabaseClient.js';
                                     <span className="text-slate-200 font-light mx-1">|</span>
                                     <span className="text-xs font-bold text-slate-500">קיבוץ:</span>
                                     {[{v:'domain',label:'לפי תחום'},{v:'date',label:'לפי תאריך'},{v:'priority',label:'לפי עדיפות'}].map(g => (
-                                        <button key={g.v} onClick={() => setTaskGroupBy(g.v)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${taskGroupBy===g.v ? 'bg-violet-500 text-white border-transparent' : 'bg-white text-slate-500 border-slate-200 hover:border-violet-300'}`}>{g.label}</button>
+                                        <button key={g.v} onClick={() => setTaskGroupBy(g.v)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${taskGroupBy===g.v ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'}`}>{g.label}</button>
                                     ))}
                                 </>)}
                             </div>
                         </div>
 
                         {/* טופס הוספה — נפתח רק לפי בקשה */}
-                        {showTaskComposer && <div className="card p-4 border-t-[3px] border-blue-400 space-y-3">
+                        {showTaskComposer && <div className="card p-4 border-t border-slate-300 space-y-3">
                             <div className="flex gap-2 mb-1">
-                                <button onClick={() => setAddingType('task')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='task' ? 'bg-blue-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-blue-300'}`}>✅ משימה חדשה</button>
-                                <button onClick={() => setAddingType('project')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='project' ? 'bg-violet-500 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-violet-300'}`}>📂 פרויקט חדש</button>
+                                <button onClick={() => setAddingType('task')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='task' ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-400'}`}>משימה חדשה</button>
+                                <button onClick={() => setAddingType('project')} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${addingType==='project' ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-400'}`}>פרויקט חדש</button>
                                 <button onClick={() => setShowTaskComposer(false)} className="w-9 rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all" title="סגירה" aria-label="סגירת טופס">×</button>
                             </div>
                             {!speechRecognitionSupported && <p className="voice-support-note">הכתבה קולית אינה נתמכת בדפדפן הפנימי. כדי להשתמש במיקרופון, פתחי את גרסת ה־LOCAL ב־Chrome או Edge.</p>}
@@ -3430,7 +3431,7 @@ import { supabase } from './lib/supabaseClient.js';
                                             <button key={p.v} onClick={() => setNewTaskPriority(p.v)} className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${newTaskPriority===p.v ? 'bg-slate-700 text-white border-transparent' : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-400'}`}>{p.label}</button>
                                         ))}
                                     </div>
-                                    <button onClick={addNewTask} className="w-full bg-blue-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-blue-600 transition-all">+ הוסף משימה</button>
+                                    <button onClick={addNewTask} className="w-full bg-slate-800 text-white py-2 rounded-xl font-semibold text-xs hover:bg-slate-900 transition-all">+ הוסף משימה</button>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
@@ -3439,7 +3440,7 @@ import { supabase } from './lib/supabaseClient.js';
                                     <select value={newProjectDomain} onChange={e => setNewProjectDomain(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer">{domains.map(d => (<option key={d.id} value={d.value}>{d.emoji} {d.label}</option>))}</select>
                                     <select value={newProjectColor} onChange={e => setNewProjectColor(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer"><option value="from-violet-500 to-purple-500">💜 סגול</option><option value="from-blue-500 to-cyan-500">💙 כחול</option><option value="from-pink-500 to-rose-500">💗 ורוד</option><option value="from-emerald-500 to-teal-500">💚 ירוק</option><option value="from-amber-500 to-orange-500">🧡 כתום</option></select>
                                     <input type="date" value={newProjectDueDate} onChange={e => setNewProjectDueDate(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-xs font-medium cursor-pointer" />
-                                    <button onClick={addNewProject} className="w-full bg-violet-500 text-white py-2 rounded-xl font-semibold text-xs hover:bg-violet-600 transition-all">+ הוסף פרויקט</button>
+                                    <button onClick={addNewProject} className="w-full bg-slate-800 text-white py-2 rounded-xl font-semibold text-xs hover:bg-slate-900 transition-all">+ הוסף פרויקט</button>
                                 </div>
                             )}
                         </div>}
