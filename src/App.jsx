@@ -330,12 +330,11 @@ import { supabase } from './lib/supabaseClient.js';
             { id: 'm4', domain: 'אדריכלות וספר', daily: 'שעות עבודה על פרויקט גמר', weekly: 'התקדמות %', monthly: 'הגשה עד סוף 2026' },
             { id: 'm5', domain: 'תוכן', daily: '✓ תוכן יומי', weekly: 'עוקבים חדשים', monthly: '1K+ עוקבים חדשים' },
         ]);
-        const [domainGoals, setDomainGoals] = useState([
-            { id: 'dg1', title: 'הוצאת הספר לאור', emoji: '📚', color: 'from-blue-500 to-cyan-500', year: 2026, achieved: false, progress: 60, points: [{ id: 'p1', label: 'יעד קרוב', text: 'סיום עריכה ל-120,000 מילים' }, { id: 'p2', label: 'יעד בינוני', text: 'שליחה לעורכת מקצועית' }, { id: 'p3', label: 'יעד רחוק', text: 'פרסום הספר - יוני 2027' }] },
-            { id: 'dg2', title: 'פרויקט גמר באדריכלות', emoji: '🎓', color: 'from-violet-500 to-purple-500', year: 2026, achieved: false, progress: 40, points: [{ id: 'p1', label: 'יעד קרוב', text: 'שיחה עם נדב + תוכנית עבודה' }, { id: 'p2', label: 'יעד בינוני', text: 'השלמת 50% - מרץ 2026' }, { id: 'p3', label: 'יעד רחוק', text: 'הגשה וקבלת רישיון - אפריל-מאי 2026' }] },
-            { id: 'dg4', title: 'יוצרת תוכן ברשתות', emoji: '📱', color: 'from-pink-500 to-rose-500', current: '160 עוקבים', year: 2026, achieved: false, progress: 75, points: [{ id: 'p1', label: 'יעד קרוב', text: '500 עוקבים (פברואר)' }, { id: 'p2', label: 'יעד בינוני', text: '5,000 עוקבים (יוני)' }, { id: 'p3', label: 'יעד רחוק', text: '500,000 עוקבים' }] },
-            { id: 'dg3', title: 'יעדים פיננסיים', emoji: '🎯', color: 'from-amber-500 to-orange-500', year: 2026, achieved: false, progress: 30, points: [{ id: 'p1', label: 'יעד קרוב', text: '' }, { id: 'p2', label: 'יעד בינוני', text: '' }, { id: 'p3', label: 'יעד רחוק', text: '' }] },
-        ]);
+        // ריק כברירת מחדל — נתוני הדוגמה הישנים (שכללו את השם והפרויקטים האישיים של חן
+        // באופן מפורש) עברו למשתמשת/משתמש חדש/ה לרגע לפני שהנתונים האמיתיים/הריקים שלהם
+        // נטענים מהענן, מה שנראה כאילו הם "בתוך" חשבון של מישהי אחרת. הנתונים האמיתיים
+        // של חן טעונים כבר בענן ולא מושפעים מהשינוי הזה.
+        const [domainGoals, setDomainGoals] = useState([]);
         const [newTaskText, setNewTaskText] = useState('');
         const [newTaskEmoji, setNewTaskEmoji] = useState('✅');
         const [newTaskDomain, setNewTaskDomain] = useState('general');
@@ -592,7 +591,7 @@ import { supabase } from './lib/supabaseClient.js';
         useEffect(() => {
             setAffirmations(prev => prev.filter(item => item.text !== 'אני בוחרת להיות עשירה ומאושרת'));
         }, []);
-        const [profileName, setProfileName] = useState('חן זרח');
+        const [profileName, setProfileName] = useState('');
         const [visionBoardItems, setVisionBoardItems] = useState([]);
         const [manifestations, setManifestations] = useState([]);
         const [manifestDailyDone, setManifestDailyDone] = useState({});
