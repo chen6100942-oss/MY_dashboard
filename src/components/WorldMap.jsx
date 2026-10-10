@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { loadAmCharts } from '../lib/loadScript.js';
 
-const WorldMap = ({ worldVisited, worldUpcoming, worldBlocked, setWorldVisited, setWorldUpcoming, setWorldBlocked }) => {
+// Static picture of where she's been — the colours mirror the status dropdowns
+// in the country list below it. Deliberately not clickable: status is changed
+// in the list, the map only reflects it. Trip planning lives in TravelHub.
+const WorldMap = ({ worldVisited, worldUpcoming, worldBlocked, colors }) => {
     const chartDivRef = useRef(null);
     const rootRef = useRef(null);
 
@@ -32,58 +35,37 @@ const WorldMap = ({ worldVisited, worldUpcoming, worldBlocked, setWorldVisited, 
 
             polygonSeries.mapPolygons.template.setAll({
                 tooltipText: '{name}',
-                toggleKey: 'active',
                 interactive: true,
-                fill: am5.color(0xe2e8f0),
-                stroke: am5.color(0xffffff),
-                strokeWidth: 0.5,
-            });
-
-            polygonSeries.mapPolygons.template.states.create('hover', {
-                fill: am5.color(0xa78bfa),
+                fill: am5.color(colors.none),
+                stroke: am5.color(0xfffdf9),
+                strokeWidth: 0.6,
             });
 
             const colorCountries = () => {
                 polygonSeries.mapPolygons.each(polygon => {
                     const id = polygon.dataItem?.get('id');
                     if (worldVisited.includes(id)) {
-                        polygon.set('fill', am5.color(0x10b981));
+                        polygon.set('fill', am5.color(colors.visited));
                     } else if (worldUpcoming.includes(id)) {
-                        polygon.set('fill', am5.color(0xf59e0b));
+                        polygon.set('fill', am5.color(colors.upcoming));
                     } else if (worldBlocked.includes(id)) {
-                        polygon.set('fill', am5.color(0xdc2626));
+                        polygon.set('fill', am5.color(colors.blocked));
                     } else {
-                        polygon.set('fill', am5.color(0xe2e8f0));
+                        polygon.set('fill', am5.color(colors.none));
                     }
                 });
             };
 
             polygonSeries.events.on('datavalidated', colorCountries);
-
-            polygonSeries.mapPolygons.template.events.on('click', (ev) => {
-                const id = ev.target.dataItem?.get('id');
-                if (!id) return;
-                if (worldVisited.includes(id)) {
-                    setWorldVisited(prev => prev.filter(c => c !== id));
-                    setWorldUpcoming(prev => [...prev.filter(c => c !== id), id]);
-                } else if (worldUpcoming.includes(id)) {
-                    setWorldUpcoming(prev => prev.filter(c => c !== id));
-                    setWorldBlocked(prev => [...prev.filter(c => c !== id), id]);
-                } else if (worldBlocked.includes(id)) {
-                    setWorldBlocked(prev => prev.filter(c => c !== id));
-                } else {
-                    setWorldVisited(prev => [...prev, id]);
-                }
-            });
         });
 
         return () => {
             cancelled = true;
             if (rootRef.current) { rootRef.current.dispose(); rootRef.current = null; }
         };
-    }, [worldVisited.join(','), worldUpcoming.join(','), worldBlocked.join(',')]);
+    }, [worldVisited.join(','), worldUpcoming.join(','), worldBlocked.join(','), colors.visited, colors.upcoming, colors.blocked, colors.none]);
 
-    return <div ref={chartDivRef} style={{ width: '100%', height: '420px', borderRadius: '1rem', overflow: 'hidden' }} />;
+    return <div ref={chartDivRef} style={{ width: '100%', height: '430px', borderRadius: '1rem', overflow: 'hidden' }} />;
 };
 
 export default WorldMap;

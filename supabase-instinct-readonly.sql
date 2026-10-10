@@ -67,7 +67,7 @@ create or replace function public.create_readonly_token(token_name text, token_s
 returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   caller_role text;
@@ -93,7 +93,7 @@ create or replace function public.revoke_readonly_token(target_token_id uuid)
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare caller_role text;
 begin
@@ -109,7 +109,7 @@ create or replace function public.list_readonly_tokens()
 returns table(id uuid, name text, scopes text[], created_at timestamptz, expires_at timestamptz, revoked_at timestamptz, last_used_at timestamptz)
 language sql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
   select rt.id, rt.name, rt.scopes, rt.created_at, rt.expires_at, rt.revoked_at, rt.last_used_at
   from readonly_tokens rt
@@ -126,7 +126,7 @@ create or replace function public._instinct_check(token_plain text, required_sco
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   row_data readonly_tokens%rowtype;
@@ -178,7 +178,7 @@ create or replace function public.instinct_get_tasks(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   uid uuid := public._instinct_check(token_plain, 'tasks:read', 'tasks');
@@ -223,7 +223,7 @@ create or replace function public.instinct_get_projects(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   uid uuid := public._instinct_check(token_plain, 'projects:read', 'projects');
@@ -270,7 +270,7 @@ create or replace function public.instinct_get_finance_summary(
 returns jsonb
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   uid uuid := public._instinct_check(token_plain, 'finance:read', 'finance');

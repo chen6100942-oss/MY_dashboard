@@ -3,6 +3,7 @@ import EmojiPicker from './components/EmojiPicker.jsx';
 import Icon from './components/Icon.jsx';
 import LoginScreen from './components/LoginScreen.jsx';
 import TravelHub from './components/TravelHub.jsx';
+import WorldMap from './components/WorldMap.jsx';
 import MorningRitualJourney from './components/MorningRitualJourney.jsx';
 import WeeklyLifePlanner from './components/WeeklyLifePlanner.jsx';
 import LifeOperatingSystem from './components/LifeOperatingSystem.jsx';
@@ -35,6 +36,32 @@ import { supabase } from './lib/supabaseClient.js';
         '📁':'folder', '📂':'folder', '🖼️':'image', '🎉':'star', '🚀':'arrow-up-right',
     };
     const emojiToIcon = (emoji) => EMOJI_TO_ICON[emoji] || 'sparkles';
+
+    // ── My World: the real country list. Everything not listed here is "עדיין לא".
+    // WORLD_RESET_KEY gates a one-time reset of saved data onto these values —
+    // without it the old saved arrays would keep overriding these defaults forever.
+    const WORLD_RESET_KEY = 'worldReset2026';
+    const WORLD_VISITED_DEFAULT = ['IL','TR','GR','CY','FR','PL','ES','MX','DO','NL','GB','DE','CZ','HU','VA','IT','PT','EG','TH','GE'];
+    const WORLD_UPCOMING_DEFAULT = [];
+    // Countries an Israeli passport can't enter. Saudi Arabia and Libya were
+    // removed from this list at Chen's request — they show as "עדיין לא".
+    const WORLD_BLOCKED_DEFAULT = ['IR','IQ','SY','LB','YE','DZ','SD','KW','MY','BN','BD','PK','KP'];
+    const WORLD_NOTES_DEFAULT = {
+        FR: 'פריז',
+        ES: 'ברצלונה, מדריד, ולנסיה, מלגה, סיביליה, רונדה',
+        NL: 'אמסטרדם (3 פעמים)',
+        GB: 'לונדון',
+        DE: 'ברלין',
+        CZ: 'פראג',
+        HU: 'בודפשט',
+        IT: 'סיציליה',
+    };
+    const WORLD_STATUS = {
+        visited:  { label: 'הייתי',            color: '#16a34a', soft: '#dcfce7', map: 0x16a34a },
+        upcoming: { label: 'אהיה בקרוב',       color: '#d97706', soft: '#fef3c7', map: 0xeab308 },
+        blocked:  { label: 'לא ניתן (פוליטי)', color: '#dc2626', soft: '#fee2e2', map: 0xdc2626 },
+        none:     { label: 'עדיין לא',          color: '#2563eb', soft: '#dbeafe', map: 0x93c5fd },
+    };
     // One consistent warm brown-beige tone for every monochrome icon badge — not a
     // different hue per item — matches the brown already used for this tab's own
     // header icon (#80685d), so the whole set reads as one quiet family of icons.
@@ -598,10 +625,12 @@ import { supabase } from './lib/supabaseClient.js';
         const [showSoundLibrary, setShowSoundLibrary] = useState(false);
         const [newHomeBlockType, setNewHomeBlockType] = useState('writing');
         const [newHomeBlockTitle, setNewHomeBlockTitle] = useState('');
-        const [worldVisited, setWorldVisited] = useState(['IL','FR','IT','ES','GR','CY','TR','US','GB','PT']);
-        const [worldUpcoming, setWorldUpcoming] = useState(['JP','TH','IS','NL','AU']);
-        const [worldBlocked, setWorldBlocked] = useState(['IR','IQ','SY','LB','YE','LY','DZ','SD','KW','MY','BN','BD','PK','KP','SA']);
-        const [worldNotes, setWorldNotes] = useState({}); // {countryId: 'note text / hotel link...'}
+        const [worldVisited, setWorldVisited] = useState(WORLD_VISITED_DEFAULT);
+        const [worldUpcoming, setWorldUpcoming] = useState(WORLD_UPCOMING_DEFAULT);
+        const [worldBlocked, setWorldBlocked] = useState(WORLD_BLOCKED_DEFAULT);
+        const [worldNotes, setWorldNotes] = useState(WORLD_NOTES_DEFAULT); // {countryId: 'note text / hotel link...'}
+        const [worldResetDone, setWorldResetDone] = useState(false);
+        const [worldFilter, setWorldFilter] = useState('visited');
         const [travelPlanner, setTravelPlanner] = useState({ destination: '', travelers: 1, quotes: [] });
         const [worldSearch, setWorldSearch] = useState('');
         const [selectedWorldCountry, setSelectedWorldCountry] = useState('');
@@ -989,10 +1018,21 @@ import { supabase } from './lib/supabaseClient.js';
             if (d.monthNotes) setMonthNotes(d.monthNotes);
             if (d.quarterlyGoals) setQuarterlyGoals(prev=>({...prev,...d.quarterlyGoals}));
             if (d.themeAccent) setThemeAccent(d.themeAccent);
-            if (d.worldVisited) setWorldVisited(d.worldVisited);
-            if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
-            if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
-            if (d.worldNotes) setWorldNotes(d.worldNotes);
+            // One-time reset onto the real country list. Runs once per account; after
+            // that the saved values win again, so edits made later are never clobbered.
+            // Notes she already wrote are kept and merged over the city defaults.
+            if (d[WORLD_RESET_KEY]) {
+                if (d.worldVisited) setWorldVisited(d.worldVisited);
+                if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
+                if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
+                if (d.worldNotes) setWorldNotes(d.worldNotes);
+            } else {
+                setWorldVisited(WORLD_VISITED_DEFAULT);
+                setWorldUpcoming(WORLD_UPCOMING_DEFAULT);
+                setWorldBlocked(WORLD_BLOCKED_DEFAULT);
+                setWorldNotes({ ...WORLD_NOTES_DEFAULT, ...(d.worldNotes || {}) });
+            }
+            setWorldResetDone(true);
             if (d.travelPlanner) setTravelPlanner(d.travelPlanner);
             if (d.profileName) setProfileName(d.profileName);
             if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
@@ -1111,7 +1151,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: worldResetDone, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                     const u = userRef.current;
                     if (!u?.uid) return;
                     localStorage.setItem(`dashboard_data:${u.uid}`, JSON.stringify(data));
@@ -1121,7 +1161,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
+        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, worldResetDone, travelPlanner, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
 
 
         // lucide icons handled per-component
@@ -1288,7 +1328,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: worldResetDone, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                 localStorage.setItem(`dashboard_data:${user.uid}`, JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local' && user.uid !== 'preview') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -4990,31 +5030,34 @@ import { supabase } from './lib/supabaseClient.js';
 
 
                     const continents = [...new Set(ALL_COUNTRIES.map(c => c.continent))];
-                    const visitedNames = ALL_COUNTRIES.filter(c => worldVisited.includes(c.id));
-                    const upcomingNames = ALL_COUNTRIES.filter(c => worldUpcoming.includes(c.id));
-                    const blockedNames = ALL_COUNTRIES.filter(c => worldBlocked.includes(c.id));
                     const normalizedWorldSearch = worldSearch.trim().toLowerCase();
-                    const worldSearchResults = normalizedWorldSearch
-                        ? ALL_COUNTRIES.filter(c =>
-                            c.name.toLowerCase().includes(normalizedWorldSearch) ||
-                            (worldNotes[c.id] || '').toLowerCase().includes(normalizedWorldSearch))
-                        : [];
 
-                    const toggleCountry = (id, toList) => {
-                        if (toList === 'visited') {
-                            setWorldVisited(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-                            setWorldUpcoming(prev => prev.filter(x=>x!==id));
-                            setWorldBlocked(prev => prev.filter(x=>x!==id));
-                        } else if (toList === 'upcoming') {
-                            setWorldUpcoming(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-                            setWorldVisited(prev => prev.filter(x=>x!==id));
-                            setWorldBlocked(prev => prev.filter(x=>x!==id));
-                        } else {
-                            setWorldBlocked(prev => prev.includes(id) ? prev.filter(x=>x!==id) : [...prev, id]);
-                            setWorldVisited(prev => prev.filter(x=>x!==id));
-                            setWorldUpcoming(prev => prev.filter(x=>x!==id));
-                        }
+                    const statusOf = (id) =>
+                        worldVisited.includes(id) ? 'visited'
+                        : worldUpcoming.includes(id) ? 'upcoming'
+                        : worldBlocked.includes(id) ? 'blocked'
+                        : 'none';
+
+                    // One setter for all four states — a country lives in exactly one
+                    // list (or none), so every change clears it from the other two.
+                    const setCountryStatus = (id, status) => {
+                        setWorldVisited(prev => status === 'visited' ? [...prev.filter(x=>x!==id), id] : prev.filter(x=>x!==id));
+                        setWorldUpcoming(prev => status === 'upcoming' ? [...prev.filter(x=>x!==id), id] : prev.filter(x=>x!==id));
+                        setWorldBlocked(prev => status === 'blocked' ? [...prev.filter(x=>x!==id), id] : prev.filter(x=>x!==id));
                     };
+
+                    const countByStatus = ALL_COUNTRIES.reduce((acc, c) => {
+                        const s = statusOf(c.id);
+                        acc[s] = (acc[s] || 0) + 1;
+                        return acc;
+                    }, { visited: 0, upcoming: 0, blocked: 0, none: 0 });
+
+                    const listedCountries = ALL_COUNTRIES.filter(c => {
+                        if (worldFilter !== 'all' && statusOf(c.id) !== worldFilter) return false;
+                        if (!normalizedWorldSearch) return true;
+                        return c.name.toLowerCase().includes(normalizedWorldSearch)
+                            || (worldNotes[c.id] || '').toLowerCase().includes(normalizedWorldSearch);
+                    });
 
                     const possibleCount = ALL_COUNTRIES.length - worldBlocked.length;
                     const visitedPercent = possibleCount > 0 ? Math.round((worldVisited.length / possibleCount) * 100) : 0;
@@ -5032,236 +5075,149 @@ import { supabase } from './lib/supabaseClient.js';
                     };
 
                     return (
-                        <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-6">
-                            {/* Header */}
-                            <div className="card p-6 text-center border-t-4 border-cyan-400">
-                                <div className="text-5xl mb-3">🌍</div>
+                        <div className="max-w-5xl mx-auto animate-slide-in-up pb-16 space-y-5">
+                            {/* ── Header: one glance at the whole journey ── */}
+                            <div className="card p-7 text-center">
                                 <h2 className="text-3xl font-extrabold text-slate-800 mb-1">My World</h2>
                                 <p className="text-slate-500 text-sm">המטרה שלי — להיות בכל מקום בעולם ✈️</p>
 
-                                {/* Progress meter */}
-                                <div className="max-w-md mx-auto mt-5">
+                                <div className="max-w-md mx-auto mt-6">
                                     <div className="flex items-end justify-between mb-1.5">
                                         <span className="text-xs font-bold text-slate-500">היכן שהייתי מתוך כל מה שאפשרי</span>
-                                        <span className="text-lg font-black text-cyan-600">{visitedPercent}%</span>
+                                        <span className="text-lg font-black" style={{color:WORLD_STATUS.visited.color}}>{visitedPercent}%</span>
                                     </div>
-                                    <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-gradient-to-l from-emerald-400 to-cyan-500 rounded-full transition-all duration-500"
-                                            style={{ width: `${visitedPercent}%` }}
-                                        />
+                                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full transition-all duration-700"
+                                            style={{ width: `${visitedPercent}%`, background: WORLD_STATUS.visited.color }} />
                                     </div>
-                                    <p className="text-[11px] text-slate-400 mt-1.5">{worldVisited.length} מתוך {possibleCount} מדינות אפשריות (לא כולל {worldBlocked.length} מדינות חסומות)</p>
+                                    <p className="text-[11px] text-slate-400 mt-1.5">{worldVisited.length} מתוך {possibleCount} מדינות אפשריות (לא כולל {worldBlocked.length} שלא ניתן להיכנס אליהן)</p>
                                 </div>
 
-                                <div className="flex justify-center gap-6 mt-4">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-black text-emerald-500">{worldVisited.length}</div>
-                                        <div className="text-xs text-slate-400 font-semibold">מדינות שהייתי</div>
-                                    </div>
-                                    <div className="w-px bg-slate-200"/>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-black text-amber-500">{worldUpcoming.length}</div>
-                                        <div className="text-xs text-slate-400 font-semibold">תכף אהיה</div>
-                                    </div>
-                                    <div className="w-px bg-slate-200"/>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-black text-red-600">{worldBlocked.length}</div>
-                                        <div className="text-xs text-slate-400 font-semibold">לא ניתן לבקר</div>
-                                    </div>
-                                    <div className="w-px bg-slate-200"/>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-black text-slate-400">{ALL_COUNTRIES.length - worldVisited.length - worldUpcoming.length - worldBlocked.length}</div>
-                                        <div className="text-xs text-slate-400 font-semibold">עדיין מחכות</div>
-                                    </div>
+                                <div className="flex justify-center flex-wrap gap-x-7 gap-y-3 mt-6">
+                                    {[
+                                        {k:'visited',  n:worldVisited.length},
+                                        {k:'upcoming', n:worldUpcoming.length},
+                                        {k:'blocked',  n:worldBlocked.length},
+                                        {k:'none',     n:ALL_COUNTRIES.length - worldVisited.length - worldUpcoming.length - worldBlocked.length},
+                                    ].map(s => (
+                                        <button key={s.k} onClick={() => setWorldFilter(s.k)}
+                                            className={`text-center px-3 py-1.5 rounded-xl transition-all ${worldFilter===s.k ? 'bg-slate-50 ring-1 ring-slate-200' : 'hover:bg-slate-50'}`}>
+                                            <div className="text-2xl font-black" style={{color:WORLD_STATUS[s.k].color}}>{s.n}</div>
+                                            <div className="text-xs text-slate-400 font-semibold">{WORLD_STATUS[s.k].label}</div>
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
 
+                            {/* ── Static map: the picture of the progress above ── */}
+                            <div className="card p-4">
+                                <WorldMap
+                                    worldVisited={worldVisited}
+                                    worldUpcoming={worldUpcoming}
+                                    worldBlocked={worldBlocked}
+                                    colors={{
+                                        visited: WORLD_STATUS.visited.map,
+                                        upcoming: WORLD_STATUS.upcoming.map,
+                                        blocked: WORLD_STATUS.blocked.map,
+                                        none: WORLD_STATUS.none.map,
+                                    }}
+                                />
+                                <div className="flex justify-center flex-wrap gap-4 text-xs font-semibold mt-3">
+                                    {Object.entries(WORLD_STATUS).map(([k, s]) => (
+                                        <span key={k} className="flex items-center gap-1.5">
+                                            <span className="w-3.5 h-3.5 rounded inline-block" style={{background:s.color}}/>
+                                            <span className="text-slate-500">{s.label}</span>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* ── Trip planner (unchanged) ── */}
                             <TravelHub data={travelPlanner} onChange={setTravelPlanner} />
 
-                            {/* Country notebook and search */}
+                            {/* ── One list for every country: status + note in the same row ── */}
                             <div className="card p-5 world-notes-search">
-                                <div className="flex flex-col md:flex-row gap-3">
+                                <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+                                    <h3 className="font-extrabold text-slate-700 text-lg shrink-0">כל מדינות העולם</h3>
                                     <div className="relative flex-1">
                                         <Icon name="search" size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                         <input
                                             value={worldSearch}
                                             onChange={e => setWorldSearch(e.target.value)}
-                                            placeholder="חיפוש מדינה או תוכן מהערות — למשל ניו יורק..."
-                                            className="w-full pr-10 pl-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:border-cyan-400 text-sm"
+                                            placeholder="חיפוש מדינה או הערה — למשל ברצלונה..."
+                                            className="w-full pr-10 pl-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-slate-400 text-sm"
                                         />
                                     </div>
-                                    <select
-                                        value={selectedWorldCountry}
-                                        onChange={e => setSelectedWorldCountry(e.target.value)}
-                                        className="md:w-56 px-3 py-3 bg-white border border-slate-200 rounded-xl outline-none text-sm">
-                                        <option value="">בחרי מדינה להוספת הערה</option>
-                                        {ALL_COUNTRIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                    </select>
                                 </div>
 
-                                {selectedWorldCountry && (() => {
-                                    const country = ALL_COUNTRIES.find(c => c.id === selectedWorldCountry);
-                                    return <div className="mt-3 p-4 bg-cyan-50/60 rounded-xl border border-cyan-100">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <div><b className="text-sm text-slate-700">{country?.name}</b><span className="text-[10px] text-slate-400 mr-2">{country?.continent}</span></div>
-                                            <button onClick={()=>setSelectedWorldCountry('')} className="text-slate-400 hover:text-slate-600 text-xs">סגור</button>
-                                        </div>
-                                        <textarea
-                                            autoFocus
-                                            value={worldNotes[selectedWorldCountry] || ''}
-                                            onChange={e => updateCountryNote(selectedWorldCountry, e.target.value)}
-                                            placeholder="כתבי ערים, מלונות, מסעדות, רעיונות, אנשים או כל דבר שתרצי לזכור..."
-                                            rows={4}
-                                            className="w-full p-3 text-sm bg-white border border-cyan-200 rounded-xl outline-none resize-y focus:border-cyan-400"
-                                        />
-                                        <p className="text-[10px] text-slate-400 mt-1">נשמר אוטומטית ויופיע בחיפוש</p>
-                                    </div>;
-                                })()}
-
-                                {normalizedWorldSearch && (
-                                    <div className="mt-4">
-                                        <p className="text-xs font-bold text-slate-500 mb-2">{worldSearchResults.length ? `${worldSearchResults.length} תוצאות` : 'לא נמצאו תוצאות'}</p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                            {worldSearchResults.map(c => (
-                                                <button key={c.id} onClick={()=>setSelectedWorldCountry(c.id)} className="text-right p-3 bg-white border border-slate-100 rounded-xl hover:border-cyan-300 transition-all">
-                                                    <div className="flex justify-between gap-2"><b className="text-sm text-slate-700">{c.name}</b><span className="text-[10px] text-slate-400">{c.continent}</span></div>
-                                                    {worldNotes[c.id] && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{worldNotes[c.id]}</p>}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Legend */}
-                            <div className="flex justify-center gap-4 text-xs font-semibold flex-wrap">
-                                <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-emerald-500 inline-block"/><span className="text-slate-600">הייתי כבר 🟢</span></span>
-                                <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-amber-400 inline-block"/><span className="text-slate-600">תכף אהיה 🟡</span></span>
-                                <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-red-600 inline-block"/><span className="text-slate-600">לא ניתן לבקר (מצב פוליטי) 🔴</span></span>
-                                <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-slate-200 inline-block"/><span className="text-slate-600">עדיין לא 🔵</span></span>
-                                <span className="text-slate-400 text-[11px]">· אפשר לעדכן את סטטוס המדינות ברשימה שבהמשך</span>
-                            </div>
-
-                            {/* Split table */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                <div className="card p-5">
-                                    <h3 className="font-extrabold text-emerald-600 mb-3 text-lg flex items-center gap-2">✅ מדינות שהייתי <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-2 py-0.5 rounded-full">{worldVisited.length}</span></h3>
-                                    {visitedNames.length === 0 && <p className="text-slate-400 text-sm text-center py-4">עדיין לא סומנה מדינה — לחצי על המפה!</p>}
-                                    <div className="space-y-1 max-h-72 overflow-y-auto">
-                                        {visitedNames.map(c => (
-                                            <div key={c.id} className="flex items-center justify-between p-2 bg-emerald-50 rounded-lg group">
-                                                <span className="text-sm font-semibold text-slate-700">{c.name}</span>
-                                                <span className="text-[10px] text-slate-400">{c.continent}</span>
-                                                <button onClick={() => toggleCountry(c.id, 'visited')} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-400 text-xs transition-all">✕</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="card p-5">
-                                    <h3 className="font-extrabold text-amber-500 mb-3 text-lg flex items-center gap-2">⏳ תכף אהיה <span className="bg-amber-100 text-amber-700 text-xs font-black px-2 py-0.5 rounded-full">{worldUpcoming.length}</span></h3>
-                                    {upcomingNames.length === 0 && <p className="text-slate-400 text-sm text-center py-4">עדיין לא סומנה מדינה</p>}
-                                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                                        {upcomingNames.map(c => (
-                                            <div key={c.id} className="p-2 bg-amber-50 rounded-lg group">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-sm font-semibold text-slate-700">{c.name}</span>
-                                                    <span className="text-[10px] text-slate-400">{c.continent}</span>
-                                                    <button onClick={() => toggleCountry(c.id, 'upcoming')} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-400 text-xs transition-all">✕</button>
-                                                </div>
-                                                <textarea
-                                                    value={worldNotes[c.id] || ''}
-                                                    onChange={e => updateCountryNote(c.id, e.target.value)}
-                                                    placeholder="📝 הערות, קישור למלון, טיסה וכו'..."
-                                                    rows={2}
-                                                    className="w-full mt-1.5 p-2 text-xs bg-white border border-amber-200 rounded-lg outline-none resize-none focus:border-amber-400 transition-all placeholder:text-slate-300"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="card p-5">
-                                    <h3 className="font-extrabold text-red-600 mb-3 text-lg flex items-center gap-2">🚫 לא ניתן לבקר <span className="bg-red-100 text-red-700 text-xs font-black px-2 py-0.5 rounded-full">{worldBlocked.length}</span></h3>
-                                    {blockedNames.length === 0 && <p className="text-slate-400 text-sm text-center py-4">לא סומנה מדינה</p>}
-                                    <div className="space-y-1 max-h-72 overflow-y-auto">
-                                        {blockedNames.map(c => (
-                                            <div key={c.id} className="flex items-center justify-between p-2 bg-red-50 rounded-lg group">
-                                                <span className="text-sm font-semibold text-slate-700">{c.name}</span>
-                                                <span className="text-[10px] text-slate-400">{c.continent}</span>
-                                                <button onClick={() => toggleCountry(c.id, 'blocked')} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-400 text-xs transition-all">✕</button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Full countries list */}
-                            <div className="card p-5">
-                                <h3 className="font-extrabold text-slate-700 mb-4 text-lg">🗺️ כל מדינות העולם</h3>
-                                <div className="space-y-5">
-                                    {continents.map(cont => (
-                                        <div key={cont}>
-                                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{cont}</h4>
-                                            <div className="flex flex-wrap gap-2">
-                                                {ALL_COUNTRIES.filter(c => c.continent === cont).map(c => {
-                                                    const isVisited = worldVisited.includes(c.id);
-                                                    const isUpcoming = worldUpcoming.includes(c.id);
-                                                    const isBlocked = worldBlocked.includes(c.id);
-                                                    return (
-                                                        <div key={c.id} className="flex gap-1 items-center">
-                                                            <button
-                                                                onClick={() => toggleCountry(c.id, 'visited')}
-                                                                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${isVisited ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : isBlocked ? 'bg-red-50 text-red-400 border-red-200' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400'}`}
-                                                            >{c.name}</button>
-                                                            <button
-                                                                onClick={() => toggleCountry(c.id, 'upcoming')}
-                                                                className={`w-5 h-5 rounded-full text-[10px] border transition-all flex items-center justify-center ${isUpcoming ? 'bg-amber-400 text-white border-amber-400' : 'bg-white text-slate-300 border-slate-200 hover:border-amber-400'}`}
-                                                                title="סמן כ'תכף אהיה'"
-                                                            >✈</button>
-                                                            <button
-                                                                onClick={() => toggleCountry(c.id, 'blocked')}
-                                                                className={`w-5 h-5 rounded-full text-[10px] border transition-all flex items-center justify-center ${isBlocked ? 'bg-red-600 text-white border-red-600' : 'bg-white text-slate-300 border-slate-200 hover:border-red-400'}`}
-                                                                title="סמן כ'לא ניתן לבקר'"
-                                                            >🚫</button>
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedWorldCountry(c.id);
-                                                                    setTimeout(() => document.querySelector('.world-notes-search')?.scrollIntoView({behavior:'smooth', block:'center'}), 0);
-                                                                }}
-                                                                className={`w-5 h-5 rounded-full text-[10px] border transition-all flex items-center justify-center ${worldNotes[c.id] ? 'bg-cyan-100 text-cyan-700 border-cyan-200' : 'bg-white text-slate-300 border-slate-200 hover:border-cyan-400'}`}
-                                                                title={worldNotes[c.id] ? 'עריכת ההערה השמורה' : 'הוספת הערה למדינה'}
-                                                            >✎</button>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
+                                <div className="flex flex-wrap gap-2 mb-4">
+                                    {[['all','הכול',ALL_COUNTRIES.length], ...Object.entries(WORLD_STATUS).map(([k,s]) => [k, s.label, countByStatus[k]])].map(([k, label, n]) => (
+                                        <button key={k} onClick={() => setWorldFilter(k)}
+                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${worldFilter===k ? 'text-white border-transparent' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
+                                            style={worldFilter===k ? {background: k==='all' ? '#64748b' : WORLD_STATUS[k].color} : undefined}>
+                                            {label} <span className="opacity-70">{n}</span>
+                                        </button>
                                     ))}
                                 </div>
-                            </div>
 
-                            {/* Saved notes grouped by country */}
-                            <div className="card p-5">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="font-extrabold text-slate-700 text-lg">הערות לפי מדינה</h3>
-                                    <span className="text-xs font-bold text-slate-400">{Object.values(worldNotes).filter(note => note?.trim()).length} הערות</span>
-                                </div>
-                                {Object.values(worldNotes).every(note => !note?.trim()) ? (
-                                    <p className="text-sm text-slate-400 text-center py-6">עדיין לא נשמרו הערות למדינות</p>
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {ALL_COUNTRIES.filter(c => worldNotes[c.id]?.trim()).map(c => (
-                                            <div key={c.id} className="p-4 bg-cyan-50/50 border border-cyan-100 rounded-xl">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div><b className="text-sm text-slate-700">{c.name}</b><span className="text-[10px] text-slate-400 mr-2">{c.continent}</span></div>
-                                                    <button onClick={() => setSelectedWorldCountry(c.id)} className="text-xs font-bold text-cyan-600 hover:text-cyan-800">עריכה</button>
-                                                </div>
-                                                <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{renderCountryNote(worldNotes[c.id])}</p>
-                                            </div>
-                                        ))}
-                                    </div>
+                                {listedCountries.length === 0 && (
+                                    <p className="text-slate-400 text-sm text-center py-8">אין מדינות שמתאימות לסינון הזה.</p>
                                 )}
-                                <p className="text-[10px] text-slate-400 mt-3">אפשר להדביק כתובות אינטרנט בתוך ההערה — הן יוצגו כאן כקישורים לחיצים.</p>
+
+                                <div className="space-y-5">
+                                    {continents.map(cont => {
+                                        const rows = listedCountries.filter(c => c.continent === cont);
+                                        if (rows.length === 0) return null;
+                                        return (
+                                            <div key={cont}>
+                                                <h4 className="text-xs font-extrabold text-slate-400 mb-2 pr-1">{cont} <span className="font-semibold">({rows.length})</span></h4>
+                                                <div className="space-y-1.5">
+                                                    {rows.map(c => {
+                                                        const st = statusOf(c.id);
+                                                        const conf = WORLD_STATUS[st];
+                                                        const note = worldNotes[c.id];
+                                                        const isOpen = selectedWorldCountry === c.id;
+                                                        return (
+                                                            <div key={c.id} className="rounded-xl border transition-all" style={{borderColor: isOpen ? conf.color : '#e8e3dd', background: isOpen ? conf.soft : '#fff'}}>
+                                                                <div className="flex items-center gap-3 p-2.5">
+                                                                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{background:conf.color}}/>
+                                                                    <button onClick={() => setSelectedWorldCountry(isOpen ? '' : c.id)} className="flex-1 min-w-0 text-right">
+                                                                        <span className="text-sm font-semibold text-slate-700">{c.name}</span>
+                                                                        {note && !isOpen && <span className="block text-[11px] text-slate-400 truncate">{note}</span>}
+                                                                    </button>
+                                                                    <select
+                                                                        value={st}
+                                                                        onChange={e => setCountryStatus(c.id, e.target.value)}
+                                                                        className="shrink-0 text-xs font-bold rounded-lg border px-2 py-1.5 outline-none cursor-pointer"
+                                                                        style={{color:conf.color, borderColor:conf.color + '55', background:conf.soft}}>
+                                                                        {Object.entries(WORLD_STATUS).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
+                                                                    </select>
+                                                                </div>
+                                                                {isOpen && (
+                                                                    <div className="px-2.5 pb-2.5">
+                                                                        <textarea
+                                                                            autoFocus
+                                                                            value={note || ''}
+                                                                            onChange={e => updateCountryNote(c.id, e.target.value)}
+                                                                            placeholder="ערים, מלונות, מסעדות, אנשים — כל מה שתרצי לזכור..."
+                                                                            rows={3}
+                                                                            className="w-full p-2.5 text-sm bg-white border rounded-lg outline-none resize-y"
+                                                                            style={{borderColor: conf.color + '55'}}
+                                                                        />
+                                                                        {note && /https?:\/\//.test(note) && (
+                                                                            <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{renderCountryNote(note)}</p>
+                                                                        )}
+                                                                        <p className="text-[10px] text-slate-400 mt-1">נשמר אוטומטית · אפשר להדביק קישורים</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
                     );
