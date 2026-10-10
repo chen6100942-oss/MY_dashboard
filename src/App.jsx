@@ -41,7 +41,14 @@ import { supabase } from './lib/supabaseClient.js';
     // WORLD_RESET_KEY gates a one-time reset of saved data onto these values —
     // without it the old saved arrays would keep overriding these defaults forever.
     const WORLD_RESET_KEY = 'worldReset2026';
-    const WORLD_VISITED_DEFAULT = ['IL','TR','GR','CY','FR','PL','ES','MX','DO','NL','GB','DE','CZ','HU','VA','IT','PT','EG','TH','GE'];
+    // Bump this and add a case in the migration below when the list itself
+    // changes, so accounts that already ran an earlier version pick up only
+    // what's new instead of being reset again.
+    const WORLD_DATA_VERSION = 2;
+    // v2 additions. Chen counts anything with its own flag as its own country
+    // (that's how her physical wall map works), so Sicily stands apart from Italy.
+    const WORLD_V2_VISITED = ['IT-SI'];
+    const WORLD_VISITED_DEFAULT = ['IL','TR','GR','CY','FR','PL','ES','MX','DO','NL','GB','DE','CZ','HU','VA','IT','IT-SI','PT','EG','TH','GE'];
     const WORLD_UPCOMING_DEFAULT = [];
     // Countries an Israeli passport can't enter. Saudi Arabia and Libya were
     // removed from this list at Chen's request — they show as "עדיין לא".
@@ -54,7 +61,6 @@ import { supabase } from './lib/supabaseClient.js';
         DE: 'ברלין',
         CZ: 'פראג',
         HU: 'בודפשט',
-        IT: 'סיציליה',
     };
     const WORLD_STATUS = {
         visited:  { label: 'הייתי',            color: '#16a34a', soft: '#dcfce7', map: 0x16a34a },
@@ -629,7 +635,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [worldUpcoming, setWorldUpcoming] = useState(WORLD_UPCOMING_DEFAULT);
         const [worldBlocked, setWorldBlocked] = useState(WORLD_BLOCKED_DEFAULT);
         const [worldNotes, setWorldNotes] = useState(WORLD_NOTES_DEFAULT); // {countryId: 'note text / hotel link...'}
-        const [worldResetDone, setWorldResetDone] = useState(false);
+        const [worldDataVersion, setWorldDataVersion] = useState(0);
         const [worldFilter, setWorldFilter] = useState('visited');
         const [travelPlanner, setTravelPlanner] = useState({ destination: '', travelers: 1, quotes: [] });
         const [worldSearch, setWorldSearch] = useState('');
@@ -1021,18 +1027,25 @@ import { supabase } from './lib/supabaseClient.js';
             // One-time reset onto the real country list. Runs once per account; after
             // that the saved values win again, so edits made later are never clobbered.
             // Notes she already wrote are kept and merged over the city defaults.
-            if (d[WORLD_RESET_KEY]) {
-                if (d.worldVisited) setWorldVisited(d.worldVisited);
-                if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
-                if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
-                if (d.worldNotes) setWorldNotes(d.worldNotes);
-            } else {
+            const savedWorldVersion = d.worldDataVersion ?? (d[WORLD_RESET_KEY] ? 1 : 0);
+            if (savedWorldVersion === 0) {
+                // Never reset: drop the old placeholder data for the real list.
                 setWorldVisited(WORLD_VISITED_DEFAULT);
                 setWorldUpcoming(WORLD_UPCOMING_DEFAULT);
                 setWorldBlocked(WORLD_BLOCKED_DEFAULT);
                 setWorldNotes({ ...WORLD_NOTES_DEFAULT, ...(d.worldNotes || {}) });
+            } else {
+                // Already reset: keep her data as-is and only append entries added
+                // in later versions. Gated by the version number rather than by
+                // "is it missing", so setting one back to עדיין לא actually sticks.
+                const savedVisited = d.worldVisited || WORLD_VISITED_DEFAULT;
+                const added = savedWorldVersion < 2 ? WORLD_V2_VISITED.filter(id => !savedVisited.includes(id)) : [];
+                setWorldVisited(added.length ? [...savedVisited, ...added] : savedVisited);
+                if (d.worldUpcoming) setWorldUpcoming(d.worldUpcoming);
+                if (d.worldBlocked) setWorldBlocked(d.worldBlocked);
+                if (d.worldNotes) setWorldNotes(d.worldNotes);
             }
-            setWorldResetDone(true);
+            setWorldDataVersion(WORLD_DATA_VERSION);
             if (d.travelPlanner) setTravelPlanner(d.travelPlanner);
             if (d.profileName) setProfileName(d.profileName);
             if (d.visionBoardItems) setVisionBoardItems(d.visionBoardItems);
@@ -1151,7 +1164,7 @@ import { supabase } from './lib/supabaseClient.js';
             if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
             autoSaveTimer.current = setTimeout(() => {
                 try {
-                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: worldResetDone, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                    const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: true, worldDataVersion, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                     const u = userRef.current;
                     if (!u?.uid) return;
                     localStorage.setItem(`dashboard_data:${u.uid}`, JSON.stringify(data));
@@ -1161,7 +1174,7 @@ import { supabase } from './lib/supabaseClient.js';
                     }
                 } catch(e) {}
             }, 1000);
-        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, worldResetDone, travelPlanner, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
+        }, [dataHydrated, visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, worldDataVersion, travelPlanner, visionBoardItems, vbBg, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips]);
 
 
         // lucide icons handled per-component
@@ -1328,7 +1341,7 @@ import { supabase } from './lib/supabaseClient.js';
 
         const saveAllData = async () => {
             try {
-                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: worldResetDone, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
+                const data = { visionText, tabs, projects, tasks, resources, morningRitual, gameChangers, dailySchedule, ideas, domains, domainGoals, successMetrics, morningRitualTitle, morningRitualEmoji, gameChangersTitle, gameChangersEmoji, archive, permanentArchive, mindsetEntries, mindsetListItems, futureSelfEntries, futureSelfFiles, dayScheduleTasks, weekSchedule, customTabData, currentWeight, affirmations, affirmationUrl, homeBlockOrder, hiddenHomeBlocks, homeBlockWidths, homeBlockTextSize, homeCustomBlocks, builtinTabBlocks, builtinTabBlockWidths, builtinTabBlockOrder, builtinTabHiddenBlocks, monthNotes, quarterlyGoals, themeAccent, worldVisited, worldUpcoming, worldBlocked, worldNotes, [WORLD_RESET_KEY]: true, worldDataVersion, travelPlanner, visionBoardItems, vbBg, profileName, manifestations, manifestDailyDone, crmClients, bucketLists, helpTips, timestamp: new Date().toISOString() };
                 localStorage.setItem(`dashboard_data:${user.uid}`, JSON.stringify(data));
                 if (supabase && user?.uid && user.uid !== 'local' && user.uid !== 'preview') {
                     const { error: err } = await supabase.from('dashboard_data').upsert({ user_id: user.uid, data, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
@@ -5015,7 +5028,7 @@ import { supabase } from './lib/supabaseClient.js';
                 {activeTab === 'my-world' && (() => {
                     const ALL_COUNTRIES = [
                         // אירופה
-                        {id:'AL',name:'אלבניה',continent:'אירופה'},{id:'AD',name:'אנדורה',continent:'אירופה'},{id:'AT',name:'אוסטריה',continent:'אירופה'},{id:'BY',name:'בלארוס',continent:'אירופה'},{id:'BE',name:'בלגיה',continent:'אירופה'},{id:'BA',name:'בוסניה והרצגובינה',continent:'אירופה'},{id:'BG',name:'בולגריה',continent:'אירופה'},{id:'HR',name:'קרואטיה',continent:'אירופה'},{id:'CY',name:'קפריסין',continent:'אירופה'},{id:'CZ',name:'צ\'כיה',continent:'אירופה'},{id:'DK',name:'דנמרק',continent:'אירופה'},{id:'EE',name:'אסטוניה',continent:'אירופה'},{id:'FI',name:'פינלנד',continent:'אירופה'},{id:'FR',name:'צרפת',continent:'אירופה'},{id:'DE',name:'גרמניה',continent:'אירופה'},{id:'GR',name:'יוון',continent:'אירופה'},{id:'HU',name:'הונגריה',continent:'אירופה'},{id:'IS',name:'איסלנד',continent:'אירופה'},{id:'IE',name:'אירלנד',continent:'אירופה'},{id:'IT',name:'איטליה',continent:'אירופה'},{id:'XK',name:'קוסובו',continent:'אירופה'},{id:'LV',name:'לטביה',continent:'אירופה'},{id:'LI',name:'ליכטנשטיין',continent:'אירופה'},{id:'LT',name:'ליטא',continent:'אירופה'},{id:'LU',name:'לוקסמבורג',continent:'אירופה'},{id:'MT',name:'מלטה',continent:'אירופה'},{id:'MD',name:'מולדובה',continent:'אירופה'},{id:'MC',name:'מונקו',continent:'אירופה'},{id:'ME',name:'מונטנגרו',continent:'אירופה'},{id:'NL',name:'הולנד',continent:'אירופה'},{id:'MK',name:'מקדוניה',continent:'אירופה'},{id:'NO',name:'נורבגיה',continent:'אירופה'},{id:'PL',name:'פולין',continent:'אירופה'},{id:'PT',name:'פורטוגל',continent:'אירופה'},{id:'RO',name:'רומניה',continent:'אירופה'},{id:'RU',name:'רוסיה',continent:'אירופה'},{id:'SM',name:'סן מרינו',continent:'אירופה'},{id:'RS',name:'סרביה',continent:'אירופה'},{id:'SK',name:'סלובקיה',continent:'אירופה'},{id:'SI',name:'סלובניה',continent:'אירופה'},{id:'ES',name:'ספרד',continent:'אירופה'},{id:'SE',name:'שוודיה',continent:'אירופה'},{id:'CH',name:'שוויץ',continent:'אירופה'},{id:'UA',name:'אוקראינה',continent:'אירופה'},{id:'GB',name:'בריטניה',continent:'אירופה'},{id:'VA',name:'ותיקן',continent:'אירופה'},
+                        {id:'AL',name:'אלבניה',continent:'אירופה'},{id:'AD',name:'אנדורה',continent:'אירופה'},{id:'AT',name:'אוסטריה',continent:'אירופה'},{id:'BY',name:'בלארוס',continent:'אירופה'},{id:'BE',name:'בלגיה',continent:'אירופה'},{id:'BA',name:'בוסניה והרצגובינה',continent:'אירופה'},{id:'BG',name:'בולגריה',continent:'אירופה'},{id:'HR',name:'קרואטיה',continent:'אירופה'},{id:'CY',name:'קפריסין',continent:'אירופה'},{id:'CZ',name:'צ\'כיה',continent:'אירופה'},{id:'DK',name:'דנמרק',continent:'אירופה'},{id:'EE',name:'אסטוניה',continent:'אירופה'},{id:'FI',name:'פינלנד',continent:'אירופה'},{id:'FR',name:'צרפת',continent:'אירופה'},{id:'DE',name:'גרמניה',continent:'אירופה'},{id:'GR',name:'יוון',continent:'אירופה'},{id:'HU',name:'הונגריה',continent:'אירופה'},{id:'IS',name:'איסלנד',continent:'אירופה'},{id:'IE',name:'אירלנד',continent:'אירופה'},{id:'IT',name:'איטליה',continent:'אירופה'},{id:'XK',name:'קוסובו',continent:'אירופה'},{id:'LV',name:'לטביה',continent:'אירופה'},{id:'LI',name:'ליכטנשטיין',continent:'אירופה'},{id:'LT',name:'ליטא',continent:'אירופה'},{id:'LU',name:'לוקסמבורג',continent:'אירופה'},{id:'MT',name:'מלטה',continent:'אירופה'},{id:'MD',name:'מולדובה',continent:'אירופה'},{id:'MC',name:'מונקו',continent:'אירופה'},{id:'ME',name:'מונטנגרו',continent:'אירופה'},{id:'NL',name:'הולנד',continent:'אירופה'},{id:'MK',name:'מקדוניה',continent:'אירופה'},{id:'NO',name:'נורבגיה',continent:'אירופה'},{id:'PL',name:'פולין',continent:'אירופה'},{id:'PT',name:'פורטוגל',continent:'אירופה'},{id:'RO',name:'רומניה',continent:'אירופה'},{id:'RU',name:'רוסיה',continent:'אירופה'},{id:'SM',name:'סן מרינו',continent:'אירופה'},{id:'RS',name:'סרביה',continent:'אירופה'},{id:'SK',name:'סלובקיה',continent:'אירופה'},{id:'SI',name:'סלובניה',continent:'אירופה'},{id:'ES',name:'ספרד',continent:'אירופה'},{id:'SE',name:'שוודיה',continent:'אירופה'},{id:'CH',name:'שוויץ',continent:'אירופה'},{id:'UA',name:'אוקראינה',continent:'אירופה'},{id:'GB',name:'בריטניה',continent:'אירופה'},{id:'VA',name:'ותיקן',continent:'אירופה'},{id:'IT-SI',name:'סיציליה',continent:'אירופה'},
                         // אסיה
                         {id:'AF',name:'אפגניסטן',continent:'אסיה'},{id:'AM',name:'ארמניה',continent:'אסיה'},{id:'AZ',name:'אזרבייג\'אן',continent:'אסיה'},{id:'BH',name:'בחריין',continent:'אסיה'},{id:'BD',name:'בנגלדש',continent:'אסיה'},{id:'BT',name:'בהוטן',continent:'אסיה'},{id:'BN',name:'ברוניי',continent:'אסיה'},{id:'KH',name:'קמבודיה',continent:'אסיה'},{id:'CN',name:'סין',continent:'אסיה'},{id:'GE',name:'גאורגיה',continent:'אסיה'},{id:'IN',name:'הודו',continent:'אסיה'},{id:'ID',name:'אינדונזיה',continent:'אסיה'},{id:'IR',name:'איראן',continent:'אסיה'},{id:'IQ',name:'עיראק',continent:'אסיה'},{id:'IL',name:'ישראל',continent:'אסיה'},{id:'JP',name:'יפן',continent:'אסיה'},{id:'JO',name:'ירדן',continent:'אסיה'},{id:'KZ',name:'קזחסטן',continent:'אסיה'},{id:'KW',name:'כווית',continent:'אסיה'},{id:'KG',name:'קירגיזסטן',continent:'אסיה'},{id:'LA',name:'לאוס',continent:'אסיה'},{id:'LB',name:'לבנון',continent:'אסיה'},{id:'MY',name:'מלזיה',continent:'אסיה'},{id:'MV',name:'מלדיביים',continent:'אסיה'},{id:'MN',name:'מונגוליה',continent:'אסיה'},{id:'MM',name:'מיאנמר',continent:'אסיה'},{id:'NP',name:'נפאל',continent:'אסיה'},{id:'KP',name:'קוריאה הצפונית',continent:'אסיה'},{id:'OM',name:'עומאן',continent:'אסיה'},{id:'PK',name:'פקיסטן',continent:'אסיה'},{id:'PH',name:'פיליפינים',continent:'אסיה'},{id:'QA',name:'קטר',continent:'אסיה'},{id:'SA',name:'ערב הסעודית',continent:'אסיה'},{id:'SG',name:'סינגפור',continent:'אסיה'},{id:'KR',name:'קוריאה הדרומית',continent:'אסיה'},{id:'LK',name:'סרי לנקה',continent:'אסיה'},{id:'SY',name:'סוריה',continent:'אסיה'},{id:'TW',name:'טייוואן',continent:'אסיה'},{id:'TJ',name:'טג\'יקיסטן',continent:'אסיה'},{id:'TH',name:'תאילנד',continent:'אסיה'},{id:'TL',name:'טימור-לסטה',continent:'אסיה'},{id:'TR',name:'טורקיה',continent:'אסיה'},{id:'TM',name:'טורקמניסטן',continent:'אסיה'},{id:'AE',name:'איחוד האמירויות',continent:'אסיה'},{id:'UZ',name:'אוזבקיסטן',continent:'אסיה'},{id:'VN',name:'וייטנאם',continent:'אסיה'},{id:'YE',name:'תימן',continent:'אסיה'},
                         // אפריקה
