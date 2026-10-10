@@ -2973,7 +2973,7 @@ html:not(.dark-mode) .primary-sidebar nav button .text-xs,
 html:not(.dark-mode) .sidebar-settings-row .text-xs {
   font-family:'Segoe UI',Heebo,sans-serif !important;
   font-size:12px !important;
-  font-weight:500 !important;
+  font-weight:400 !important;
   letter-spacing:.01em;
 }
 html:not(.dark-mode) .primary-sidebar nav button.bg-violet-50,

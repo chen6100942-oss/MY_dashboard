@@ -61,11 +61,6 @@ html .dashboard-main .goal-mini-card button {
 }
 #google_translate_element,.goog-te-gadget,.goog-te-banner-frame,.skiptranslate iframe{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;opacity:0!important;pointer-events:none!important}
 body{top:0!important}
-/* ארבע הכרטיסיות שבשימוש היומיומי הכי תדיר — בולטות יותר בסרגל. */
-html:not(.dark-mode) .primary-sidebar nav button.nav-tab-home .text-xs,
-html:not(.dark-mode) .primary-sidebar nav button.nav-tab-tasks .text-xs,
-html:not(.dark-mode) .primary-sidebar nav button.nav-tab-finance .text-xs,
-html:not(.dark-mode) .primary-sidebar nav button.nav-tab-help .text-xs{font-weight:800!important}
 .primary-sidebar>.language-switcher{display:flex!important;align-items:center;justify-content:center;gap:5px;padding:8px 10px!important;border-top:1px solid rgba(83,66,58,.08)!important;background:transparent!important;box-shadow:none!important}
 .primary-sidebar>.language-switcher button{min-width:30px;height:25px;padding:0 6px;border:0;border-radius:8px;color:#84756d;background:transparent;font-size:9px;font-weight:800;transition:.18s ease}
 .primary-sidebar>.language-switcher button:hover,.primary-sidebar>.language-switcher button.active{color:#654b3e;background:rgba(116,82,64,.09)}
@@ -1048,27 +1043,32 @@ body:has(.reference-home) .home-canvas > div:has(.home-editorial-calendar){displ
    while all visible controls live in the row directly below the masthead. */
 body:has(.reference-home) .reference-utility-row{
   display:grid!important;
-  grid-template-columns:48px minmax(160px,.8fr) minmax(210px,1.1fr) repeat(3,minmax(135px,.76fr))!important;
-  gap:11px!important;
+  grid-template-columns:48px minmax(190px,1fr) repeat(5,minmax(112px,.7fr))!important;
+  gap:9px!important;
   margin-top:12px!important;
   direction:rtl!important
 }
 body:has(.reference-home) .reference-date{display:none!important}
-body:has(.reference-home) .reference-live-date{grid-area:auto!important;display:flex!important;align-items:center;gap:6px;overflow:hidden;direction:rtl;white-space:nowrap}
-body:has(.reference-home) .reference-live-date span{overflow:hidden;text-overflow:ellipsis;font-weight:800;color:#694b3c}
 body:has(.reference-home) .reference-top-action{display:flex;align-items:center;justify-content:center;gap:8px;color:#49382f;font-size:12px;direction:rtl}
-body:has(.reference-home) .reference-daily-action,body:has(.reference-home) .reference-morning-action,body:has(.reference-home) .reference-goal-action{grid-area:auto!important}
+body:has(.reference-home) .reference-daily-action,body:has(.reference-home) .reference-morning-action,body:has(.reference-home) .reference-goal-action,body:has(.reference-home) .reference-task-action,body:has(.reference-home) .reference-project-action{grid-area:auto!important}
 body:has(.reference-home) .reference-top-action b{font-weight:400}
 body:has(.reference-home) .reference-top-action svg{color:#8e654e;stroke-width:1.6}
+
+/* Live date chip — its own fixed badge at the very top-left of the page,
+   clear of the save/undo/theme buttons (which float further right). */
+.reference-top-date-badge{position:fixed;top:18px;left:calc(1.5cm + 12px + 8px);z-index:71;display:flex;align-items:center;gap:6px;height:34px;padding:0 12px;border:1px solid rgba(92,66,51,.14);border-radius:9px;background:rgba(250,247,240,.92);color:#694b3c;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 6px 16px rgba(69,61,51,.08);cursor:pointer;direction:rtl}
+@media(max-width:900px){.reference-top-date-badge{left:16px}}
+.reference-top-date-badge svg{color:#8e654e}
+body:has(.reference-home) .reference-float-actions{left:calc(2cm + 16px + 150px)!important}
 body:has(.reference-home) .reference-search{grid-area:search;width:100%!important;justify-content:flex-start!important;padding:0 16px!important}
 body:has(.reference-home) .reference-search>span:first-child{flex:0 0 18px!important;width:18px!important;height:18px!important;color:#704532!important}
 body:has(.reference-home) .reference-search input{width:100%!important;height:100%!important;padding:0 4px!important;border:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;font-size:12px!important}
 body:has(.reference-home) .reference-search input:focus{outline:0!important;border:0!important;box-shadow:none!important}
 body:has(.reference-home) .reference-countdown{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;overflow:hidden;direction:rtl;font-size:11px;font-weight:400;white-space:nowrap}
 body:has(.reference-home) .reference-countdown{grid-area:auto!important}
-body:has(.reference-home) .reference-countdown>span:first-of-type{color:#725444;font-weight:400}
+body:has(.reference-home) .reference-countdown>span:first-of-type{color:#8f5f48;font-weight:800;font-size:12px}
 body:has(.reference-home) .reference-countdown>span[style]{color:#9a694f}
-body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:11px;font-weight:400}
+body:has(.reference-home) .reference-countdown b{color:#8f5f48;font-size:12px;font-weight:800}
 body:has(.reference-home) .reference-countdown small{color:#99897e;font-weight:400}
 body:has(.reference-home) .reference-sounds{grid-area:auto!important;display:flex;align-items:center;justify-content:center;gap:4px;padding:0!important;color:#805b48;direction:rtl}
 /* Every item in the utility row shares one plain weight/size — only the
@@ -1196,3 +1196,17 @@ html body .dashboard-hero>div{opacity:0!important;pointer-events:none!important}
 html body .dashboard-hero::before,
 html body .dashboard-hero::after{display:none!important}
 @media(max-width:700px){html body .dashboard-hero{aspect-ratio:1584/265!important}}
+
+/* Right sidebar — no bold anywhere, and long labels ("משימות ופרויקטים")
+   stay on one line instead of wrapping. */
+.primary-sidebar,
+.primary-sidebar *{font-weight:400!important}
+.primary-sidebar nav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Shared "sidebar look" for labels and icon badges being rolled out across
+   the app, tab by tab. .app-muted-label matches the sidebar's plain-weight
+   text; .app-icon-badge matches its soft pastel icon squares (28px, 10%-tint
+   background); .app-emoji-muted softens a user-picked emoji's saturation so
+   it reads as quiet rather than a bright sticker. */
+.app-muted-label{font-family:'Segoe UI',Heebo,sans-serif!important;font-weight:400!important;color:#8a7d74}
+.app-icon-badge{width:28px;height:28px;flex:0 0 28px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;background:color-mix(in srgb, currentColor 10%, transparent)}

@@ -9,7 +9,7 @@ import LifeOperatingSystem from './components/LifeOperatingSystem.jsx';
 import DailyPearl from './components/DailyPearl.jsx';
 import OpeningMotivationFilm from './components/OpeningMotivationFilm.jsx';
 import VacationMode from './components/VacationMode.jsx';
-import ZenHomePreview from './components/ZenHomePreview.jsx';
+import ZenHomePreview, { FEATURED_NAV_ITEMS } from './components/ZenHomePreview.jsx';
 import FinanceTracker from './components/FinanceTracker.jsx';
 import FinancePinGate from './components/FinancePinGate.jsx';
 import MfaChallenge from './components/MfaChallenge.jsx';
@@ -18,9 +18,27 @@ import NumerologyTab from './components/NumerologyTab.jsx';
 import ClientsTab from './components/ClientsTab.jsx';
 import { supabase } from './lib/supabaseClient.js';
 
-    const PERSONAL_GROWTH_TAB_IDS = ['ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset'];
     const LOCAL_VISUAL_PREVIEW = ['localhost', '127.0.0.1'].includes(window.location.hostname)
         && new URLSearchParams(window.location.search).get('visualPreview') === '1';
+
+    // Displays a user-picked emoji as a monochrome line icon, matching the sidebar's
+    // look, instead of the emoji's own colorful artwork. Falls back to 'sparkles' for
+    // anything not covered — the picker itself still shows real emoji when choosing.
+    const EMOJI_TO_ICON = {
+        '✍️':'edit-3', '📊':'trending-up', '📈':'trending-up', '🎓':'book-open', '📚':'book-open',
+        '🌍':'globe', '🌎':'globe', '🌏':'globe', '✨':'sparkles', '🔮':'sparkles', '🎨':'sparkles',
+        '⚖️':'heart', '❤️':'heart', '🩷':'heart', '💪':'dumbbell', '🧘':'flower-2', '🧘‍♀️':'flower-2',
+        '🌸':'flower-2', '☕':'coffee', '✈️':'plane', '🏠':'home', '🏡':'home', '👥':'users',
+        '💡':'lightbulb', '🎯':'target', '🌱':'leaf', '🌿':'leaf', '🎵':'music-2', '🎶':'music-2',
+        '📅':'calendar', '💰':'piggy-bank', '💵':'piggy-bank', '💳':'piggy-bank', '🐷':'piggy-bank',
+        '🔢':'layout-grid', '🗺️':'map', '⭐':'star', '🌟':'star', '🙏':'heart-handshake', '🔗':'link',
+        '📁':'folder', '📂':'folder', '🖼️':'image', '🎉':'star', '🚀':'arrow-up-right',
+    };
+    const emojiToIcon = (emoji) => EMOJI_TO_ICON[emoji] || 'sparkles';
+    // One consistent warm brown-beige tone for every monochrome icon badge — not a
+    // different hue per item — matches the brown already used for this tab's own
+    // header icon (#80685d), so the whole set reads as one quiet family of icons.
+    const APP_ICON_COLOR = '#80685d';
 
     const App = () => {
         // ============================================================
@@ -557,7 +575,7 @@ import { supabase } from './lib/supabaseClient.js';
         const [showAddBuiltinBlock, setShowAddBuiltinBlock] = useState(null); // tabId
         const [builtinLayoutEditTab, setBuiltinLayoutEditTab] = useState(null); // tabId
         const [settingsSection, setSettingsSection] = useState('profile'); // profile|design|tabs|domains|backup
-        const [personalGrowthOpen, setPersonalGrowthOpen] = useState(() => localStorage.getItem('personalGrowthNavOpen') === '1');
+        const [openFeaturedGroup, setOpenFeaturedGroup] = useState(() => localStorage.getItem('openFeaturedNavGroup') || '');
         const [themeAccent, setThemeAccent] = useState('violet'); // violet|blue|rose|emerald|amber|cyan
         const [darkMode, setDarkMode] = useState(() => {
             const stored = localStorage.getItem('dashboardTheme');
@@ -625,6 +643,21 @@ import { supabase } from './lib/supabaseClient.js';
         const [inviteLoading, setInviteLoading] = useState(false);
         const [inviteResult, setInviteResult] = useState(null);
         const [dataHydrated, setDataHydrated] = useState(LOCAL_VISUAL_PREVIEW);
+
+        // ── Instinct (WhatsApp assistant) read-only tokens — admin-only, see
+        // supabase-instinct-readonly.sql for the functions these call. ──
+        const [instinctTokens, setInstinctTokens] = useState([]);
+        const [instinctTokensLoaded, setInstinctTokensLoaded] = useState(false);
+        const [instinctTokenName, setInstinctTokenName] = useState('Instinct');
+        const [instinctTokenScopes, setInstinctTokenScopes] = useState(['tasks:read', 'projects:read']);
+        const [instinctNewToken, setInstinctNewToken] = useState(null);
+        const [instinctBusy, setInstinctBusy] = useState(false);
+        const [instinctError, setInstinctError] = useState('');
+        useEffect(() => {
+            if (activeTab === 'tab-settings' && userProfile?.role === 'admin' && !instinctTokensLoaded) {
+                loadInstinctTokens();
+            }
+        }, [activeTab, userProfile, instinctTokensLoaded]);
 
         const dragItem = useRef(null);
         const dragOverItem = useRef(null);
@@ -788,9 +821,9 @@ import { supabase } from './lib/supabaseClient.js';
         const ensureBuiltinTabs = (tabsArr) => {
             let deletedIds = [];
             try { deletedIds = JSON.parse(localStorage.getItem('deleted_tab_ids') || '[]'); } catch(e) {}
-            // 'numerology', 'vision-board' and the whole "התפתחות אישית" sidebar group
-            // (ikigai, manifesting, book-wisdom, inspiration, mindset) are reached from
-            // home-page shortcuts now ("התפתחות רוחנית" / "התפתחות אישית"), not the sidebar.
+            // 'numerology', 'vision-board' and the "ikigai"/"manifesting"/"book-wisdom"/
+            // "inspiration"/"mindset" group aren't standalone sidebar rows — they're reached
+            // only via the featured groups (FEATURED_NAV_ITEMS) in the sidebar/home page.
             const deleted = new Set([...deletedIds, 'future-self', 'metrics', 'ideas', 'schedule', 'numerology', 'vision-board', 'ikigai', 'manifesting', 'book-wisdom', 'inspiration', 'mindset', 'gantt', 'morning-ritual']);
             const result = [...tabsArr]
                 .filter(tab => !deleted.has(tab.id))
@@ -851,7 +884,10 @@ import { supabase } from './lib/supabaseClient.js';
                     ? { ...withP, year: withP.year ?? 2026, achieved: withP.achieved ?? false }
                     : withP;
             });
-            if (withProgress.some(g => g.id === 'dg3')) return withProgress;
+            // Only patch in the legacy dg3 goal for existing users who already have other
+            // goals saved. An empty array means no goals yet (new user, or goals mid-load) —
+            // fabricating dg3 here would turn "no goals loaded yet" into a fake saved goal.
+            if (withProgress.length === 0 || withProgress.some(g => g.id === 'dg3')) return withProgress;
             return [...withProgress, { id: 'dg3', title: 'יעדים פיננסיים', emoji: '🎯', color: 'from-amber-500 to-orange-500', year: 2026, achieved: false, progress: 30, points: [{ id: 'p1', label: 'יעד קרוב', text: '' }, { id: 'p2', label: 'יעד בינוני', text: '' }, { id: 'p3', label: 'יעד רחוק', text: '' }] }];
         };
 
@@ -1207,6 +1243,47 @@ import { supabase } from './lib/supabaseClient.js';
                 setInviteResult({ success: false, message: 'שגיאת רשת — נסי שנית' });
             }
             setInviteLoading(false);
+        };
+
+        const loadInstinctTokens = async () => {
+            setInstinctError('');
+            const { data, error } = await supabase.rpc('list_readonly_tokens');
+            if (error) { setInstinctError('שגיאה בטעינת הטוקנים'); return; }
+            setInstinctTokens(data || []);
+            setInstinctTokensLoaded(true);
+        };
+
+        const toggleInstinctScope = (scope) => {
+            setInstinctTokenScopes(prev => prev.includes(scope) ? prev.filter(s => s !== scope) : [...prev, scope]);
+        };
+
+        const createInstinctToken = async () => {
+            if (!instinctTokenName.trim() || instinctTokenScopes.length === 0 || instinctBusy) return;
+            setInstinctBusy(true);
+            setInstinctError('');
+            setInstinctNewToken(null);
+            const { data, error } = await supabase.rpc('create_readonly_token', {
+                token_name: instinctTokenName.trim(),
+                token_scopes: instinctTokenScopes,
+                days_valid: 90,
+            });
+            if (error) {
+                setInstinctError('שגיאה ביצירת הטוקן — ודאי שהרצת את supabase-instinct-readonly.sql');
+            } else {
+                setInstinctNewToken(data);
+                await loadInstinctTokens();
+            }
+            setInstinctBusy(false);
+        };
+
+        const revokeInstinctToken = async (tokenId) => {
+            if (instinctBusy) return;
+            setInstinctBusy(true);
+            setInstinctError('');
+            const { error } = await supabase.rpc('revoke_readonly_token', { target_token_id: tokenId });
+            if (error) setInstinctError('שגיאה בביטול הטוקן');
+            else await loadInstinctTokens();
+            setInstinctBusy(false);
         };
 
         const saveAllData = async () => {
@@ -1801,7 +1878,7 @@ import { supabase } from './lib/supabaseClient.js';
                     </div>
                     {/* Nav items */}
                     <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 no-scrollbar">
-                        {tabs.filter(tab => tab.id !== 'archive' && !PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
+                        {tabs.filter(tab => tab.id !== 'archive' && !FEATURED_NAV_ITEMS.some(item => item.id === tab.id)).map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 draggable={tab.id !== 'tab-settings'}
                                 onDragStart={tab.id !== 'tab-settings' ? e => handleSidebarTabDragStart(e, tab.id) : undefined}
@@ -1820,29 +1897,39 @@ import { supabase } from './lib/supabaseClient.js';
                             </button>
                         ))}
 
-                        {tabs.some(t => PERSONAL_GROWTH_TAB_IDS.includes(t.id)) && (
-                            <div className="nav-personal-growth-group">
+                        {/* התפתחות אישית / התפתחות רוחנית / בריאות וכושר / תכנון חופשה —
+                            הועברו הנה מדף הבית (ZenHomePreview), שם היו שורת קיצורים.
+                            FEATURED_NAV_ITEMS הוא מקור האמת המשותף לשני המקומות. */}
+                        {FEATURED_NAV_ITEMS.map(item => item.children ? (
+                            <div className="nav-personal-growth-group" key={item.id}>
                                 <button
-                                    onClick={() => setPersonalGrowthOpen(prev => { const next = !prev; localStorage.setItem('personalGrowthNavOpen', next ? '1' : '0'); return next; })}
-                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${PERSONAL_GROWTH_TAB_IDS.includes(activeTab) && !personalGrowthOpen ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
-                                    <span className="nav-line-icon" aria-hidden="true" style={{color:'#9d639d'}}><Icon name="sparkles" size={17} /></span>
-                                    <span className="text-xs flex-1 text-right">התפתחות אישית</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transition:'transform .2s ease', transform: personalGrowthOpen ? 'none' : 'rotate(90deg)'}}><polyline points="6 9 12 15 18 9"/></svg>
+                                    onClick={() => setOpenFeaturedGroup(prev => { const next = prev === item.id ? '' : item.id; localStorage.setItem('openFeaturedNavGroup', next); return next; })}
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all ${item.children.some(c => c.id === activeTab) && openFeaturedGroup !== item.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                    <span className="nav-line-icon" aria-hidden="true" style={{color:'#9d639d'}}><Icon name={item.icon} size={17} /></span>
+                                    <span className="text-xs flex-1 text-right">{item.label}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{transition:'transform .2s ease', transform: openFeaturedGroup === item.id ? 'none' : 'rotate(90deg)'}}><polyline points="6 9 12 15 18 9"/></svg>
                                 </button>
-                                {personalGrowthOpen && (
+                                {openFeaturedGroup === item.id && (
                                     <div className="space-y-0.5" style={{paddingRight:'14px', marginTop:'2px'}}>
-                                        {tabs.filter(tab => PERSONAL_GROWTH_TAB_IDS.includes(tab.id)).map(tab => (
-                                            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                                                className={`nav-tab-${tab.id} w-full flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all relative ${activeTab===tab.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
-                                                {activeTab===tab.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'16px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
-                                                <span className="nav-line-icon" aria-hidden="true" style={{color:'#8f829c'}}><Icon name={tab.icon || 'circle'} size={15} /></span>
-                                                <span>{tab.name}</span>
+                                        {item.children.map(child => (
+                                            <button key={`${item.id}-${child.id}-${child.label}`} onClick={() => setActiveTab(child.id)}
+                                                className={`nav-tab-${child.id} w-full flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all relative ${activeTab===child.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                                {activeTab===child.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'16px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
+                                                <span className="nav-line-icon" aria-hidden="true" style={{color:'#8f829c'}}><Icon name={child.icon} size={15} /></span>
+                                                <span>{child.label}</span>
                                             </button>
                                         ))}
                                     </div>
                                 )}
                             </div>
-                        )}
+                        ) : (
+                            <button key={item.id} onClick={() => setActiveTab(item.id)}
+                                className={`nav-tab-${item.id} w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all relative ${activeTab===item.id ? 'bg-violet-50 text-violet-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                                {activeTab===item.id && <span style={{position:'absolute',right:0,top:'50%',transform:'translateY(-50%)',width:'3px',height:'20px',background:'#7c3aed',borderRadius:'2px 0 0 2px'}}/>}
+                                <span className="nav-line-icon" aria-hidden="true" style={{color:'#9d639d'}}><Icon name={item.icon} size={17} /></span>
+                                <span className="text-xs">{item.label}</span>
+                            </button>
+                        ))}
 
                         {/* גישה למובייל בלבד לארכיון/הגדרות - בפס התחתון שורת ההגדרות המלאה מוסתרת (ראו CSS), אז מוסיפים כאן קיצור */}
                         <button onClick={() => setActiveTab('tab-settings')}
@@ -1880,6 +1967,12 @@ import { supabase } from './lib/supabaseClient.js';
                             <span className="nav-line-icon" aria-hidden="true" style={{color:'#a9785d'}}><Icon name="palm-tree" size={17} /></span>
                             <span className="text-xs">מצב חופשה</span>
                         </button>
+                        <a href={`https://wa.me/16508702892?text=${encodeURIComponent('היי, אני באפליקציה Design Your Life. אני רוצה לדבר על המשימות שלי')}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:bg-slate-50 hover:text-slate-700">
+                            <span className="nav-line-icon" aria-hidden="true" style={{color:'#4caf7d'}}><Icon name="send" size={17} /></span>
+                            <span className="text-xs">דברי עם Instinct</span>
+                        </a>
                     </div>
                     <div className="language-switcher" aria-label="בחירת שפה">
                         <button className={uiLanguage==='he'?'active':''} onClick={()=>changeUiLanguage('he')} title="עברית">עב</button>
@@ -3351,6 +3444,68 @@ import { supabase } from './lib/supabaseClient.js';
                                         </p>
                                     )}
                                 </div>
+
+                                <div className="card p-6">
+                                    <h3 className="text-sm font-bold text-slate-700 border-b border-slate-100 pb-2 mb-4">🔑 טוקני קריאה-בלבד — Instinct</h3>
+                                    <p className="text-xs text-slate-500 mb-3">טוקן נותן גישת קריאה-בלבד (לא כתיבה, לא מחיקה) לנתיבי <code dir="ltr">/api/readonly/*</code>. הטוקן מוצג פעם אחת בלבד כאן — העתיקי אותו מיד לכספת של Instinct, לא לצ'אט או להודעה.</p>
+
+                                    {instinctError && <p className="text-xs font-semibold text-rose-500 mb-3">{instinctError}</p>}
+
+                                    {instinctNewToken && (
+                                        <div className="mb-4 p-3 bg-amber-50 border-2 border-amber-300 rounded-xl space-y-2">
+                                            <p className="text-xs font-bold text-amber-700">הטוקן החדש (מוצג פעם אחת בלבד — העתיקי עכשיו):</p>
+                                            <code dir="ltr" className="block text-[11px] bg-white border border-amber-200 rounded-lg p-2 break-all select-all">{instinctNewToken}</code>
+                                            <button onClick={() => setInstinctNewToken(null)} className="text-[11px] font-bold text-amber-600 hover:text-amber-800">הבנתי, אפשר להסתיר ✓</button>
+                                        </div>
+                                    )}
+
+                                    <div className="flex flex-col gap-2 mb-3">
+                                        <input
+                                            type="text"
+                                            value={instinctTokenName}
+                                            onChange={e => setInstinctTokenName(e.target.value)}
+                                            placeholder="שם לטוקן (לזיהוי בלבד, למשל Instinct)"
+                                            className="px-3 py-2 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-violet-400 transition-all"
+                                        />
+                                        <div className="flex gap-3 flex-wrap">
+                                            {[{v:'tasks:read',label:'משימות'},{v:'projects:read',label:'פרויקטים'},{v:'finance:read',label:'פיננסים (סיכומים)'}].map(s => (
+                                                <label key={s.v} className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
+                                                    <input type="checkbox" checked={instinctTokenScopes.includes(s.v)} onChange={() => toggleInstinctScope(s.v)} />
+                                                    {s.label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={createInstinctToken}
+                                            disabled={instinctBusy || !instinctTokenName.trim() || instinctTokenScopes.length === 0}
+                                            className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl text-sm transition-all disabled:opacity-50"
+                                        >
+                                            {instinctBusy ? 'רגע...' : '+ צור טוקן חדש (תוקף 90 יום)'}
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {instinctTokens.length === 0 && <p className="text-xs text-slate-400">אין טוקנים עדיין.</p>}
+                                        {instinctTokens.map(t => {
+                                            const isRevoked = !!t.revoked_at;
+                                            const isExpired = new Date(t.expires_at) < new Date();
+                                            return (
+                                                <div key={t.id} className={`flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isRevoked||isExpired ? 'bg-slate-50 border-slate-200 opacity-60' : 'bg-emerald-50/50 border-emerald-100'}`}>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-slate-700 truncate">{t.name} <span className="font-normal text-slate-400">— {t.scopes.join(', ')}</span></p>
+                                                        <p className="text-[10px] text-slate-400">
+                                                            {isRevoked ? 'בוטל' : isExpired ? 'פג תוקף' : `בתוקף עד ${new Date(t.expires_at).toLocaleDateString('he-IL')}`}
+                                                            {t.last_used_at && ` · שימוש אחרון ${new Date(t.last_used_at).toLocaleString('he-IL')}`}
+                                                        </p>
+                                                    </div>
+                                                    {!isRevoked && (
+                                                        <button onClick={() => revokeInstinctToken(t.id)} disabled={instinctBusy} className="shrink-0 px-2.5 py-1 bg-rose-100 hover:bg-rose-200 text-rose-600 text-[10px] font-bold rounded-lg transition-all disabled:opacity-50">בטל</button>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -3485,7 +3640,7 @@ import { supabase } from './lib/supabaseClient.js';
                                             <div onClick={() => setSelectedItem(isSelected ? null : {type: item._type, id: item.id})}
                                                 className={`card p-3 flex items-center gap-3 cursor-pointer transition-all border-2 group/row ${item.completed ? 'opacity-60' : ''} ${isSelected ? 'border-violet-400 bg-violet-50' : isProject ? 'border-slate-100 hover:border-violet-200' : 'border-slate-100 hover:border-blue-200'}`}>
                                                 {isProject ? (
-                                                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.color||'from-violet-500 to-purple-500'} flex items-center justify-center text-sm shrink-0`}>{item.emoji}</div>
+                                                    <span className="app-icon-badge shrink-0" style={{color:APP_ICON_COLOR}}><Icon name={emojiToIcon(item.emoji)} size={16}/></span>
                                                 ) : (
                                                     <button onClick={e => { e.stopPropagation(); toggleTask(item.id); }} className="shrink-0" title={item.completed ? 'בטל השלמה' : 'סמן כהושלם'}>
                                                         {item.completed
@@ -3731,9 +3886,9 @@ import { supabase } from './lib/supabaseClient.js';
 
                         {/* ניהול תחומים - רוחב מלא בתחתית */}
                         <section className="space-y-4">
-                            <div className="flex items-center justify-center gap-2"><div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-indigo-600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><h2 className="text-base font-bold text-slate-800">ניהול תחומים</h2></div>
+                            <div className="flex items-center justify-center gap-2"><div className="app-icon-badge" style={{color:APP_ICON_COLOR}}><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div><h2 className="text-base app-muted-label">ניהול תחומים</h2></div>
                             <div className="card p-5 border-t-[3px] border-indigo-400"><div className="grid grid-cols-1 md:grid-cols-3 gap-3"><EmojiPicker value={newDomainEmoji} onChange={setNewDomainEmoji} /><input type="text" value={newDomainLabel} onChange={e => setNewDomainLabel(e.target.value)} placeholder="שם התחום" className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl outline-none text-sm" /><button onClick={addDomain} className="bg-indigo-500 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-indigo-600 transition-all">הוסף תחום</button></div></div>
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">{domains.map(d => (<div key={d.id} className="card p-3 flex items-center gap-2 group"><span className="text-xl">{d.emoji}</span><span className="flex-1 text-sm font-semibold text-slate-700 truncate">{d.label}</span><button onClick={() => deleteDomain(d.id)} className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-rose-100 hover:bg-rose-200 rounded-xl flex items-center justify-center text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div>))}</div>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">{domains.map((d, di) => (<div key={d.id} className="card p-3 flex items-center gap-2 group"><span className="app-icon-badge" style={{color:APP_ICON_COLOR}}><Icon name={emojiToIcon(d.emoji)} size={18}/></span><span className="flex-1 text-sm app-muted-label truncate">{d.label}</span><button onClick={() => deleteDomain(d.id)} className="opacity-0 group-hover:opacity-100 w-8 h-8 bg-rose-100 hover:bg-rose-200 rounded-xl flex items-center justify-center text-rose-500 transition-all"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></div>))}</div>
                         </section>
                         {renderBuiltinExtra('tasks')}
                     </div>

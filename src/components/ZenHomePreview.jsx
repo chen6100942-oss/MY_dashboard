@@ -9,6 +9,27 @@ const fallbackGoals = [
   { title: 'יעדים פיננסיים', progress: 30, icon: 'target' },
 ];
 
+// גם הסרגל הימני (App.jsx) מציג את הקבוצות האלה — מקור אמת יחיד כדי שלא ייסחפו זה מזה.
+export const FEATURED_NAV_ITEMS = [
+  { id: 'book-wisdom', label: 'התפתחות אישית', icon: 'book-open', children: [
+    { id: 'inspiration', label: 'מוטיבציה והשראה', icon: 'sparkles' },
+    { id: 'book-wisdom', label: 'סיכומי ספרים', icon: 'book-open' },
+    { id: 'mindset', label: 'Mindset', icon: 'brain' },
+    { id: 'vision-board', label: 'לוח חזון', icon: 'image' },
+  ] },
+  { id: 'ikigai', label: 'התפתחות רוחנית', icon: 'flower-2', children: [
+    { id: 'ikigai', label: 'IKIGAI', icon: 'flower-2' },
+    { id: 'manifesting', label: 'Manifesting', icon: 'sparkles' },
+    { id: 'numerology', label: 'נומורולוגיה', icon: 'sparkles' },
+  ] },
+  { id: 'goals', label: 'בריאות וכושר', icon: 'dumbbell' },
+  { id: 'my-world', label: 'תכנון חופשה', icon: 'plane', children: [
+    { id: 'finance', label: 'תוכנית חסכון לטיסה הבאה שלי', icon: 'piggy-bank' },
+    { id: 'my-world', label: 'לראות את היעד על המפה — My World', icon: 'map' },
+    { id: 'goals', label: 'להוסיף את הטיסה כיעד', icon: 'target' },
+  ] },
+];
+
 export default function ZenHomePreview({
   tasks = [], goals = [], projects = [], tabs = [], onNavigate,
   layoutEditMode = false, onToggleLayout, onAddBlock,
@@ -25,7 +46,7 @@ export default function ZenHomePreview({
   }, []);
   const year = today.getFullYear();
   const weekdayShort = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'][today.getDay()];
-  const compactDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')} ${year}`;
+  const compactDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(year).slice(-2)}`;
   const daysToEndOf2026 = Math.max(0, Math.ceil((new Date(2026, 11, 31, 23, 59, 59) - today) / 864e5));
   const weeksToEndOf2026 = Math.floor(daysToEndOf2026 / 7);
   const monthName = today.toLocaleDateString('en-US', { month: 'long' });
@@ -41,46 +62,25 @@ export default function ZenHomePreview({
     return { title: goal.title || goal.text || fallback.title, icon: fallback.icon, progress: Number(goal.progress ?? goal.percent ?? 0) || 0 };
   }) : fallbackGoals;
   const openTasks = tasks.filter(task => !task.completed);
-  const featuredNavItems = [
-    { id: 'book-wisdom', label: 'התפתחות אישית', icon: 'book-open', children: [
-      { id: 'inspiration', label: 'מוטיבציה והשראה', icon: 'sparkles' },
-      { id: 'book-wisdom', label: 'סיכומי ספרים', icon: 'book-open' },
-      { id: 'mindset', label: 'Mindset', icon: 'brain' },
-      { id: 'vision-board', label: 'לוח חזון', icon: 'image' },
-    ] },
-    { id: 'ikigai', label: 'התפתחות רוחנית', icon: 'flower-2', children: [
-      { id: 'ikigai', label: 'IKIGAI', icon: 'flower-2' },
-      { id: 'manifesting', label: 'Manifesting', icon: 'sparkles' },
-      { id: 'numerology', label: 'נומורולוגיה', icon: 'sparkles' },
-    ] },
-    { id: 'goals', label: 'בריאות וכושר', icon: 'dumbbell' },
-    { id: 'my-world', label: 'תכנון חופשה', icon: 'plane', children: [
-      { id: 'finance', label: 'תוכנית חסכון לטיסה הבאה שלי', icon: 'piggy-bank' },
-      { id: 'my-world', label: 'לראות את היעד על המפה — My World', icon: 'map' },
-      { id: 'goals', label: 'להוסיף את הטיסה כיעד', icon: 'target' },
-    ] },
-  ];
-  const featuredIds = new Set(featuredNavItems.map(item => item.id));
-  // "משימות היום" ו"רווחה והתפתחות" לא מוצגים כאן — הראשון תמיד גלוי בדף הבית עצמו,
-  // והשני פוצל ל"התפתחות אישית" ו"התפתחות רוחנית".
+  const featuredIds = new Set(FEATURED_NAV_ITEMS.map(item => item.id));
+  // "התפתחות אישית" / "התפתחות רוחנית" / "בריאות וכושר" / "תכנון חופשה" עברו לסרגל הימני
+  // (App.jsx) — כאן נשארים רק שאר הטאבים שלא מיוצגים שם.
   const sidebarOnlyIds = new Set(['home', 'gantt', 'finance', 'numerology', 'morning-ritual', 'ikigai', 'inspiration', 'mindset', 'archive', 'vision-board', 'tasks', 'manifesting', 'resources', 'book-wisdom', 'clients', 'help']);
   const [expandedNavId, setExpandedNavId] = useState('');
-  const expandedNavItem = featuredNavItems.find(item => item.id === expandedNavId && item.children);
-  const navItems = tabs.length ? [
-    ...featuredNavItems.filter(item => item.children || tabs.some(tab => tab.id === item.id)),
-    ...tabs.filter(tab => !featuredIds.has(tab.id) && !sidebarOnlyIds.has(tab.id)).map(tab => ({
-      id: tab.id,
-      label: tab.name,
-      icon: tab.icon || 'circle',
-    })),
-  ] : featuredNavItems;
+  const navItems = tabs.length
+    ? tabs.filter(tab => !featuredIds.has(tab.id) && !sidebarOnlyIds.has(tab.id)).map(tab => ({
+        id: tab.id,
+        label: tab.name,
+        icon: tab.icon || 'circle',
+      }))
+    : [];
 
   return (
     <section className="reference-home" aria-label="לוח הבקרה הראשי">
+      <div className="reference-top-date-badge" onClick={() => onNavigate?.('gantt')}><Icon name="calendar" size={13}/><span>יום {weekdayShort}, {compactDate}</span></div>
       <div className="reference-utility-row">
         <button className="reference-sounds" onClick={() => setSoundMenuOpen(open => !open)} aria-expanded={soundMenuOpen} aria-label={`מוזיקה: ${activeSoundLabel}`} title={`מוזיקה: ${activeSoundLabel}`}><Icon name="music-2" size={17}/><Icon name="chevron-down" size={12}/></button>
         <div className="reference-countdown"><span>{weeksToEndOf2026} שבועות</span><b>{daysToEndOf2026} ימים</b><small>עד סוף 2026</small></div>
-        <button className="reference-live-date" onClick={() => onNavigate?.('gantt')}><Icon name="calendar" size={13}/><span>יום {weekdayShort}, {compactDate}</span></button>
         {soundMenuOpen && <div className="reference-sound-menu">
           {soundTracks.map(track => <button key={track.id} className={activeSoundId === track.id ? 'is-active' : ''} onClick={() => { onSelectSound?.(track.id); setSoundMenuOpen(false); }}><Icon name="music-2" size={13}/><span><b>{track.label}</b><small>{track.note}</small></span></button>)}
           <button className={!activeSoundId ? 'is-active' : ''} onClick={() => { onSelectSound?.(''); setSoundMenuOpen(false); }}><Icon name="volume-x" size={13}/><span><b>שקט</b><small>ללא מוזיקת רקע</small></span></button>
@@ -89,15 +89,15 @@ export default function ZenHomePreview({
         <button className="reference-top-action reference-daily-action" onClick={() => window.dispatchEvent(new CustomEvent('open-daily-message'))}><Icon name="star" size={16}/><b>המסר היומי</b></button>
         <button className="reference-top-action reference-morning-action" onClick={() => onNavigate?.('morning-ritual')}><Icon name="coffee" size={16}/><b>טקס הבוקר</b></button>
         <button className="reference-top-action reference-goal-action" onClick={onNewGoal}><Icon name="target" size={16}/><b>יעד ל-2026</b></button>
+        <button className="reference-top-action reference-task-action" onClick={() => onNavigate?.('tasks')}><Icon name="check-square" size={16}/><b>משימה חדשה</b></button>
+        <button className="reference-top-action reference-project-action" onClick={() => onNavigate?.('tasks')}><Icon name="folder" size={16}/><b>פרויקט חדש</b></button>
       </div>
       <div className="reference-float-actions">
         <button onClick={onUndo} disabled={!canUndo} title="בטל" aria-label="בטל"><Icon name="undo" size={16}/></button>
         <button onClick={onSave} title="שמור עכשיו" aria-label="שמור עכשיו"><Icon name="save" size={16}/></button>
         <button className="reference-icon-button" aria-label={darkMode ? 'מצב יום' : 'מצב לילה'} title={darkMode ? 'מצב יום' : 'מצב לילה'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={16}/></button>
       </div>
-      <div className="reference-quick-actions">
-        <button onClick={() => onNavigate?.('tasks')}><Icon name="check-square" size={16}/><b>משימה חדשה</b></button>
-        <button onClick={() => onNavigate?.('tasks')}><Icon name="folder" size={16}/><b>פרויקט חדש</b></button>
+      {navItems.length > 0 && <div className="reference-quick-actions">
         {navItems.map(item => (
           <div className="reference-nav-item" key={item.id}>
             <button
@@ -121,7 +121,7 @@ export default function ZenHomePreview({
             )}
           </div>
         ))}
-      </div>
+      </div>}
       <div className="reference-section-title"><span/>יעדים לשנת {year}<span/></div>
       <div className="reference-goals-strip">
         {goalRows.map(goal => <button key={goal.title} onClick={() => onNavigate?.('goals')}><Icon name={goal.icon} size={18}/><span><b>{goal.title}</b><small>{goal.progress}%</small><i><em style={{ width: `${Math.min(100, goal.progress)}%` }}/></i></span><Icon name="chevron-left" size={13}/></button>)}
