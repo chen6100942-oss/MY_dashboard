@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Read-only view</title>
+<!--
+  Standalone read-only viewer for the /api/readonly endpoints.
+
+  Deliberately isolated: plain HTML with no imports, no Supabase client, no
+  app bundle, and no knowledge of any logged-in session. The token typed
+  below is the only credential, it lives in a local variable for the life of
+  the request, and it is never written to localStorage, sessionStorage, the
+  URL or any log. Everything this page can show, the token holder could
+  already fetch directly from the API — it adds a screen, not access.
+
+  Unbranded on purpose: anyone who lands here without a token sees an empty
+  field and no indication of whose data sits behind it.
+-->
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px;
+    font: 15px/1.6 'Segoe UI', system-ui, Arial, sans-serif;
+    background: #f6f6f4; color: #2b2b2b;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 16px; font-weight: 600; margin: 0 0 16px; color: #555; }
+  form { display: flex; gap: 8px; margin-bottom: 20px; }
+  input {
+    flex: 1; min-width: 0; padding: 10px 12px; font: inherit;
+    border: 1px solid #ccc; border-radius: 8px; background: #fff;
+  }
+  input:focus { outline: 2px solid #999; outline-offset: -1px; }
+  button {
+    padding: 10px 18px; font: inherit; font-weight: 600; cursor: pointer;
+    border: 0; border-radius: 8px; background: #3a3a3a; color: #fff;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  .msg { padding: 12px 14px; border-radius: 8px; background: #fff; border: 1px solid #e0e0e0; }
+  .err { border-color: #e0b4b4; background: #fdf4f4; color: #8a2b2b; }
+  section { margin-bottom: 28px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid #ddd; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 8px 0; border-bottom: 1px solid #ededed; }
+  li:last-child { border-bottom: 0; }
+  .meta { color: #666; font-size: 13px; }
+  footer { margin-top: 28px; color: #888; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Read-only view</h1>
+
+  <form id="f" autocomplete="off">
+    <input id="t" type="password" placeholder="Access token" autocomplete="off"
+           spellcheck="false" aria-label="Access token">
+    <button id="b" type="submit">הצג</button>
+  </form>
+
+  <div id="out"></div>
+
+  <footer>קריאה בלבד · הטוקן אינו נשמר בדפדפן ויש להקלידו מחדש בכל פעם</footer>
+</main>
+
+<script>
+(function () {
+  var form = document.getElementById('f');
+  var field = document.getElementById('t');
+  var btn = document.getElementById('b');
+  var out = document.getElementById('out');
+
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function show(html, isError) {
+    out.innerHTML = '<div class="msg' + (isError ? ' err' : '') + '">' + html + '</div>';
+  }
+
+  var STATUS_HE = { open: 'פתוחה', done: 'הושלמה' };
+
+  function get(path, token) {
+    return fetch(path, { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store' })
+      .then(function (res) {
+        if (res.ok) return res.json();
+        var byCode = {
+          401: 'הטוקן שגוי, בוטל או פג תוקפו.',
+          403: 'לטוקן הזה אין הרשאה לנתונים האלה.',
+          429: 'יותר מדי בקשות — נסו שוב בעוד דקה.'
+        };
+        throw new Error(byCode[res.status] || ('השרת החזיר שגיאה (' + res.status + ').'));
+      });
+  }
+
+  function renderTasks(data) {
+    var items = (data && data.items) || [];
+    if (!items.length) return '<section><h2>משימות (0)</h2><p class="meta">אין משימות.</p></section>';
+    return '<section><h2>משימות (' + items.length + ')</h2><ul>' + items.map(function (t) {
+      var bits = [];
+      bits.push(STATUS_HE[t.status] || t.status);
+      if (t.due_date) bits.push('יעד: ' + esc(t.due_date));
+      if (t.priority) bits.push('דחיפות: ' + esc(t.priority));
+      if (t.domain) bits.push('תחום: ' + esc(t.domain));
+      return '<li>' + esc(t.text) + '<br><span class="meta">' + bits.join(' · ') + '</span></li>';
+    }).join('') + '</ul></section>';
+  }
+
+  function renderProjects(data) {
+    var items = (data && data.items) || [];
+    if (!items.length) return '<section><h2>פרויקטים (0)</h2><p class="meta">אין פרויקטים.</p></section>';
+    return '<section><h2>פרויקטים (' + items.length + ')</h2><ul>' + items.map(function (p) {
+      var bits = ['התקדמות: ' + (p.progress_percent == null ? 0 : p.progress_percent) + '%'];
+      if (p.due_date) bits.push('יעד: ' + esc(p.due_date));
+      if (p.domain) bits.push('תחום: ' + esc(p.domain));
+      return '<li>' + esc(p.title) + '<br><span class="meta">' + bits.join(' · ') + '</span></li>';
+    }).join('') + '</ul></section>';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var token = field.value.trim();
+    if (!token) { show('נא להקליד טוקן.', true); return; }
+
+    btn.disabled = true;
+    show('טוען…');
+
+    Promise.all([
+      get('/api/readonly/tasks?limit=500', token),
+      get('/api/readonly/projects?limit=500', token)
+    ]).then(function (res) {
+      var stamp = (res[0] && res[0].generated_at) || new Date().toISOString();
+      out.innerHTML = renderTasks(res[0]) + renderProjects(res[1]) +
+        '<footer>נקרא ב-' + esc(stamp) + '</footer>';
+    }).catch(function (err) {
+      show(esc(err.message), true);
+    }).then(function () {
+      btn.disabled = false;
+      // The token stays only in this closure for the life of the request.
+      token = null;
+      field.value = '';
+    });
+  });
+})();
+</script>
+</body>
+</html>
